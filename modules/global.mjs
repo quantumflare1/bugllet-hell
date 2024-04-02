@@ -1,0 +1,4 @@
+const BOARD_WIDTH = 540;
+const BOARD_HEIGHT = 864;
+
+export { BOARD_HEIGHT, BOARD_WIDTH };
