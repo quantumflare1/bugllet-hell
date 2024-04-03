@@ -1,6 +1,8 @@
 import * as Player from "./modules/player.mjs";
 import * as Global from "./modules/global.mjs";
 import * as Bullets from "./modules/bullets.mjs";
+import * as Pattern from "./modules/pattern.mjs";
+import * as Enemy from "./modules/enemy.mjs";
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
@@ -17,6 +19,9 @@ function fullscreen() {
 }
 
 function circle(context, x, y, r) {
+    if (r < 0) {
+        return;
+    }
     context.beginPath();
     context.arc(x, y, r, 0, 2 * Math.PI);
     context.fill();
@@ -37,8 +42,12 @@ function draw() {
     gpctx.fillStyle = "rgb(150, 240, 255)";
     circle(gpctx, Player.x, Player.y, Player.size);
 
-    gpctx.fillStyle = "rgb(255, 0, 0)";
+    gpctx.fillStyle = "rgb(180, 0, 0)";
     for (const i of Bullets.bullets) {
+        circle(gpctx, i.x, i.y, i.size);
+    }
+    gpctx.fillStyle = "rgb(255, 0, 0)";
+    for (const i of Enemy.enemies) { // i am very good at naming variables
         circle(gpctx, i.x, i.y, i.size);
     }
 
@@ -51,6 +60,9 @@ function draw() {
     ctx.fillText("Lives", 600, 140);
     for (let i = 0; i < Player.lives; i++) {
         circle(ctx, 708 + 30 * i, 133, 8);
+    }
+    if (Player.lives < 0) {
+        ctx.fillText("you lose", 700, 140);
     }
 
     ctx.fillText("Bombs", 600, 180);
@@ -75,9 +87,13 @@ function tick(ms) {
     for (const i of Bullets.bullets) {
         i.tick(timeElapsed);
     }
+    for (const i of Enemy.enemies) {
+        i.tick(timeElapsed);
+    }
     draw();
 
     lastFrameTime = ms;
+    if (Player.lives >= 0)
     requestAnimationFrame(tick);
 }
 
@@ -96,7 +112,7 @@ function load() {
     addEventListener("keydown", Player.keydown);
     addEventListener("keyup", Player.keyup);
 
-    Bullets.makeBullet("basic", 263, 100, Math.PI / 2);
+    Enemy.makeEnemy(100, 70, "drone");
     requestAnimationFrame(tick);
 }
 

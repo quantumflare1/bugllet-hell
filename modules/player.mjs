@@ -4,7 +4,7 @@ import * as Global from "./global.mjs";
 const BASE_MOVEMENT = 140;
 const BASE_RUN = 252;
 const BORDER_SIZE = 20;
-const POWER_LOSS_FACTOR = 0.1;
+const POWER_LOSS_FACTOR = 0.04;
 
 let x, y, size;
 let movingLeft, movingRight, movingUp, movingDown, isFiring;
@@ -72,6 +72,10 @@ function keyup(e = new KeyboardEvent()) {
     }
 }
 
+function powerUp(damage) {
+    power += damage / 300;
+}
+
 function tick(ms) {
     let moveX = 0;
     let moveY = 0;
@@ -116,8 +120,8 @@ function tick(ms) {
     invTime -= ms;
 
     power -= Math.sqrt(power) * ms / 1000 * POWER_LOSS_FACTOR;
-    if (power > 4.99) {
-        power = 4.99;
+    if (power > 3.99) {
+        power = 3.99;
     }
     else if (power < 0) {
         power = 0;
@@ -125,29 +129,28 @@ function tick(ms) {
 
     timeSinceLastBullet += ms;
     if (timeSinceLastBullet > fireCooldown && isFiring) {
-        if (power > 4) {
+        if (power > 3) {
             fireBullet(6, 60, -780, 20, 0);
             fireBullet(6, -60, -780, -20, 0);
             fireBullet(6, 0, -800, 14, 0);
             fireBullet(6, 0, -800, -14, 0);
             fireBullet(6, 0, -800, 0, 0);
-        }
-        else if (power > 3) {
-            fireBullet(6, 60, -780, 12, 0);
-            fireBullet(6, -60, -780, -12, 0);
-            fireBullet(6, 0, -800, 10, 0);
-            fireBullet(6, 0, -800, -10, 0);
+            fireCooldown = 50;
         }
         else if (power > 2) {
             fireBullet(6, 40, -780, 12, 0);
             fireBullet(6, -40, -780, -12, 0);
-            fireBullet(6, 0, -800, 0, 0);
+            fireBullet(6, 0, -800, 10, 0);
+            fireBullet(6, 0, -800, -10, 0);
+            fireCooldown = 55;
         }
         else if (power > 1) {
             fireBullet(6, 10, -800, 6, 0);
             fireBullet(6, -10, -800, -6, 0);
+            fireCooldown = 60;
         } else {
             fireBullet(6, 0, -800, 0, 0);
+            fireCooldown = 66;
         }
         timeSinceLastBullet = 0;
     }
@@ -163,7 +166,7 @@ function init() {
     lives = 3;
     bombs = 2;
     score = 0;
-    power = 5;
+    power = 0;
 
     timeSinceLastBullet = 0;
     fireCooldown = 66;
@@ -171,4 +174,4 @@ function init() {
     invTime = 0;
 }
 
-export { x, y, size, lives, bombs, score, power, init, tick, keydown, keyup };
+export { x, y, size, lives, bombs, score, power, init, tick, keydown, keyup, powerUp };

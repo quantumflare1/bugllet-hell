@@ -7,6 +7,8 @@ class Bullet {
         this.size = size;
         this.velX = velX;
         this.velY = velY;
+        this.baseVelX = velX;
+        this.baseVelY = velY;
         this.rot = rot;
         this.expireTime = expireTime;
         this.lifetime = 0;
@@ -53,11 +55,22 @@ const playerBullets = new Set();
 
 const types = {
     basic: {
-        size: 4,
-        vel: 800,
+        size: 6,
+        vel: 500,
         rot: 0,
-        expireTime: 1000,
+        expireTime: 2000,
         script: () => {}
+    },
+    spiral: {
+        size: 8,
+        vel: 100,
+        rot: 15,
+        expireTime: 3000,
+        script: (bullet, ms) => {
+            const SPEED_MULTIPLIER = 4;
+            bullet.x += bullet.baseVelX * ms / 1000 * SPEED_MULTIPLIER;
+            bullet.y += bullet.baseVelY * ms / 1000 * SPEED_MULTIPLIER;
+        }
     }
 }
 
