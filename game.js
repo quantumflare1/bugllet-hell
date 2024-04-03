@@ -1,5 +1,6 @@
 import * as Player from "./modules/player.mjs";
 import * as Global from "./modules/global.mjs";
+import * as Bullets from "./modules/bullets.mjs";
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
@@ -9,6 +10,7 @@ const gpctx = gameplayCanvas.getContext("2d");
 
 let lastFrameTime = document.timeline.currentTime;
 const bullets = new Set();
+const playerBullets = new Set();
 
 function fullscreen() {
     document.body.requestFullscreen({ navigationUI: "hide" });
@@ -21,14 +23,6 @@ function circle(context, x, y, r) {
     context.closePath();
 }
 
-function getBullet(e) {
-    bullets.add(e.detail);
-}
-
-function killBullet(e) {
-    bullets.delete(e.detail);
-}
-
 function draw() {
     ctx.fillStyle = "#222";
     ctx.fillRect(0, 0, 1200, 900);
@@ -36,11 +30,17 @@ function draw() {
     gpctx.fillStyle = "#333";
     gpctx.fillRect(0, 0, 540, 864);
 
-    gpctx.fillStyle = "white";
-    for (const i of bullets) {
+    gpctx.fillStyle = "rgb(80, 112, 128)";
+    for (const i of Bullets.playerBullets) {
         circle(gpctx, i.x, i.y, i.size);
     }
-    circle(gpctx, Player.x, Player.y, 5);
+    gpctx.fillStyle = "rgb(150, 240, 255)";
+    circle(gpctx, Player.x, Player.y, Player.size);
+
+    gpctx.fillStyle = "rgb(255, 0, 0)";
+    for (const i of Bullets.bullets) {
+        circle(gpctx, i.x, i.y, i.size);
+    }
 
     ctx.fillStyle = "white";
     ctx.font = "50px monospace";
@@ -69,7 +69,10 @@ function tick(ms) {
     const timeElapsed = ms - lastFrameTime;
 
     Player.tick(timeElapsed);
-    for (const i of bullets) {
+    for (const i of Bullets.playerBullets) {
+        i.tick(timeElapsed);
+    }
+    for (const i of Bullets.bullets) {
         i.tick(timeElapsed);
     }
     draw();
@@ -93,9 +96,7 @@ function load() {
     addEventListener("keydown", Player.keydown);
     addEventListener("keyup", Player.keyup);
 
-    addEventListener("game_fire_bullet", getBullet);
-    addEventListener("game_destroy_bullet", killBullet);
-
+    Bullets.makeBullet("basic", 263, 100, Math.PI / 2);
     requestAnimationFrame(tick);
 }
 

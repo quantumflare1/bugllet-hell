@@ -1,20 +1,23 @@
 import * as Global from "./global.mjs";
 
 class Bullet {
-    constructor(x, y, size, velX, velY, rot, deathTime, script = () => {}) {
+    constructor(x, y, size, velX, velY, rot, expireTime, script = () => {}, friendly = false) {
         this.x = x;
         this.y = y;
         this.size = size;
         this.velX = velX;
         this.velY = velY;
         this.rot = rot;
-        this.deathTime = deathTime;
+        this.expireTime = expireTime;
         this.lifetime = 0;
+        this.isFriendly = friendly;
         this.script = script;
 
-        dispatchEvent(new CustomEvent("game_fire_bullet", {
-            detail: this
-        }));
+        if (this.isFriendly) {
+            playerBullets.add(this);
+        } else {
+            bullets.add(this);
+        }
     }
     tick(ms) {
         this.lifetime += ms;
@@ -30,24 +33,38 @@ class Bullet {
         this.velX *= prevVecLength / newVecLength;
         this.velY *= prevVecLength / newVecLength;
 
-        this.script(this);
+        this.script(this, ms);
 
         // kill bullets
         if (this.x - this.size > Global.BOARD_WIDTH || this.x + this.size < 0 ||
             this.y - this.size > Global.BOARD_HEIGHT || this.y + this.size < 0 ||
-            this.size === 0 || this.lifetime > this.deathTime) {
-            dispatchEvent(new CustomEvent("game_destroy_bullet", {
-                detail: this
-            }));
+            this.size === 0 || this.lifetime > this.expireTime) {
+            if (this.isFriendly) {
+                playerBullets.delete(this);
+            } else {
+                bullets.delete(this);
+            }
         }
     }
 }
 
-class PlayerBullet extends Bullet {
-    constructor(x, y, size, velX, velY, rot, deathTime, script) {
-        super(x, y, size, velX, velY, rot, deathTime, script);
-        this.isFriendly = true;
+const bullets = new Set();
+const playerBullets = new Set();
+
+const types = {
+    basic: {
+        size: 4,
+        vel: 800,
+        rot: 0,
+        expireTime: 1000,
+        script: () => {}
     }
 }
 
-export { PlayerBullet };
+function makeBullet(type, x, y, dir) {
+    const velX = types[type].vel * Math.cos(dir);
+    const velY = types[type].vel * Math.sin(dir);
+    new Bullet(x, y, types[type].size, velX, velY, types[type].rot, types[type].expireTime, types[type].script);
+}
+
+export { types, bullets, playerBullets, Bullet, makeBullet };

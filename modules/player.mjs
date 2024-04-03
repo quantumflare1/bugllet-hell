@@ -1,26 +1,27 @@
-import { PlayerBullet } from "./bullets.mjs";
+import * as Bullets from "./bullets.mjs";
 import * as Global from "./global.mjs";
 
 const BASE_MOVEMENT = 140;
 const BASE_RUN = 252;
 const BORDER_SIZE = 20;
+const POWER_LOSS_FACTOR = 0.1;
 
-let x, y;
+let x, y, size;
 let movingLeft, movingRight, movingUp, movingDown, isFiring;
 let moveSpeed;
 let lives, bombs, score, power;
 let timeSinceLastBullet, fireCooldown;
+let invTime;
 
-function fireBullet() {
-    // this is a test bullet that gets bigger
-    const bullet = new PlayerBullet(x, y, 3, 0, -800, 0, 1000, (bullet) => {
-        if (bullet.lifetime > 500 && bullet.size > 0.1) {
-            bullet.size -= 0.1;
+function fireBullet(size, velX, velY, offsetX, offsetY) {
+    // this is a test bullet that gets smaller
+    new Bullets.Bullet(x + offsetX, y + offsetY, size, velX, velY, 0, 2000, /*(bullet, ms) => {
+        const GROW_DELAY = 300;
+        const GROW_RATE = 8;
+        if (bullet.lifetime > GROW_DELAY && bullet.size > ms / 1000 * GROW_RATE) {
+            bullet.size += ms / 1000 * GROW_RATE;
         }
-        if (bullet.size <= 0.1) {
-            bullet.size = 0;
-        }
-    });
+    },*/() => {}, true);
 }
 
 function keydown(e = new KeyboardEvent()) {
@@ -104,19 +105,51 @@ function tick(ms) {
         x = Global.BOARD_WIDTH - BORDER_SIZE;
     }
 
-    timeSinceLastBullet += ms;
-
-    if (timeSinceLastBullet > fireCooldown && isFiring) {
-        timeSinceLastBullet = 0;
-        fireBullet();
+    if (invTime <= 0)
+    for (const i of Bullets.bullets) {
+        const dist = Math.sqrt((i.x - x) ** 2 + (i.y - y) ** 2);
+        if (dist < i.size + size) {
+            lives--;
+            invTime = 2000;
+        }
     }
+    invTime -= ms;
 
-    power -= Math.sqrt(power) / 2000;
+    power -= Math.sqrt(power) * ms / 1000 * POWER_LOSS_FACTOR;
     if (power > 4.99) {
         power = 4.99;
     }
     else if (power < 0) {
         power = 0;
+    }
+
+    timeSinceLastBullet += ms;
+    if (timeSinceLastBullet > fireCooldown && isFiring) {
+        if (power > 4) {
+            fireBullet(6, 60, -780, 20, 0);
+            fireBullet(6, -60, -780, -20, 0);
+            fireBullet(6, 0, -800, 14, 0);
+            fireBullet(6, 0, -800, -14, 0);
+            fireBullet(6, 0, -800, 0, 0);
+        }
+        else if (power > 3) {
+            fireBullet(6, 60, -780, 12, 0);
+            fireBullet(6, -60, -780, -12, 0);
+            fireBullet(6, 0, -800, 10, 0);
+            fireBullet(6, 0, -800, -10, 0);
+        }
+        else if (power > 2) {
+            fireBullet(6, 40, -780, 12, 0);
+            fireBullet(6, -40, -780, -12, 0);
+            fireBullet(6, 0, -800, 0, 0);
+        }
+        else if (power > 1) {
+            fireBullet(6, 10, -800, 6, 0);
+            fireBullet(6, -10, -800, -6, 0);
+        } else {
+            fireBullet(6, 0, -800, 0, 0);
+        }
+        timeSinceLastBullet = 0;
     }
 }
 
@@ -124,6 +157,7 @@ function init() {
     // board size is 540x864
     x = Global.BOARD_WIDTH / 2;
     y = Global.BOARD_HEIGHT - 64;
+    size = 5;
     moveSpeed = BASE_MOVEMENT;
 
     lives = 3;
@@ -133,6 +167,8 @@ function init() {
 
     timeSinceLastBullet = 0;
     fireCooldown = 66;
+
+    invTime = 0;
 }
 
-export { x, y, lives, bombs, score, power, init, tick, keydown, keyup };
+export { x, y, size, lives, bombs, score, power, init, tick, keydown, keyup };
