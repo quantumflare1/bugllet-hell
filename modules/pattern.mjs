@@ -36,7 +36,7 @@ function basicTracker(enemy) {
 
         Bullets.makeBullet("basic", enemy.x, enemy.y, aimAtPlayer(enemy.x, enemy.y));
 
-        if (bulletsShot > 10) {
+        if (bulletsShot > 10 || !Enemy.enemies.has(enemy)) {
             clearInterval(interval);
         }
     }, 120);

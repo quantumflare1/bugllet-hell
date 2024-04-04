@@ -26,9 +26,11 @@ const level = {
             { x: 324, y: -10 },
             { x: 432, y: -10 }
         ]),
-        new Wave(16000, ["drone", "aggroDrone", "drone"], [
+        new Wave(16000, ["drone", "drone", "aggroDrone", "drone", "drone"], [
             { x: 135, y: -10 },
+            { x: -10, y: 120 },
             { x: 270, y: -10 },
+            { x: 550, y: 120 },
             { x: 405, y: -10 }
         ]),
         new Wave(12000, ["drone", "drone", "aggroDrone", "bigDrone", "aggroDrone", "drone", "drone"], [

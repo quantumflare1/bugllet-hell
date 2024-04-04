@@ -158,15 +158,15 @@ function downDash(enemy, ms, dashRate) {
 }
 
 function upDash(enemy, ms, dashRate) {
-    basicDash(enemy, ms, dashRate, Math.PI * 3 / 2);
+    basicDash(enemy, ms, dashRate, -Math.PI / 2);
 }
 
 function leftDash(enemy, ms, dashRate) {
-    basicDash(enemy, ms, dashRate, 0);
+    basicDash(enemy, ms, dashRate, Math.PI);
 }
 
 function rightDash(enemy, ms, dashRate) {
-    basicDash(enemy, ms, dashRate, Math.PI * 2);
+    basicDash(enemy, ms, dashRate, 0);
 }
 
 function randomDash(enemy, ms, dashRate) {
@@ -237,10 +237,10 @@ const types = {
                 upDash(enemy, ms, DASH_RATE);
             }
             else if (enemy.x < 20) {
-                leftDash(enemy, ms, DASH_RATE);
+                rightDash(enemy, ms, DASH_RATE);
             }
             else if (enemy.x > Global.BOARD_WIDTH - 20) {
-                rightDash(enemy, ms, DASH_RATE);
+                leftDash(enemy, ms, DASH_RATE);
             }
             else {
                 basicFire(enemy, 1500);
@@ -251,7 +251,7 @@ const types = {
     aggroDrone: {
         size: 14,
         score: 2,
-        hp: 50,
+        hp: 80,
         screenTime: 18000,
         patterns: ["singleAimedShot"],
         script: (enemy, ms) => {
@@ -278,8 +278,8 @@ const types = {
     bigDrone: {
         size: 20,
         score: 4,
-        hp: 150,
-        screenTime: 22000,
+        hp: 250,
+        screenTime: 25000,
         patterns: ["basicTracker", "basicRadial"],
         script: (enemy, ms) => {
             const DASH_RATE = 2500;

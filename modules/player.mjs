@@ -11,7 +11,7 @@ let movingLeft, movingRight, movingUp, movingDown, isFiring;
 let moveSpeed;
 let lives, bombs, score, power;
 let timeSinceLastBullet, fireCooldown;
-let invTime;
+let invTime, bombCooldown;
 
 function fireBullet(size, velX, velY, offsetX, offsetY) {
     // this is a test bullet that gets smaller
@@ -41,6 +41,15 @@ function keydown(e = new KeyboardEvent()) {
         case "Shift":
             moveSpeed = BASE_RUN;
             break;
+        case "X":
+            case "x":
+                if (bombs > 0 && bombCooldown < 0) {
+                    Bullets.bullets.clear();
+                    bombs--;
+                    bombCooldown = 4000;
+                }
+
+                break;
         case "Z":
         case "z":
             isFiring = true;
@@ -73,7 +82,7 @@ function keyup(e = new KeyboardEvent()) {
 }
 
 function powerUp(damage) {
-    power += damage / 100;
+    power += damage / 140;
 }
 
 function tick(ms) {
@@ -109,16 +118,23 @@ function tick(ms) {
         x = Global.BOARD_WIDTH - BORDER_SIZE;
     }
 
+    if (bombCooldown > 1000) {
+        Bullets.bullets.clear();
+    }
     if (invTime <= 0)
     for (const i of Bullets.bullets) {
         const dist = Math.sqrt((i.x - x) ** 2 + (i.y - y) ** 2);
         if (dist < i.size + size) {
             lives--;
             power = power > 0.5 ? power - 0.5 : 0;
+            if (bombs < 2) {
+                bombs = 2;
+            }
             invTime = 2000;
         }
     }
     invTime -= ms;
+    bombCooldown -= ms;
 
     power -= Math.sqrt(power) * ms / 1000 * POWER_LOSS_FACTOR;
     if (power > 3.99) {
@@ -173,6 +189,7 @@ function init() {
     fireCooldown = 66;
 
     invTime = 0;
+    bombCooldown = 0;
 }
 
 export { x, y, size, lives, bombs, score, power, init, tick, keydown, keyup, powerUp };
