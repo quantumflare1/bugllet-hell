@@ -3,6 +3,7 @@ import * as Global from "./modules/global.mjs";
 import * as Bullets from "./modules/bullets.mjs";
 import * as Pattern from "./modules/pattern.mjs";
 import * as Enemy from "./modules/enemy.mjs";
+import * as Level from "./modules/level.mjs";
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
@@ -90,6 +91,7 @@ function tick(ms) {
     for (const i of Enemy.enemies) {
         i.tick(timeElapsed);
     }
+    Level.level.tick(timeElapsed);
     draw();
 
     lastFrameTime = ms;
@@ -112,7 +114,6 @@ function load() {
     addEventListener("keydown", Player.keydown);
     addEventListener("keyup", Player.keyup);
 
-    Enemy.makeEnemy(100, 70, "drone");
     requestAnimationFrame(tick);
 }
 

@@ -56,9 +56,30 @@ const playerBullets = new Set();
 const types = {
     basic: {
         size: 6,
-        vel: 500,
+        vel: 400,
         rot: 0,
         expireTime: 2000,
+        script: () => {}
+    },
+    small: {
+        size: 3,
+        vel: 500,
+        rot: 0,
+        expireTime: 1500,
+        script: () => {}
+    },
+    large: {
+        size: 10,
+        vel: 300,
+        rot: 0,
+        expireTime: 2500,
+        script: () => {}
+    },
+    massive: {
+        size: 24,
+        vel: 200,
+        rot: 0,
+        expireTime: 4000,
         script: () => {}
     },
     spiral: {
@@ -67,16 +88,16 @@ const types = {
         rot: 15,
         expireTime: 3000,
         script: (bullet, ms) => {
-            const SPEED_MULTIPLIER = 4;
+            const SPEED_MULTIPLIER = 3;
             bullet.x += bullet.baseVelX * ms / 1000 * SPEED_MULTIPLIER;
             bullet.y += bullet.baseVelY * ms / 1000 * SPEED_MULTIPLIER;
         }
     }
 }
 
-function makeBullet(type, x, y, dir) {
-    const velX = types[type].vel * Math.cos(dir);
-    const velY = types[type].vel * Math.sin(dir);
+function makeBullet(type, x, y, dir, vel = types[type].vel) {
+    const velX = vel * Math.cos(dir);
+    const velY = vel * Math.sin(dir);
     new Bullet(x, y, types[type].size, velX, velY, types[type].rot, types[type].expireTime, types[type].script);
 }
 

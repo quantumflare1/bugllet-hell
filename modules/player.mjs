@@ -4,7 +4,7 @@ import * as Global from "./global.mjs";
 const BASE_MOVEMENT = 140;
 const BASE_RUN = 252;
 const BORDER_SIZE = 20;
-const POWER_LOSS_FACTOR = 0.04;
+const POWER_LOSS_FACTOR = 0.02;
 
 let x, y, size;
 let movingLeft, movingRight, movingUp, movingDown, isFiring;
@@ -73,7 +73,7 @@ function keyup(e = new KeyboardEvent()) {
 }
 
 function powerUp(damage) {
-    power += damage / 300;
+    power += damage / 100;
 }
 
 function tick(ms) {
@@ -114,6 +114,7 @@ function tick(ms) {
         const dist = Math.sqrt((i.x - x) ** 2 + (i.y - y) ** 2);
         if (dist < i.size + size) {
             lives--;
+            power = power > 0.5 ? power - 0.5 : 0;
             invTime = 2000;
         }
     }
@@ -128,28 +129,28 @@ function tick(ms) {
     }
 
     timeSinceLastBullet += ms;
-    if (timeSinceLastBullet > fireCooldown && isFiring) {
+    if (timeSinceLastBullet > fireCooldown && isFiring && invTime <= 0) {
         if (power > 3) {
-            fireBullet(6, 60, -780, 20, 0);
-            fireBullet(6, -60, -780, -20, 0);
-            fireBullet(6, 0, -800, 14, 0);
-            fireBullet(6, 0, -800, -14, 0);
-            fireBullet(6, 0, -800, 0, 0);
+            fireBullet(8, 60, -780, 16, -8);
+            fireBullet(8, -60, -780, -16, -8);
+            fireBullet(8, 0, -800, 10, -10);
+            fireBullet(8, 0, -800, -10, -10);
+            fireBullet(8, 0, -800, 0, -12);
             fireCooldown = 50;
         }
         else if (power > 2) {
-            fireBullet(6, 40, -780, 12, 0);
-            fireBullet(6, -40, -780, -12, 0);
-            fireBullet(6, 0, -800, 10, 0);
-            fireBullet(6, 0, -800, -10, 0);
+            fireBullet(8, 40, -780, 12, -8);
+            fireBullet(8, -40, -780, -12, -8);
+            fireBullet(8, 0, -800, 5, -10);
+            fireBullet(8, 0, -800, -5, -10);
             fireCooldown = 55;
         }
         else if (power > 1) {
-            fireBullet(6, 10, -800, 6, 0);
-            fireBullet(6, -10, -800, -6, 0);
+            fireBullet(9, 10, -800, 2, -10);
+            fireBullet(9, -10, -800, -2, -10);
             fireCooldown = 60;
         } else {
-            fireBullet(6, 0, -800, 0, 0);
+            fireBullet(10, 0, -800, 0, -10);
             fireCooldown = 66;
         }
         timeSinceLastBullet = 0;
