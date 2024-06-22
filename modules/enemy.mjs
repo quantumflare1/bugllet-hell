@@ -45,11 +45,13 @@ class Enemy {
                 const damage = Math.ceil(Math.log2(i.size));
                 this.hp -= damage;
                 Bullets.playerBullets.delete(i);
+                Player.powerUp(damage);
+                Player.scoreUp(damage);
 
                 if (this.hp <= 0) {
+                    Player.scoreUp(this.score);
                     enemies.delete(this);
                 }
-                Player.powerUp(damage);
             }
         }
     }
@@ -223,7 +225,7 @@ function randomDash(enemy, ms, dashRate) {
 const types = {
     drone: {
         size: 12,
-        score: 1,
+        score: 1000,
         hp: 60,
         screenTime: 20000,
         patterns: ["basicSpread", "spiralDouble"],
@@ -250,7 +252,7 @@ const types = {
     },
     aggroDrone: {
         size: 14,
-        score: 2,
+        score: 2000,
         hp: 80,
         screenTime: 18000,
         patterns: ["singleAimedShot"],
@@ -277,7 +279,7 @@ const types = {
     },
     bigDrone: {
         size: 20,
-        score: 4,
+        score: 4000,
         hp: 250,
         screenTime: 25000,
         patterns: ["basicTracker", "basicRadial"],

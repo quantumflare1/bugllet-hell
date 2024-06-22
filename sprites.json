@@ -1,0 +1,7 @@
+{
+    "player": {
+        "body": "./assets/beeplayer.png",
+        "wings0": "./assets/wingsup.png",
+        "wings1": "./assets/wingsdown.png"
+    }
+}

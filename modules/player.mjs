@@ -5,13 +5,19 @@ const BASE_MOVEMENT = 140;
 const BASE_RUN = 252;
 const BORDER_SIZE = 20;
 const POWER_LOSS_FACTOR = 0.02;
+const WINGBEATS_PER_SECOND = 20;
+const GRAZE_RADIUS = 10;
+const GRAZE_DECAY_RATE = 0.08;
+const GRAZE_PER_BULLET = 0.02;
 
 let x, y, size;
 let movingLeft, movingRight, movingUp, movingDown, isFiring;
 let moveSpeed;
-let lives, bombs, score, power;
+let lives, bombs, score, power
+let grazeMultiplier, timeSinceLastGraze;
 let timeSinceLastBullet, fireCooldown;
 let invTime, bombCooldown;
+let wingTimer, wingState;
 
 function fireBullet(size, velX, velY, offsetX, offsetY) {
     // this is a test bullet that gets smaller
@@ -25,6 +31,7 @@ function fireBullet(size, velX, velY, offsetX, offsetY) {
 }
 
 function keydown(e = new KeyboardEvent()) {
+    //e.preventDefault()
     switch (e.key) {
         case "ArrowUp":
             movingUp = true;
@@ -85,6 +92,10 @@ function powerUp(damage) {
     power += damage / 140;
 }
 
+function scoreUp(points) {
+    score += points;
+}
+
 function tick(ms) {
     let moveX = 0;
     let moveY = 0;
@@ -118,6 +129,13 @@ function tick(ms) {
         x = Global.BOARD_WIDTH - BORDER_SIZE;
     }
 
+    timeSinceLastGraze += ms;
+    if (timeSinceLastGraze > 1000) {
+        grazeMultiplier -= GRAZE_DECAY_RATE * ms / 1000;
+        if (grazeMultiplier < 1) {
+            grazeMultiplier = 1;
+        }
+    }
     if (bombCooldown > 1000) {
         Bullets.bullets.clear();
     }
@@ -131,10 +149,23 @@ function tick(ms) {
                 bombs = 2;
             }
             invTime = 2000;
+            break;
+        }
+        if (dist < i.size + GRAZE_RADIUS) {
+            grazeMultiplier += GRAZE_PER_BULLET;
+            timeSinceLastGraze = 0;
         }
     }
+
     invTime -= ms;
     bombCooldown -= ms;
+    wingTimer += ms;
+
+    // flip between up and down wing states
+    if (wingTimer > 1000 / WINGBEATS_PER_SECOND) {
+        wingTimer -= 1000 / WINGBEATS_PER_SECOND;
+        wingState = wingState === 1 ? 0 : 1;
+    }
 
     power -= Math.sqrt(power) * ms / 1000 * POWER_LOSS_FACTOR;
     if (power > 3.99) {
@@ -185,11 +216,16 @@ function init() {
     score = 0;
     power = 0;
 
+    grazeMultiplier = 1;
+    timeSinceLastGraze = 0;
+
     timeSinceLastBullet = 0;
     fireCooldown = 66;
 
     invTime = 0;
     bombCooldown = 0;
+    wingTimer = 0;
+    wingState = 0;
 }
 
-export { x, y, size, lives, bombs, score, power, init, tick, keydown, keyup, powerUp };
+export { x, y, size, lives, bombs, score, power, wingState, init, tick, keydown, keyup, powerUp, scoreUp };

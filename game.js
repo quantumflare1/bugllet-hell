@@ -4,6 +4,7 @@ import * as Bullets from "./modules/bullets.mjs";
 import * as Pattern from "./modules/pattern.mjs";
 import * as Enemy from "./modules/enemy.mjs";
 import * as Level from "./modules/level.mjs";
+import sprites from "./sprites.json" assert { type: "json" }
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
@@ -14,6 +15,8 @@ const gpctx = gameplayCanvas.getContext("2d");
 let lastFrameTime = document.timeline.currentTime;
 const bullets = new Set();
 const playerBullets = new Set();
+
+const spriteImages = {};
 
 function fullscreen() {
     document.body.requestFullscreen({ navigationUI: "hide" });
@@ -40,8 +43,11 @@ function draw() {
     for (const i of Bullets.playerBullets) {
         circle(gpctx, i.x, i.y, i.size);
     }
+
+    gpctx.drawImage(spriteImages.player.body, Math.floor(Player.x - spriteImages.player.body.width / 2), Math.floor(Player.y - 23));
+    gpctx.drawImage(spriteImages.player[`wings${Player.wingState}`], Math.floor(Player.x - spriteImages.player[`wings${Player.wingState}`].width / 2), Math.floor(Player.y - 10));
     gpctx.fillStyle = "rgb(150, 240, 255)";
-    circle(gpctx, Player.x, Player.y, Player.size);
+    //circle(gpctx, Player.x, Player.y, Player.size);
 
     gpctx.fillStyle = "rgb(180, 0, 0)";
     for (const i of Bullets.bullets) {
@@ -108,6 +114,15 @@ function load() {
     gameplayCanvas.height = Global.BOARD_HEIGHT;
     gameplayCanvas.id = "gameplay";
     document.getElementById("game").appendChild(gameplayCanvas);
+
+    Object.keys(sprites).forEach((v) => {
+        spriteImages[v] = {};
+        Object.keys(sprites[v]).forEach((val) => {
+            spriteImages[v][val] = new Image();
+            spriteImages[v][val].src = sprites[v][val];
+        });
+    });
+    
 
     Player.init();
     //addEventListener("click", fullscreen);

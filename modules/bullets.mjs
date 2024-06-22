@@ -1,5 +1,6 @@
 import * as Global from "./global.mjs";
 
+// todo: add bullet spread (inaccuracy)
 class Bullet {
     constructor(x, y, size, velX, velY, rot, expireTime, script = () => {}, friendly = false) {
         this.x = x;
@@ -13,6 +14,7 @@ class Bullet {
         this.expireTime = expireTime;
         this.lifetime = 0;
         this.isFriendly = friendly;
+        this.grazed = false;
         this.script = script;
 
         if (this.isFriendly) {
