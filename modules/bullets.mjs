@@ -1,6 +1,7 @@
 import * as Global from "./global.mjs";
 
 // todo: add bullet spread (inaccuracy)
+// also todo: maybe tick bullets twice per frame? (more accurate collision)
 class Bullet {
     constructor(x, y, size, velX, velY, rot, expireTime, script = () => {}, friendly = false) {
         this.x = x;

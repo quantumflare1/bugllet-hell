@@ -33,20 +33,22 @@ function circle(context, x, y, r) {
 }
 
 function draw() {
-    ctx.fillStyle = "#222";
-    ctx.fillRect(0, 0, 1200, 900);
-
     gpctx.fillStyle = "#333";
-    gpctx.fillRect(0, 0, 540, 864);
+    gpctx.fillRect(0, 0, 648, 864);
 
     gpctx.fillStyle = "rgb(80, 112, 128)";
     for (const i of Bullets.playerBullets) {
-        circle(gpctx, i.x, i.y, i.size);
+        gpctx.drawImage(spriteImages.player.bullet, Math.floor(i.x - spriteImages.player.bullet.width / 2), Math.floor(i.y - spriteImages.player.bullet.height / 2));
+        //circle(gpctx, i.x, i.y, i.size);
     }
 
+    if (Player.blinkState === 1) {
+        gpctx.globalAlpha = 0.2;
+    }
     gpctx.drawImage(spriteImages.player.body, Math.floor(Player.x - spriteImages.player.body.width / 2), Math.floor(Player.y - 23));
     gpctx.drawImage(spriteImages.player[`wings${Player.wingState}`], Math.floor(Player.x - spriteImages.player[`wings${Player.wingState}`].width / 2), Math.floor(Player.y - 10));
     gpctx.fillStyle = "rgb(150, 240, 255)";
+    gpctx.globalAlpha = 1;
     //circle(gpctx, Player.x, Player.y, Player.size);
 
     gpctx.fillStyle = "rgb(180, 0, 0)";
@@ -57,31 +59,42 @@ function draw() {
     for (const i of Enemy.enemies) { // i am very good at naming variables
         circle(gpctx, i.x, i.y, i.size);
     }
+}
+
+function drawUI() {
+    ctx.fillStyle = "#222";
+    ctx.fillRect(0, 0, 1200, 900);
 
     ctx.fillStyle = "white";
     ctx.font = "50px monospace";
     ctx.textAlign = "start"
-    ctx.fillText("bullet smell", 600, 80);
+    ctx.fillText("bullet smell", 700, 80);
 
     ctx.font = "20px monospace";
-    ctx.fillText("Lives", 600, 140);
+    ctx.drawImage(spriteImages.ui.lifeDisplay, 700, 120);
     for (let i = 0; i < Player.lives; i++) {
-        circle(ctx, 708 + 30 * i, 133, 8);
-    }
-    if (Player.lives < 0) {
-        ctx.fillText("you lose", 700, 140);
+        //circle(ctx, 708 + 30 * i, 133, 8);
+        if (i % 2 === 0) {
+            ctx.drawImage(spriteImages.ui.life, 700 + 8 + i * 16, 120 + 24);
+        } else {
+            ctx.drawImage(spriteImages.ui.life, 700 + 8 + i * 16, 120 + 46);
+        }
     }
 
-    ctx.fillText("Bombs", 600, 180);
+    ctx.drawImage(spriteImages.ui.bombDisplay, 700, 200);
     for (let i = 0; i < Player.bombs; i++) {
-        circle(ctx, 708 + 30 * i, 173, 8);
+        if (i % 2 === 0) {
+            ctx.drawImage(spriteImages.ui.bomb, 700 + 8 + i * 16, 200 + 24);
+        } else {
+            ctx.drawImage(spriteImages.ui.bomb, 700 + 8 + i * 16, 200 + 46);
+        }
     }
 
-    ctx.fillText("Score", 600, 220);
-    ctx.fillText(Player.score, 700, 220);
+    ctx.fillText("Score", 700, 320);
+    ctx.fillText(Player.score, 800, 320);
 
-    ctx.fillText("Power", 600, 260);
-    ctx.fillText(Player.power.toFixed(2), 700, 260);
+    ctx.fillText("Power", 700, 360);
+    ctx.fillText(Player.power.toFixed(2), 800, 360);
 }
 
 function tick(ms) {
@@ -119,15 +132,16 @@ function load() {
         spriteImages[v] = {};
         Object.keys(sprites[v]).forEach((val) => {
             spriteImages[v][val] = new Image();
-            spriteImages[v][val].src = sprites[v][val];
+            spriteImages[v][val].src = `./assets/${v}/${sprites[v][val]}`;
         });
     });
-    
+    spriteImages.ui.bomb.addEventListener("load", drawUI);
 
     Player.init();
     //addEventListener("click", fullscreen);
     addEventListener("keydown", Player.keydown);
     addEventListener("keyup", Player.keyup);
+    addEventListener("game_statupdate", drawUI);
 
     requestAnimationFrame(tick);
 }

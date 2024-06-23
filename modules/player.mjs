@@ -6,6 +6,7 @@ const BASE_RUN = 252;
 const BORDER_SIZE = 20;
 const POWER_LOSS_FACTOR = 0.02;
 const WINGBEATS_PER_SECOND = 20;
+const BLINKS_PER_SECOND = 15;
 const GRAZE_RADIUS = 10;
 const GRAZE_DECAY_RATE = 0.08;
 const GRAZE_PER_BULLET = 0.02;
@@ -13,11 +14,12 @@ const GRAZE_PER_BULLET = 0.02;
 let x, y, size;
 let movingLeft, movingRight, movingUp, movingDown, isFiring;
 let moveSpeed;
-let lives, bombs, score, power
+let lives, bombs, score, power;
 let grazeMultiplier, timeSinceLastGraze;
 let timeSinceLastBullet, fireCooldown;
 let invTime, bombCooldown;
 let wingTimer, wingState;
+let blinkTimer, blinkState;
 
 function fireBullet(size, velX, velY, offsetX, offsetY) {
     // this is a test bullet that gets smaller
@@ -54,6 +56,7 @@ function keydown(e = new KeyboardEvent()) {
                     Bullets.bullets.clear();
                     bombs--;
                     bombCooldown = 4000;
+                    dispatchEvent(new Event("game_statupdate"));
                 }
 
                 break;
@@ -89,7 +92,9 @@ function keyup(e = new KeyboardEvent()) {
 }
 
 function powerUp(damage) {
-    power += damage / 140;
+    if (power < 3.99) {
+        power += damage / 140;
+    }
 }
 
 function scoreUp(points) {
@@ -145,10 +150,12 @@ function tick(ms) {
         if (dist < i.size + size) {
             lives--;
             power = power > 0.5 ? power - 0.5 : 0;
+            grazeMultiplier = 1;
             if (bombs < 2) {
                 bombs = 2;
             }
             invTime = 2000;
+            dispatchEvent(new Event("game_statupdate"));
             break;
         }
         if (dist < i.size + GRAZE_RADIUS) {
@@ -160,11 +167,20 @@ function tick(ms) {
     invTime -= ms;
     bombCooldown -= ms;
     wingTimer += ms;
+    if (invTime > 0) blinkTimer += ms;
 
     // flip between up and down wing states
     if (wingTimer > 1000 / WINGBEATS_PER_SECOND) {
         wingTimer -= 1000 / WINGBEATS_PER_SECOND;
         wingState = wingState === 1 ? 0 : 1;
+    }
+
+    if (blinkTimer > 1000 / BLINKS_PER_SECOND) {
+        blinkTimer -= 1000 / BLINKS_PER_SECOND;
+        blinkState = blinkState === 1 ? 0 : 1;
+    }
+    if (invTime <= 0) {
+        blinkState = 0;
     }
 
     power -= Math.sqrt(power) * ms / 1000 * POWER_LOSS_FACTOR;
@@ -178,26 +194,26 @@ function tick(ms) {
     timeSinceLastBullet += ms;
     if (timeSinceLastBullet > fireCooldown && isFiring && invTime <= 0) {
         if (power > 3) {
-            fireBullet(8, 60, -780, 16, -8);
-            fireBullet(8, -60, -780, -16, -8);
-            fireBullet(8, 0, -800, 10, -10);
-            fireBullet(8, 0, -800, -10, -10);
-            fireBullet(8, 0, -800, 0, -12);
+            fireBullet(6, 120, -1760, 10, 0);
+            fireBullet(6, -120, -1760, -10, 0);
+            fireBullet(6, 40, -1800, 6, -5);
+            fireBullet(6, -40, -1800, -6, -5);
+            fireBullet(6, 0, -1800, 0, -10);
             fireCooldown = 50;
         }
         else if (power > 2) {
-            fireBullet(8, 40, -780, 12, -8);
-            fireBullet(8, -40, -780, -12, -8);
-            fireBullet(8, 0, -800, 5, -10);
-            fireBullet(8, 0, -800, -5, -10);
+            fireBullet(6, 80, -1560, 8, 0);
+            fireBullet(6, -80, -1560, -8, 0);
+            fireBullet(6, 10, -1600, 4, -6);
+            fireBullet(6, -10, -1600, -4, -6);
             fireCooldown = 55;
         }
         else if (power > 1) {
-            fireBullet(9, 10, -800, 2, -10);
-            fireBullet(9, -10, -800, -2, -10);
+            fireBullet(6, 20, -1400, 2, -8);
+            fireBullet(6, -20, -1400, -2, -8);
             fireCooldown = 60;
         } else {
-            fireBullet(10, 0, -800, 0, -10);
+            fireBullet(6, 0, -1200, 0, -8);
             fireCooldown = 66;
         }
         timeSinceLastBullet = 0;
@@ -226,6 +242,8 @@ function init() {
     bombCooldown = 0;
     wingTimer = 0;
     wingState = 0;
+    blinkTimer = 0;
+    blinkState = 1;
 }
 
-export { x, y, size, lives, bombs, score, power, wingState, init, tick, keydown, keyup, powerUp, scoreUp };
+export { x, y, size, lives, bombs, score, power, wingState, blinkState, init, tick, keydown, keyup, powerUp, scoreUp };

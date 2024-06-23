@@ -1,7 +1,14 @@
 {
     "player": {
-        "body": "./assets/beeplayer.png",
-        "wings0": "./assets/wingsup.png",
-        "wings1": "./assets/wingsdown.png"
+        "body": "player.png",
+        "wings0": "wings_up.png",
+        "wings1": "wings_down.png",
+        "bullet": "stinger.png"
+    },
+    "ui": {
+        "lifeDisplay": "life_meter.png",
+        "life": "life_gem.png",
+        "bombDisplay": "bomb_meter.png",
+        "bomb": "bomb.png"
     }
 }

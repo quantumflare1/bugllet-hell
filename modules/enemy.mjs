@@ -47,6 +47,7 @@ class Enemy {
                 Bullets.playerBullets.delete(i);
                 Player.powerUp(damage);
                 Player.scoreUp(damage);
+                dispatchEvent(new Event("game_statupdate"));
 
                 if (this.hp <= 0) {
                     Player.scoreUp(this.score);
