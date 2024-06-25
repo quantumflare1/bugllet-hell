@@ -5,6 +5,7 @@ import * as Pattern from "./modules/pattern.mjs";
 import * as Enemy from "./modules/enemy.mjs";
 import * as Level from "./modules/level.mjs";
 import sprites from "./sprites.json" assert { type: "json" }
+import font from "./font.json" assert { type: "json" }
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
@@ -17,6 +18,10 @@ const bullets = new Set();
 const playerBullets = new Set();
 
 const spriteImages = {};
+const fontBitmap = new Image();
+
+// temp
+const title = "1-1: First Encounter";
 
 function fullscreen() {
     document.body.requestFullscreen({ navigationUI: "hide" });
@@ -32,9 +37,23 @@ function circle(context, x, y, r) {
     context.closePath();
 }
 
+function drawText(context, text, sx, sy) {
+    for (let i = 0; i < text.length; i++) {
+        context.drawImage(fontBitmap, font[text[i]][0], font[text[i]][1], 7, 12, sx + i * 14, sy, 14, 24);
+    }
+}
+
+function fillPowerMeter() {
+    ctx.fillStyle = "rgb(192, 151, 74)";
+    ctx.fillRect(702, 414, Math.floor(Player.power / 4 * (spriteImages.ui.powerMeter.width - 8)), 16);
+}
+
 function draw() {
     gpctx.fillStyle = "#333";
     gpctx.fillRect(0, 0, 648, 864);
+
+    gpctx.fillStyle = "rgb(99, 99, 99)";
+    circle(gpctx, Player.x, Player.y, Player.bombRadius);
 
     gpctx.fillStyle = "rgb(80, 112, 128)";
     for (const i of Bullets.playerBullets) {
@@ -68,33 +87,38 @@ function drawUI() {
     ctx.fillStyle = "white";
     ctx.font = "50px monospace";
     ctx.textAlign = "start"
-    ctx.fillText("bullet smell", 700, 80);
+    //ctx.fillText("bullet smell", 700, 80);
+
+    drawText(ctx, title, 700, 40);
 
     ctx.font = "20px monospace";
-    ctx.drawImage(spriteImages.ui.lifeDisplay, 700, 120);
+    ctx.drawImage(spriteImages.ui.lifeDisplay, 700, 200);
     for (let i = 0; i < Player.lives; i++) {
         //circle(ctx, 708 + 30 * i, 133, 8);
         if (i % 2 === 0) {
-            ctx.drawImage(spriteImages.ui.life, 700 + 8 + i * 16, 120 + 24);
+            ctx.drawImage(spriteImages.ui.life, 700 + 8 + i * 16, 200 + 24);
         } else {
-            ctx.drawImage(spriteImages.ui.life, 700 + 8 + i * 16, 120 + 46);
+            ctx.drawImage(spriteImages.ui.life, 700 + 8 + i * 16, 200 + 46);
         }
     }
 
-    ctx.drawImage(spriteImages.ui.bombDisplay, 700, 200);
+    ctx.drawImage(spriteImages.ui.bombDisplay, 700, 300);
     for (let i = 0; i < Player.bombs; i++) {
         if (i % 2 === 0) {
-            ctx.drawImage(spriteImages.ui.bomb, 700 + 8 + i * 16, 200 + 24);
+            ctx.drawImage(spriteImages.ui.bomb, 700 + 8 + i * 16, 300 + 24);
         } else {
-            ctx.drawImage(spriteImages.ui.bomb, 700 + 8 + i * 16, 200 + 46);
+            ctx.drawImage(spriteImages.ui.bomb, 700 + 8 + i * 16, 300 + 46);
         }
     }
 
-    ctx.fillText("Score", 700, 320);
-    ctx.fillText(Player.score, 800, 320);
+    ctx.drawImage(spriteImages.ui.scoreDisplay, 700, 95);
+    for (let i = 0; i < 9; i++) {
+        drawText(ctx, `${Math.floor((Player.score / (10 ** (8 - i))) % 10)}`, 708 + 14 * i, 120);
+    }
 
-    ctx.fillText("Power", 700, 360);
-    ctx.fillText(Player.power.toFixed(2), 800, 360);
+    fillPowerMeter();
+    ctx.drawImage(spriteImages.ui.powerMeter, 700, 400);
+    drawText(ctx, Player.power.toFixed(2), 752, 412);
 }
 
 function tick(ms) {
@@ -122,6 +146,7 @@ function load() {
     canvas.width = 1200;
     canvas.height = 900;
     document.getElementById("game").appendChild(canvas);
+    ctx.imageSmoothingEnabled = false;
 
     gameplayCanvas.width = Global.BOARD_WIDTH;
     gameplayCanvas.height = Global.BOARD_HEIGHT;
@@ -135,7 +160,8 @@ function load() {
             spriteImages[v][val].src = `./assets/${v}/${sprites[v][val]}`;
         });
     });
-    spriteImages.ui.bomb.addEventListener("load", drawUI);
+    fontBitmap.src = "./assets/ui/font.png";
+    fontBitmap.addEventListener("load", drawUI);
 
     Player.init();
     //addEventListener("click", fullscreen);

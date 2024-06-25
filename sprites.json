@@ -9,6 +9,8 @@
         "lifeDisplay": "life_meter.png",
         "life": "life_gem.png",
         "bombDisplay": "bomb_meter.png",
-        "bomb": "bomb.png"
+        "bomb": "bomb.png",
+        "scoreDisplay": "score.png",
+        "powerMeter": "power_meter.png"
     }
 }

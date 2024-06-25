@@ -10,6 +10,7 @@ const BLINKS_PER_SECOND = 15;
 const GRAZE_RADIUS = 10;
 const GRAZE_DECAY_RATE = 0.08;
 const GRAZE_PER_BULLET = 0.02;
+const BOMB_BLAST_SPEED = 1000;
 
 let x, y, size;
 let movingLeft, movingRight, movingUp, movingDown, isFiring;
@@ -17,7 +18,7 @@ let moveSpeed;
 let lives, bombs, score, power;
 let grazeMultiplier, timeSinceLastGraze;
 let timeSinceLastBullet, fireCooldown;
-let invTime, bombCooldown;
+let invTime, bombCooldown, bombRadius;
 let wingTimer, wingState;
 let blinkTimer, blinkState;
 
@@ -51,15 +52,9 @@ function keydown(e = new KeyboardEvent()) {
             moveSpeed = BASE_RUN;
             break;
         case "X":
-            case "x":
-                if (bombs > 0 && bombCooldown < 0) {
-                    Bullets.bullets.clear();
-                    bombs--;
-                    bombCooldown = 4000;
-                    dispatchEvent(new Event("game_statupdate"));
-                }
-
-                break;
+        case "x":
+            bomb();
+            break;
         case "Z":
         case "z":
             isFiring = true;
@@ -92,13 +87,22 @@ function keyup(e = new KeyboardEvent()) {
 }
 
 function powerUp(damage) {
-    if (power < 3.99) {
-        power += damage / 140;
+    power += damage / 140;
+    if (power > 4) {
+        power = 4;
     }
 }
 
 function scoreUp(points) {
     score += points;
+}
+
+function bomb() {
+    if (bombs > 0 && bombCooldown < 0) {
+        bombs--;
+        bombCooldown = 4000;
+        dispatchEvent(new Event("game_statupdate"));
+    }
 }
 
 function tick(ms) {
@@ -142,7 +146,10 @@ function tick(ms) {
         }
     }
     if (bombCooldown > 1000) {
-        Bullets.bullets.clear();
+        bombRadius += BOMB_BLAST_SPEED * ms / 1000;
+        //Bullets.bullets.clear();
+    } else {
+        bombRadius = -10;
     }
     if (invTime <= 0)
     for (const i of Bullets.bullets) {
@@ -162,6 +169,9 @@ function tick(ms) {
             grazeMultiplier += GRAZE_PER_BULLET;
             timeSinceLastGraze = 0;
         }
+        if (dist < i.size + bombRadius) {
+            Bullets.bullets.delete(i);
+        }
     }
 
     invTime -= ms;
@@ -171,29 +181,33 @@ function tick(ms) {
 
     // flip between up and down wing states
     if (wingTimer > 1000 / WINGBEATS_PER_SECOND) {
-        wingTimer -= 1000 / WINGBEATS_PER_SECOND;
+        wingTimer = 0;
         wingState = wingState === 1 ? 0 : 1;
     }
 
     if (blinkTimer > 1000 / BLINKS_PER_SECOND) {
-        blinkTimer -= 1000 / BLINKS_PER_SECOND;
+        blinkTimer = 0;
         blinkState = blinkState === 1 ? 0 : 1;
     }
     if (invTime <= 0) {
         blinkState = 0;
     }
 
-    power -= Math.sqrt(power) * ms / 1000 * POWER_LOSS_FACTOR;
-    if (power > 3.99) {
-        power = 3.99;
-    }
-    else if (power < 0) {
-        power = 0;
-    }
+    //power -= Math.sqrt(power) * ms / 1000 * POWER_LOSS_FACTOR;
 
     timeSinceLastBullet += ms;
     if (timeSinceLastBullet > fireCooldown && isFiring && invTime <= 0) {
-        if (power > 3) {
+        if (power >= 4) {
+            fireBullet(6, 180, -1920, 10, 0);
+            fireBullet(6, -180, -1920, -10, 0);
+            fireBullet(6, 100, -1960, 8, 0);
+            fireBullet(6, -100, -1960, -8, 0);
+            fireBullet(6, 20, -2000, 8, -5);
+            fireBullet(6, -20, -2000, -8, -5);
+            fireBullet(6, 0, -2000, 0, -10);
+            fireCooldown = 45;
+        }
+        if (power >= 3) {
             fireBullet(6, 120, -1760, 10, 0);
             fireBullet(6, -120, -1760, -10, 0);
             fireBullet(6, 40, -1800, 6, -5);
@@ -201,14 +215,14 @@ function tick(ms) {
             fireBullet(6, 0, -1800, 0, -10);
             fireCooldown = 50;
         }
-        else if (power > 2) {
+        else if (power >= 2) {
             fireBullet(6, 80, -1560, 8, 0);
             fireBullet(6, -80, -1560, -8, 0);
             fireBullet(6, 10, -1600, 4, -6);
             fireBullet(6, -10, -1600, -4, -6);
             fireCooldown = 55;
         }
-        else if (power > 1) {
+        else if (power >= 1) {
             fireBullet(6, 20, -1400, 2, -8);
             fireBullet(6, -20, -1400, -2, -8);
             fireCooldown = 60;
@@ -240,10 +254,11 @@ function init() {
 
     invTime = 0;
     bombCooldown = 0;
+    bombRadius = 0;
     wingTimer = 0;
     wingState = 0;
     blinkTimer = 0;
     blinkState = 1;
 }
 
-export { x, y, size, lives, bombs, score, power, wingState, blinkState, init, tick, keydown, keyup, powerUp, scoreUp };
+export { x, y, size, lives, bombs, score, power, wingState, blinkState, bombRadius, init, tick, keydown, keyup, powerUp, scoreUp };

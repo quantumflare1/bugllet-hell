@@ -24,6 +24,7 @@ class Enemy {
         this.despawnY = 0;
         this.despawning = false;
         this.phase = 0;
+        this.bombed = false;
         this.waveId = waveId;
 
         enemies.add(this);
@@ -48,12 +49,18 @@ class Enemy {
                 Player.powerUp(damage);
                 Player.scoreUp(damage);
                 dispatchEvent(new Event("game_statupdate"));
-
-                if (this.hp <= 0) {
-                    Player.scoreUp(this.score);
-                    enemies.delete(this);
-                }
+                break;
             }
+        }
+        const dist = Math.sqrt((Player.x - this.x) ** 2 + (Player.y - this.y) ** 2);
+        if (dist < this.size + Player.bombRadius && !this.bombed) {
+            this.hp -= 60;
+            this.bombed = true;
+            setTimeout(() => { this.bombed = false; }, 4000);
+        }
+        if (this.hp <= 0) {
+            Player.scoreUp(this.score);
+            enemies.delete(this);
         }
     }
 }
