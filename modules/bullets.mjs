@@ -59,37 +59,37 @@ const playerBullets = new Set();
 const types = {
     basic: {
         size: 6,
-        vel: 400,
+        vel: 300,
         rot: 0,
-        expireTime: 2000,
+        expireTime: 3000,
         script: () => {}
     },
     small: {
         size: 3,
-        vel: 500,
-        rot: 0,
-        expireTime: 1500,
-        script: () => {}
-    },
-    large: {
-        size: 10,
-        vel: 300,
+        vel: 360,
         rot: 0,
         expireTime: 2500,
         script: () => {}
     },
-    massive: {
-        size: 24,
-        vel: 200,
+    large: {
+        size: 10,
+        vel: 250,
         rot: 0,
         expireTime: 4000,
         script: () => {}
     },
+    massive: {
+        size: 24,
+        vel: 170,
+        rot: 0,
+        expireTime: 5000,
+        script: () => {}
+    },
     spiral: {
         size: 8,
-        vel: 100,
+        vel: 90,
         rot: 15,
-        expireTime: 3000,
+        expireTime: 3500,
         script: (bullet, ms) => {
             const SPEED_MULTIPLIER = 3;
             bullet.x += bullet.baseVelX * ms / 1000 * SPEED_MULTIPLIER;

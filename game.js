@@ -4,6 +4,7 @@ import * as Bullets from "./modules/bullets.mjs";
 import * as Pattern from "./modules/pattern.mjs";
 import * as Enemy from "./modules/enemy.mjs";
 import * as Level from "./modules/level.mjs";
+import * as Pickup from "./modules/pickup.mjs";
 import sprites from "./sprites.json" assert { type: "json" }
 import font from "./font.json" assert { type: "json" }
 
@@ -16,6 +17,7 @@ const gpctx = gameplayCanvas.getContext("2d");
 let lastFrameTime = document.timeline.currentTime;
 const bullets = new Set();
 const playerBullets = new Set();
+let paused = false;
 
 const spriteImages = {};
 const fontBitmap = new Image();
@@ -25,6 +27,26 @@ const title = "1-1: First Encounter";
 
 function fullscreen() {
     document.body.requestFullscreen({ navigationUI: "hide" });
+}
+
+function pause(e) {
+    if (e.key === "Escape") {
+        if (!paused) {
+            gpctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+            gpctx.fillRect(0, 0, gameplayCanvas.width, gameplayCanvas.height);
+    
+            gpctx.font = "60px monospace";
+            gpctx.textAlign = "center";
+            gpctx.fillStyle = "rgb(255, 255, 255)";
+            drawText(gpctx, "Paused", gameplayCanvas.width / 2 - 7 * 3 * 3, gameplayCanvas.height / 2, 3);
+            gpctx.font = "20px monospace";
+            drawText(gpctx, "Press Z to resume", gameplayCanvas.width / 2 - 7 * 9 * 2, gameplayCanvas.height / 2 + 70);
+        }
+
+        paused = true;
+    } else if (e.key === "z") {
+        paused = false;
+    }
 }
 
 function circle(context, x, y, r) {
@@ -37,9 +59,9 @@ function circle(context, x, y, r) {
     context.closePath();
 }
 
-function drawText(context, text, sx, sy) {
+function drawText(context, text, sx, sy, scale = 2) {
     for (let i = 0; i < text.length; i++) {
-        context.drawImage(fontBitmap, font[text[i]][0], font[text[i]][1], 7, 12, sx + i * 14, sy, 14, 24);
+        context.drawImage(fontBitmap, font[text[i]][0], font[text[i]][1], 7, 12, sx + i * 7 * scale, sy, 7 * scale, 12 * scale);
     }
 }
 
@@ -78,6 +100,10 @@ function draw() {
     for (const i of Enemy.enemies) { // i am very good at naming variables
         circle(gpctx, i.x, i.y, i.size);
     }
+    gpctx.fillStyle = "rgb(0, 0, 255)";
+    for (const i of Pickup.pickups) {
+        circle(gpctx, i.x, i.y, i.size);
+    }
 }
 
 function drawUI() {
@@ -89,7 +115,7 @@ function drawUI() {
     ctx.textAlign = "start"
     //ctx.fillText("bullet smell", 700, 80);
 
-    drawText(ctx, title, 700, 40);
+    drawText(ctx, title, 700, 40, 2);
 
     ctx.font = "20px monospace";
     ctx.drawImage(spriteImages.ui.lifeDisplay, 700, 200);
@@ -113,29 +139,34 @@ function drawUI() {
 
     ctx.drawImage(spriteImages.ui.scoreDisplay, 700, 95);
     for (let i = 0; i < 9; i++) {
-        drawText(ctx, `${Math.floor((Player.score / (10 ** (8 - i))) % 10)}`, 708 + 14 * i, 120);
+        drawText(ctx, `${Math.floor((Player.score / (10 ** (8 - i))) % 10)}`, 708 + 14 * i, 120, 2);
     }
 
     fillPowerMeter();
     ctx.drawImage(spriteImages.ui.powerMeter, 700, 400);
-    drawText(ctx, Player.power.toFixed(2), 752, 412);
+    drawText(ctx, Player.power.toFixed(2), 752, 412, 2);
 }
 
 function tick(ms) {
     const timeElapsed = ms - lastFrameTime;
 
-    Player.tick(timeElapsed);
-    for (const i of Bullets.playerBullets) {
-        i.tick(timeElapsed);
+    if (!paused) {
+        Player.tick(timeElapsed);
+        for (const i of Bullets.playerBullets) {
+            i.tick(timeElapsed);
+        }
+        for (const i of Bullets.bullets) {
+            i.tick(timeElapsed);
+        }
+        for (const i of Enemy.enemies) {
+            i.tick(timeElapsed);
+        }
+        for (const i of Pickup.pickups) {
+            i.tick(timeElapsed);
+        }
+        Level.level.tick(timeElapsed);
+        draw();
     }
-    for (const i of Bullets.bullets) {
-        i.tick(timeElapsed);
-    }
-    for (const i of Enemy.enemies) {
-        i.tick(timeElapsed);
-    }
-    Level.level.tick(timeElapsed);
-    draw();
 
     lastFrameTime = ms;
     if (Player.lives >= 0)
@@ -147,6 +178,7 @@ function load() {
     canvas.height = 900;
     document.getElementById("game").appendChild(canvas);
     ctx.imageSmoothingEnabled = false;
+    gpctx.imageSmoothingEnabled = false;
 
     gameplayCanvas.width = Global.BOARD_WIDTH;
     gameplayCanvas.height = Global.BOARD_HEIGHT;
@@ -168,6 +200,7 @@ function load() {
     addEventListener("keydown", Player.keydown);
     addEventListener("keyup", Player.keyup);
     addEventListener("game_statupdate", drawUI);
+    addEventListener("keydown", pause);
 
     requestAnimationFrame(tick);
 }

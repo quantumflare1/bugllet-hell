@@ -2,6 +2,7 @@ import * as Player from "./player.mjs";
 import * as Pattern from "./pattern.mjs";
 import * as Bullets from "./bullets.mjs";
 import * as Global from "./global.mjs";
+import * as Pickup from "./pickup.mjs";
 
 const enemies = new Set();
 
@@ -46,9 +47,8 @@ class Enemy {
                 const damage = Math.ceil(Math.log2(i.size));
                 this.hp -= damage;
                 Bullets.playerBullets.delete(i);
-                Player.powerUp(damage);
+                Player.powerUp(damage / 1000);
                 Player.scoreUp(damage);
-                dispatchEvent(new Event("game_statupdate"));
                 break;
             }
         }
@@ -56,14 +56,37 @@ class Enemy {
         if (dist < this.size + Player.bombRadius && !this.bombed) {
             this.hp -= 60;
             this.bombed = true;
-            setTimeout(() => { this.bombed = false; }, 4000);
+            // todo: make enemies bombable more than once
         }
         if (this.hp <= 0) {
             Player.scoreUp(this.score);
+            this.generatePickup(this);
+
             enemies.delete(this);
         }
     }
+    generatePickup(enemy) {
+        if (Player.power < 4 && Math.random() < 0.8) {
+            const rand = Math.random();
+            if (rand < 0.2)
+                new Pickup.Pickup("point", enemy.x, enemy.y, 15, 2000, 0, 120, () => {});
+            else if (rand < 0.3)
+                new Pickup.Pickup("power", enemy.x, enemy.y, 20, 0.2, 0, 120, () => {});
+            else
+                new Pickup.Pickup("power", enemy.x, enemy.y, 15, 0.06, 0, 120, () => {});
+        }
+        else if (Math.random() < 0.5) {
+            if (Player.power < 4 && Math.random() < 0.75) {
+                if (Math.random() < 0.1)
+                    new Pickup.Pickup("power", enemy.x, enemy.y, 20, 0.2, 0, 120, () => {});
+                new Pickup.Pickup("power", enemy.x, enemy.y, 15, 0.06, 0, 120, () => {});
+            }
+            else
+                new Pickup.Pickup("point", enemy.x, enemy.y, 15, 2000, 0, 120, () => {});
+        }
+    }
 }
+
 
 function aimAtDespawnPoint(enemy) {
     if (enemy.despawnY - enemy.y < 0) {
@@ -233,8 +256,8 @@ function randomDash(enemy, ms, dashRate) {
 const types = {
     drone: {
         size: 12,
-        score: 1000,
-        hp: 60,
+        score: 200,
+        hp: 55,
         screenTime: 20000,
         patterns: ["basicSpread", "spiralDouble"],
         script: (enemy, ms) => {
@@ -260,8 +283,8 @@ const types = {
     },
     aggroDrone: {
         size: 14,
-        score: 2000,
-        hp: 80,
+        score: 500,
+        hp: 70,
         screenTime: 18000,
         patterns: ["singleAimedShot"],
         script: (enemy, ms) => {
@@ -287,8 +310,8 @@ const types = {
     },
     bigDrone: {
         size: 20,
-        score: 4000,
-        hp: 250,
+        score: 1000,
+        hp: 230,
         screenTime: 25000,
         patterns: ["basicTracker", "basicRadial"],
         script: (enemy, ms) => {
@@ -316,7 +339,7 @@ const types = {
 
 function makeEnemy(x, y, type, waveId) {
     new Enemy(x, y, types[type].size, types[type].score, types[type].hp, types[type].screenTime, types[type].patterns, types[type].script, waveId);
-    pickDespawnPoint(x, y);
+    //pickDespawnPoint(x, y); why is this here???
 }
 
 export { enemies, types, makeEnemy };
