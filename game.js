@@ -17,13 +17,15 @@ const gpctx = gameplayCanvas.getContext("2d");
 let lastFrameTime = document.timeline.currentTime;
 const bullets = new Set();
 const playerBullets = new Set();
-let paused = false;
+let fps = 0;
+let msSinceLastFpsCheck = 0;
+let framesSinceLastFpsCheck = 0;
 
 const spriteImages = {};
 const fontBitmap = new Image();
 
 // temp
-const title = "1-1: First Encounter";
+const title = "Introduction?";
 
 function fullscreen() {
     document.body.requestFullscreen({ navigationUI: "hide" });
@@ -31,7 +33,7 @@ function fullscreen() {
 
 function pause(e) {
     if (e.key === "Escape") {
-        if (!paused) {
+        if (!Global.paused) {
             gpctx.fillStyle = "rgba(0, 0, 0, 0.8)";
             gpctx.fillRect(0, 0, gameplayCanvas.width, gameplayCanvas.height);
     
@@ -40,12 +42,13 @@ function pause(e) {
             gpctx.fillStyle = "rgb(255, 255, 255)";
             drawText(gpctx, "Paused", gameplayCanvas.width / 2 - 7 * 3 * 3, gameplayCanvas.height / 2, 3);
             gpctx.font = "20px monospace";
-            drawText(gpctx, "Press Z to resume", gameplayCanvas.width / 2 - 7 * 9 * 2, gameplayCanvas.height / 2 + 70);
+            drawText(gpctx, "Press Z to resume", gameplayCanvas.width / 2 - 7 * 9 * 2, gameplayCanvas.height / 2 + 70, 2);
+            drawText(gpctx, "idk why the text looks so crusty", 20, 20, 1);
         }
 
-        paused = true;
+        Global.setPaused(true);
     } else if (e.key === "z") {
-        paused = false;
+        Global.setPaused(false);
     }
 }
 
@@ -59,15 +62,15 @@ function circle(context, x, y, r) {
     context.closePath();
 }
 
-function drawText(context, text, sx, sy, scale = 2) {
+function drawText(context, text, sx, sy, scale) {
     for (let i = 0; i < text.length; i++) {
-        context.drawImage(fontBitmap, font[text[i]][0], font[text[i]][1], 7, 12, sx + i * 7 * scale, sy, 7 * scale, 12 * scale);
+        context.drawImage(fontBitmap, font[text[i]][0], font[text[i]][1], 7, 17, sx + i * 7 * scale, sy, 7 * scale, 17 * scale);
     }
 }
 
-function fillPowerMeter() {
+function fillPowerMeter(scale) {
     ctx.fillStyle = "rgb(192, 151, 74)";
-    ctx.fillRect(702, 414, Math.floor(Player.power / 4 * (spriteImages.ui.powerMeter.width - 8)), 16);
+    ctx.fillRect(700 + 3 * scale, 560 + 10 * scale, Math.floor(Player.power / 4 * (spriteImages.ui.powerMeter.width * scale - 4 * scale) / scale) * scale, 4 * scale);
 }
 
 function draw() {
@@ -92,6 +95,11 @@ function draw() {
     gpctx.globalAlpha = 1;
     //circle(gpctx, Player.x, Player.y, Player.size);
 
+    gpctx.fillStyle = "rgb(0, 0, 255)";
+    for (const i of Pickup.pickups) {
+        gpctx.drawImage(spriteImages.pickup[i.type], Math.floor(i.x - i.size / 2), Math.floor(i.y - i.size / 2));
+        //circle(gpctx, i.x, i.y, i.size);
+    }
     gpctx.fillStyle = "rgb(180, 0, 0)";
     for (const i of Bullets.bullets) {
         circle(gpctx, i.x, i.y, i.size);
@@ -100,57 +108,58 @@ function draw() {
     for (const i of Enemy.enemies) { // i am very good at naming variables
         circle(gpctx, i.x, i.y, i.size);
     }
-    gpctx.fillStyle = "rgb(0, 0, 255)";
-    for (const i of Pickup.pickups) {
-        circle(gpctx, i.x, i.y, i.size);
-    }
 }
 
 function drawUI() {
-    ctx.fillStyle = "#222";
-    ctx.fillRect(0, 0, 1200, 900);
+    const scaleFactor = 3;
+    ctx.drawImage(spriteImages.ui.bg, 0, 0);
 
-    ctx.fillStyle = "white";
-    ctx.font = "50px monospace";
-    ctx.textAlign = "start"
-    //ctx.fillText("bullet smell", 700, 80);
+    drawText(ctx, title, 700, 40, scaleFactor);
 
-    drawText(ctx, title, 700, 40, 2);
-
+    ctx.drawImage(spriteImages.ui.scoreDisplay, 700, 100, spriteImages.ui.scoreDisplay.width * scaleFactor, spriteImages.ui.scoreDisplay.height * scaleFactor);
+    for (let i = 0; i < 9; i++) {
+        drawText(ctx, `${Math.floor((Player.score / (10 ** (8 - i))) % 10)}`, 700 + 4 * scaleFactor + 7 * scaleFactor * i, 100 + 13 * scaleFactor, scaleFactor);
+    }
+    
     ctx.font = "20px monospace";
-    ctx.drawImage(spriteImages.ui.lifeDisplay, 700, 200);
+    ctx.drawImage(spriteImages.ui.lifeDisplay, 700, 240, spriteImages.ui.lifeDisplay.width * scaleFactor, spriteImages.ui.lifeDisplay.height * scaleFactor);
     for (let i = 0; i < Player.lives; i++) {
-        //circle(ctx, 708 + 30 * i, 133, 8);
         if (i % 2 === 0) {
-            ctx.drawImage(spriteImages.ui.life, 700 + 8 + i * 16, 200 + 24);
+            ctx.drawImage(spriteImages.ui.life, 700 + 4 * scaleFactor + i * 8 * scaleFactor, 240 + 12 * scaleFactor, spriteImages.ui.life.width * scaleFactor, spriteImages.ui.life.height * scaleFactor);
         } else {
-            ctx.drawImage(spriteImages.ui.life, 700 + 8 + i * 16, 200 + 46);
+            ctx.drawImage(spriteImages.ui.life, 700 + 4 * scaleFactor + i * 8 * scaleFactor, 240 + 23 * scaleFactor, spriteImages.ui.life.width * scaleFactor, spriteImages.ui.life.height * scaleFactor);
         }
     }
 
-    ctx.drawImage(spriteImages.ui.bombDisplay, 700, 300);
+    ctx.drawImage(spriteImages.ui.bombDisplay, 700, 400, spriteImages.ui.bombDisplay.width * scaleFactor, spriteImages.ui.bombDisplay.height * scaleFactor);
     for (let i = 0; i < Player.bombs; i++) {
         if (i % 2 === 0) {
-            ctx.drawImage(spriteImages.ui.bomb, 700 + 8 + i * 16, 300 + 24);
+            ctx.drawImage(spriteImages.ui.bomb, 700 + 4 * scaleFactor + i * 8 * scaleFactor, 400 + 12 * scaleFactor, spriteImages.ui.bomb.width * scaleFactor, spriteImages.ui.bomb.height * scaleFactor);
         } else {
-            ctx.drawImage(spriteImages.ui.bomb, 700 + 8 + i * 16, 300 + 46);
+            ctx.drawImage(spriteImages.ui.bomb, 700 + 4 * scaleFactor + i * 8 * scaleFactor, 400 + 23 * scaleFactor, spriteImages.ui.bomb.width * scaleFactor, spriteImages.ui.bomb.height * scaleFactor);
         }
     }
 
-    ctx.drawImage(spriteImages.ui.scoreDisplay, 700, 95);
-    for (let i = 0; i < 9; i++) {
-        drawText(ctx, `${Math.floor((Player.score / (10 ** (8 - i))) % 10)}`, 708 + 14 * i, 120, 2);
-    }
+    fillPowerMeter(scaleFactor);
+    ctx.drawImage(spriteImages.ui.powerMeter, 700, 560, spriteImages.ui.powerMeter.width * scaleFactor, spriteImages.ui.powerMeter.height * scaleFactor);
+    drawText(ctx, Player.power.toFixed(2), 700 + 26 * scaleFactor, 560 + 6 * scaleFactor, scaleFactor);
 
-    fillPowerMeter();
-    ctx.drawImage(spriteImages.ui.powerMeter, 700, 400);
-    drawText(ctx, Player.power.toFixed(2), 752, 412, 2);
+    drawText(ctx, `${fps.toFixed(2)} fps`, 700, 870 - 10 * scaleFactor, scaleFactor);
 }
 
 function tick(ms) {
     const timeElapsed = ms - lastFrameTime;
+    msSinceLastFpsCheck += timeElapsed;
+    framesSinceLastFpsCheck++;
 
-    if (!paused) {
+    if (msSinceLastFpsCheck > 500) {
+        fps = framesSinceLastFpsCheck / (msSinceLastFpsCheck / 1000);
+        msSinceLastFpsCheck = 0;
+        framesSinceLastFpsCheck = 0;
+        drawUI();
+    }
+
+    if (!Global.paused) {
         Player.tick(timeElapsed);
         for (const i of Bullets.playerBullets) {
             i.tick(timeElapsed);

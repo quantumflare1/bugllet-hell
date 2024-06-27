@@ -66,23 +66,28 @@ class Enemy {
         }
     }
     generatePickup(enemy) {
+        function pickupFall(ms) {
+            if (this.lifetime < 600) {
+                this.velY += (-this.baseVelY + 120) * ms / 600;
+            }
+        }
         if (Player.power < 4 && Math.random() < 0.8) {
             const rand = Math.random();
             if (rand < 0.2)
-                new Pickup.Pickup("point", enemy.x, enemy.y, 15, 2000, 0, 120, () => {});
+                new Pickup.Pickup("point", enemy.x, enemy.y, 15, 2000, 0, -230 + Math.random() * 60, pickupFall);
             else if (rand < 0.3)
-                new Pickup.Pickup("power", enemy.x, enemy.y, 20, 0.2, 0, 120, () => {});
+                new Pickup.Pickup("power", enemy.x, enemy.y, 20, 0.2, 0, -230 + Math.random() * 60, pickupFall);
             else
-                new Pickup.Pickup("power", enemy.x, enemy.y, 15, 0.06, 0, 120, () => {});
+                new Pickup.Pickup("power", enemy.x, enemy.y, 15, 0.06, 0, -230 + Math.random() * 60, pickupFall);
         }
         else if (Math.random() < 0.5) {
             if (Player.power < 4 && Math.random() < 0.75) {
                 if (Math.random() < 0.1)
-                    new Pickup.Pickup("power", enemy.x, enemy.y, 20, 0.2, 0, 120, () => {});
-                new Pickup.Pickup("power", enemy.x, enemy.y, 15, 0.06, 0, 120, () => {});
+                    new Pickup.Pickup("power", enemy.x, enemy.y, 20, 0.2, 0, -230 + Math.random() * 60, pickupFall);
+                new Pickup.Pickup("power", enemy.x, enemy.y, 15, 0.06, 0, -230 + Math.random() * 60, pickupFall);
             }
             else
-                new Pickup.Pickup("point", enemy.x, enemy.y, 15, 2000, 0, 120, () => {});
+                new Pickup.Pickup("point", enemy.x, enemy.y, 15, 2000, 0, -230 + Math.random() * 60, pickupFall);
         }
     }
 }
@@ -258,7 +263,7 @@ const types = {
         size: 12,
         score: 200,
         hp: 55,
-        screenTime: 20000,
+        screenTime: 15000,
         patterns: ["basicSpread", "spiralDouble"],
         script: (enemy, ms) => {
             const DASH_RATE = 3000;
@@ -285,7 +290,7 @@ const types = {
         size: 14,
         score: 500,
         hp: 70,
-        screenTime: 18000,
+        screenTime: 14000,
         patterns: ["singleAimedShot"],
         script: (enemy, ms) => {
             const DASH_RATE = 1000;
@@ -312,7 +317,7 @@ const types = {
         size: 20,
         score: 1000,
         hp: 230,
-        screenTime: 25000,
+        screenTime: 20000,
         patterns: ["basicTracker", "basicRadial"],
         script: (enemy, ms) => {
             const DASH_RATE = 2500;

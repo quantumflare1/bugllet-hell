@@ -10,6 +10,8 @@ class Pickup {
         this.y = y;
         this.velX = velX;
         this.velY = velY;
+        this.baseVelX = velX;
+        this.baseVelY = velY;
         this.size = size;
         this.value = value;
         this.script = script;
@@ -30,7 +32,7 @@ class Pickup {
             pickups.delete(this);
         }
         if (this.x - this.size >= Global.BOARD_WIDTH || this.x + this.size <= 0 ||
-            this.y - this.size >= Global.BOARD_HEIGHT || this.y + this.size <= 0) {
+            this.y - this.size >= Global.BOARD_HEIGHT) {
                 pickups.delete(this);
         }
     }

@@ -10,7 +10,7 @@ const BLINKS_PER_SECOND = 15;
 const GRAZE_RADIUS = 10;
 const GRAZE_DECAY_RATE = 0.08;
 const GRAZE_PER_BULLET = 0.02;
-const BOMB_BLAST_SPEED = 1000;
+const BOMB_BLAST_SPEED = 2000;
 
 let x, y, size;
 let movingLeft, movingRight, movingUp, movingDown, isFiring;
@@ -53,6 +53,7 @@ function keydown(e = new KeyboardEvent()) {
             break;
         case "X":
         case "x":
+            if (!Global.paused)
             bomb();
             break;
         case "Z":
@@ -195,15 +196,22 @@ function tick(ms) {
             }
             invTime = 2000;
             dispatchEvent(new Event("game_statupdate"));
-            function pickupBehavior(ms) {
-                if (this.lifetime > 200) {
-                    this.velX = 0;
-                    this.velY = 150;
+
+            if (power !== 0) {
+                function pickupBehavior(ms) {
+                    if (this.lifetime > 400) {
+                        this.velX = 0;
+                        this.velY = 120;
+                    } else {
+                        this.velX -= 300 * ms / 1000;
+                        this.velY += 300 * ms / 1000;
+                    }
                 }
+
+                const pickupVelX = Math.random() > 0.5 ? Math.random() * 60 + 270 : Math.random() * 60 - 270;
+                const pickupVelY = Math.random() * 160 - 270;
+                new Pickup.Pickup("power", x, y, 15, powerDiff - 0.05, pickupVelX, pickupVelY, pickupBehavior);
             }
-            const pickupVelX = Math.random() > 0.5 ? Math.random() * 60 + 270 : Math.random() * 60 - 270;
-            const pickupVelY = Math.random() > 0.5 ? Math.random() * 60 + 70 : Math.random() * 160 - 270;
-            new Pickup.Pickup("power", x, y, 15, powerDiff - 0.05, pickupVelX, pickupVelY, pickupBehavior);
             break;
         }
         if (dist < i.size + GRAZE_RADIUS) {
@@ -282,8 +290,8 @@ function init() {
     size = 5;
     moveSpeed = BASE_MOVEMENT;
 
-    lives = 3;
-    bombs = 2;
+    lives = 5;
+    bombs = 3;
     score = 0;
     power = 0;
 

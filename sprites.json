@@ -11,6 +11,13 @@
         "bombDisplay": "bomb_meter.png",
         "bomb": "bomb.png",
         "scoreDisplay": "score.png",
-        "powerMeter": "power_meter.png"
+        "powerMeter": "power_meter.png",
+        "bg": "background.png"
+    },
+    "pickup": {
+        "point": "points.png",
+        "power": "power.png",
+        "life": "life.png",
+        "bomb": "bomb.png"
     }
 }
