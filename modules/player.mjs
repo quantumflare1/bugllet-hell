@@ -30,33 +30,31 @@ function fireBullet(size, velX, velY, offsetX, offsetY) {
         if (bullet.lifetime > GROW_DELAY && bullet.size > ms / 1000 * GROW_RATE) {
             bullet.size += ms / 1000 * GROW_RATE;
         }
-    },*/() => {}, true);
+    },*/() => {}, "player", 0);
 }
 
 function keydown(e = new KeyboardEvent()) {
     //e.preventDefault()
-    switch (e.key) {
-        case "ArrowUp":
+    switch (e.key.toLowerCase()) {
+        case "arrowup":
             movingUp = true;
             break;
-        case "ArrowDown":
+        case "arrowdown":
             movingDown = true;
             break;
-        case "ArrowLeft":
+        case "arrowleft":
             movingLeft = true;
             break;
-        case "ArrowRight":
+        case "arrowright":
             movingRight = true;
             break;
-        case "Shift":
+        case "shift":
             moveSpeed = BASE_RUN;
             break;
-        case "X":
         case "x":
             if (!Global.paused)
             bomb();
             break;
-        case "Z":
         case "z":
             isFiring = true;
             break;

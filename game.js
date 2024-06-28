@@ -6,7 +6,8 @@ import * as Enemy from "./modules/enemy.mjs";
 import * as Level from "./modules/level.mjs";
 import * as Pickup from "./modules/pickup.mjs";
 import sprites from "./sprites.json" assert { type: "json" }
-import font from "./font.json" assert { type: "json" }
+import font from "./assets/ui/font.json" assert { type: "json" }
+import bullet from "./assets/enemy/bullets.json" assert { type: "json" }
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
@@ -15,14 +16,15 @@ const gameplayCanvas = document.createElement("canvas");
 const gpctx = gameplayCanvas.getContext("2d");
 
 let lastFrameTime = document.timeline.currentTime;
-const bullets = new Set();
-const playerBullets = new Set();
 let fps = 0;
 let msSinceLastFpsCheck = 0;
 let framesSinceLastFpsCheck = 0;
+let bgScroll = 0;
+const bgScrollRate = 50;
 
 const spriteImages = {};
-const fontBitmap = new Image();
+const fontSheet = new Image();
+const bulletSheet = new Image();
 
 // temp
 const title = "Introduction?";
@@ -43,11 +45,11 @@ function pause(e) {
             drawText(gpctx, "Paused", gameplayCanvas.width / 2 - 7 * 3 * 3, gameplayCanvas.height / 2, 3);
             gpctx.font = "20px monospace";
             drawText(gpctx, "Press Z to resume", gameplayCanvas.width / 2 - 7 * 9 * 2, gameplayCanvas.height / 2 + 70, 2);
-            drawText(gpctx, "idk why the text looks so crusty", 20, 20, 1);
+            drawText(gpctx, "idk why the text looks so crusty it looks fine in the ui", 20, 20, 1);
         }
 
         Global.setPaused(true);
-    } else if (e.key === "z") {
+    } else if (e.key.toLowerCase() === "z") {
         Global.setPaused(false);
     }
 }
@@ -64,8 +66,16 @@ function circle(context, x, y, r) {
 
 function drawText(context, text, sx, sy, scale) {
     for (let i = 0; i < text.length; i++) {
-        context.drawImage(fontBitmap, font[text[i]][0], font[text[i]][1], 7, 17, sx + i * 7 * scale, sy, 7 * scale, 17 * scale);
+        context.drawImage(fontSheet, font[text[i]][0], font[text[i]][1], 7, 17, sx + i * 7 * scale, sy, 7 * scale, 17 * scale);
     }
+}
+function drawBullet(b) {
+    const sprData = bullet[b.type][b.variety];
+    gpctx.setTransform(1, 0, 0, 1, b.x, b.y);
+    gpctx.rotate(Math.atan(b.velX / b.velY));
+    gpctx.drawImage(bulletSheet, ...sprData, Math.floor(-sprData[2] / 2), Math.floor(-sprData[3] / 2), sprData[2], sprData[3]);
+    gpctx.rotate(-Math.atan(b.velX / b.velY));
+    gpctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
 function fillPowerMeter(scale) {
@@ -74,10 +84,13 @@ function fillPowerMeter(scale) {
 }
 
 function draw() {
-    gpctx.fillStyle = "#333";
-    gpctx.fillRect(0, 0, 648, 864);
+    //gpctx.fillStyle = "#333";
+    //gpctx.fillRect(0, 0, 648, 864);
+    gpctx.drawImage(spriteImages.ui.gameBg, 0, bgScroll - Global.BOARD_HEIGHT);
+    gpctx.drawImage(spriteImages.ui.gameBg, 0, bgScroll);
+    gpctx.drawImage(spriteImages.ui.vignette, 0, 0);
 
-    gpctx.fillStyle = "rgb(99, 99, 99)";
+    gpctx.fillStyle = "rgba(255, 255, 255, 0.2)";
     circle(gpctx, Player.x, Player.y, Player.bombRadius);
 
     gpctx.fillStyle = "rgb(80, 112, 128)";
@@ -102,11 +115,14 @@ function draw() {
     }
     gpctx.fillStyle = "rgb(180, 0, 0)";
     for (const i of Bullets.bullets) {
-        circle(gpctx, i.x, i.y, i.size);
+        drawBullet(i);
+        //circle(gpctx, i.x, i.y, i.size);
     }
     gpctx.fillStyle = "rgb(255, 0, 0)";
     for (const i of Enemy.enemies) { // i am very good at naming variables
-        circle(gpctx, i.x, i.y, i.size);
+        gpctx.drawImage(spriteImages.enemy[i.type], Math.floor(i.x - spriteImages.enemy[i.type].width / 2), Math.floor(i.y - spriteImages.enemy[i.type].height / 2));
+        gpctx.drawImage(spriteImages.enemy[`${i.type}Wings${i.wingState}`], Math.floor(i.x - spriteImages.enemy[`${i.type}Wings${i.wingState}`].width / 2), Math.floor(i.y - spriteImages.enemy[`${i.type}Wings${i.wingState}`].height / 2));
+        //circle(gpctx, i.x, i.y, i.size);
     }
 }
 
@@ -160,6 +176,10 @@ function tick(ms) {
     }
 
     if (!Global.paused) {
+        bgScroll += bgScrollRate * timeElapsed / 1000;
+        if (bgScroll >= Global.BOARD_HEIGHT) {
+            bgScroll = 0;
+        }
         Player.tick(timeElapsed);
         for (const i of Bullets.playerBullets) {
             i.tick(timeElapsed);
@@ -201,8 +221,10 @@ function load() {
             spriteImages[v][val].src = `./assets/${v}/${sprites[v][val]}`;
         });
     });
-    fontBitmap.src = "./assets/ui/font.png";
-    fontBitmap.addEventListener("load", drawUI);
+    fontSheet.src = "./assets/ui/font.png";
+    fontSheet.addEventListener("load", drawUI);
+
+    bulletSheet.src = "./assets/enemy/bullets.png";
 
     Player.init();
     //addEventListener("click", fullscreen);
@@ -211,6 +233,7 @@ function load() {
     addEventListener("game_statupdate", drawUI);
     addEventListener("keydown", pause);
 
+    console.log(`${performance.measure("loadtime").duration.toFixed(1)}ms load time`);
     requestAnimationFrame(tick);
 }
 

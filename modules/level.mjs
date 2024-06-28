@@ -20,27 +20,21 @@ class Wave {
 
 const level = {
     waves: [
-        new Wave(500, ["drone", "drone", "drone", "drone"], [
-            { x: 108, y: -10 },
+        new Wave(500, ["drone", "drone", "drone"], [
             { x: 216, y: -10 },
             { x: 324, y: -10 },
             { x: 432, y: -10 }
         ]),
-        new Wave(20000, ["drone", "drone", "aggroDrone", "drone", "drone"], [
+        new Wave(20000, ["drone", "aggroDrone", "drone"], [
             { x: 135, y: -10 },
-            { x: -10, y: 120 },
             { x: 270, y: -10 },
-            { x: 550, y: 120 },
             { x: 405, y: -10 }
         ]),
-        new Wave(16000, ["drone", "drone", "aggroDrone", "bigDrone", "aggroDrone", "drone", "drone"], [
+        new Wave(16000, ["drone", "bigDrone", "aggroDrone", "drone"], [
             { x: 50, y: -10 },
-            { x: 100, y: -10 },
-            { x: 180, y: -10 },
             { x: 270, y: -10 },
             { x: 360, y: -10 },
-            { x: 440, y: -10 },
-            { x: 490, y: -10 }
+            { x: 440, y: -10 }
         ])
     ],
     nextWave: 0,

@@ -3,7 +3,7 @@ import * as Global from "./global.mjs";
 // todo: add bullet spread (inaccuracy)
 // also todo: maybe tick bullets twice per frame? (more accurate collision)
 class Bullet {
-    constructor(x, y, size, velX, velY, rot, expireTime, script = () => {}, friendly = false) {
+    constructor(x, y, size, velX, velY, rot, expireTime, script = () => {}, type, variety) {
         this.x = x;
         this.y = y;
         this.size = size;
@@ -14,11 +14,12 @@ class Bullet {
         this.rot = rot;
         this.expireTime = expireTime;
         this.lifetime = 0;
-        this.isFriendly = friendly;
         this.grazed = false;
         this.script = script;
+        this.type = type;
+        this.variety = variety;
 
-        if (this.isFriendly) {
+        if (this.type === "player") {
             playerBullets.add(this);
         } else {
             bullets.add(this);
@@ -41,8 +42,8 @@ class Bullet {
         this.script(this, ms);
 
         // kill bullets
-        if (this.x - this.size > Global.BOARD_WIDTH || this.x + this.size < 0 ||
-            this.y - this.size > Global.BOARD_HEIGHT || this.y + this.size < 0 ||
+        if (this.x - this.size > Global.BOARD_WIDTH + 10 || this.x + this.size < -10 ||
+            this.y - this.size > Global.BOARD_HEIGHT + 10 || this.y + this.size < -10 ||
             this.size === 0 || this.lifetime > this.expireTime) {
             if (this.isFriendly) {
                 playerBullets.delete(this);
@@ -98,10 +99,10 @@ const types = {
     }
 }
 
-function makeBullet(type, x, y, dir, vel = types[type].vel) {
-    const velX = vel * Math.cos(dir);
-    const velY = vel * Math.sin(dir);
-    new Bullet(x, y, types[type].size, velX, velY, types[type].rot, types[type].expireTime, types[type].script);
+function makeBullet(type, x, y, dir, variety) {
+    const velX = types[type].vel * Math.cos(dir);
+    const velY = types[type].vel * Math.sin(dir);
+    new Bullet(x, y, types[type].size, velX, velY, types[type].rot, types[type].expireTime, types[type].script, type, variety);
 }
 
 export { types, bullets, playerBullets, Bullet, makeBullet };

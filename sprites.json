@@ -12,12 +12,19 @@
         "bomb": "bomb.png",
         "scoreDisplay": "score.png",
         "powerMeter": "power_meter.png",
-        "bg": "background.png"
+        "bg": "background.png",
+        "gameBg": "game_background.png",
+        "vignette": "vignette.png"
     },
     "pickup": {
         "point": "points.png",
         "power": "power.png",
         "life": "life.png",
         "bomb": "bomb.png"
+    },
+    "enemy": {
+        "drone": "basic_drone.png",
+        "droneWings0": "basic_rotor.png",
+        "droneWings1": "basic_rotor2.png"
     }
 }
