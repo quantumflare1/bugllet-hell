@@ -5,10 +5,10 @@ import * as Global from "./global.mjs";
 import * as Pickup from "./pickup.mjs";
 
 const enemies = new Set();
-const WINGBEATS_PER_SECOND = 30;
 
+// rewrite enemy ai
 class Enemy {
-    constructor(x, y, size, score, hp, screenTime, patterns, script, waveId, type, shotRate, moveRate) {
+    constructor(x, y, size, score, hp, screenTime, patterns, script, waveId, type, shotRate, moveRate, wingRate) {
         this.x = x;
         this.y = y;
         this.size = size;
@@ -31,6 +31,7 @@ class Enemy {
         this.bombed = false;
         this.waveId = waveId;
         this.type = type;
+        this.wingRate = wingRate;
         this.wingState = 0;
         this.wingTimer = 0;
 
@@ -54,7 +55,7 @@ class Enemy {
                 const damage = Math.ceil(Math.log2(i.size));
                 this.hp -= damage;
                 Bullets.playerBullets.delete(i);
-                Player.powerUp(damage / 1000);
+                //Player.powerUp(damage / 1000);
                 Player.scoreUp(damage);
                 break;
             }
@@ -65,7 +66,7 @@ class Enemy {
             this.bombed = true;
             // todo: make enemies bombable more than once
         }
-        if (this.wingTimer > 1000 / WINGBEATS_PER_SECOND) {
+        if (this.wingTimer > 1000 / this.wingRate) {
             this.wingTimer = 0;
             this.wingState = this.wingState === 1 ? 0 : 1;
         }
@@ -91,11 +92,11 @@ class Enemy {
             if (rand < 0.2)
                 new Pickup.Pickup("point", this.x, this.y, 15, 2000, 0, -230 + Math.random() * 60, pickupFall);
             else
-                new Pickup.Pickup("power", this.x, this.y, 15, 0.09, 0, -230 + Math.random() * 60, pickupFall);
+                new Pickup.Pickup("power", this.x, this.y, 15, 0.12, 0, -230 + Math.random() * 60, pickupFall);
         }
         else if (Math.random() < 0.5) {
             if (Player.power < 4 && Math.random() < 0.75) {
-                new Pickup.Pickup("power", this.x, this.y, 15, 0.09, 0, -230 + Math.random() * 60, pickupFall);
+                new Pickup.Pickup("power", this.x, this.y, 15, 0.12, 0, -230 + Math.random() * 60, pickupFall);
             }
             else
                 new Pickup.Pickup("point", this.x, this.y, 15, 2000, 0, -230 + Math.random() * 60, pickupFall);
@@ -159,28 +160,26 @@ class Enemy {
         this.shotCooldown = this.shotRate;
         Pattern[randomPattern(this.patterns)](this);
     }
-    basicDash(direction) {
-        const DASH_VELOCITY = 250;
-    
-        const vec = getVel(DASH_VELOCITY, direction);
+    basicDash(direction, vel) {
+        const vec = getVel(vel, direction);
         this.velX = vec.velX;
         this.velY = vec.velY;
         
     }
     downDash() {
-        this.basicDash(Math.PI / 2);
+        this.basicDash(Math.PI / 2, 350);
     }
     upDash() {
-        this.basicDash(-Math.PI / 2);
+        this.basicDash(-Math.PI / 2, 350);
     }
     leftDash() {
-        this.basicDash(Math.PI);
+        this.basicDash(Math.PI, 350);
     }
     rightDash() {
-        this.basicDash(0);
+        this.basicDash(0, 350);
     }
     despawnDash() {
-        this.basicDash(aimAtDespawnPoint(this));
+        this.basicDash(aimAtDespawnPoint(this), 250);
     }
     randomDash() {
         let moveDirection = Math.random() * 2 * Math.PI;
@@ -214,7 +213,7 @@ class Enemy {
             }
         }
     
-        this.basicDash(moveDirection);
+        this.basicDash(moveDirection, 250);
     }
 }
 
@@ -242,9 +241,10 @@ const types = {
         size: 12,
         score: 200,
         hp: 55,
-        screenTime: 15000,
+        screenTime: 18000,
         shotRate: 1500,
         dashRate: 3000,
+        wingRate: 30,
         patterns: ["basicSpread", "spiralDouble"],
         script: (enemy, ms) => {
             const DECELERATION = 0.9;
@@ -280,14 +280,15 @@ const types = {
         size: 14,
         score: 500,
         hp: 70,
-        screenTime: 14000,
+        screenTime: 16000,
         shotRate: 400,
         dashRate: 1000,
+        wingRate: 10,
         patterns: ["singleAimedShot"],
         script: (enemy, ms) => {
             const DECELERATION = 0.9;
             if (enemy.moveCooldown <= 0) {
-                if (enemy.lifetime < enemy.screenTime) {
+                if (enemy.lifetime > enemy.screenTime && enemy.lifetime > 500) {
                     if (!enemy.despawning) {
                         enemy.pickDespawnPoint();
                         enemy.despawning = true;
@@ -299,7 +300,7 @@ const types = {
                 else if (enemy.x < 20) enemy.leftDash();
                 else if (enemy.x > Global.BOARD_WIDTH - 20) enemy.rightDash();
                 else enemy.randomDash();
-
+                
                 enemy.moveCooldown = enemy.moveRate;
             } else if (enemy.velX > 1 || enemy.velY > 1 || enemy.velX < -1 || enemy.velY < -1) {
                 enemy.velX *= (DECELERATION * ms / 1000) / (ms / 1000);
@@ -318,14 +319,15 @@ const types = {
         size: 20,
         score: 1000,
         hp: 230,
-        screenTime: 20000,
+        screenTime: 22000,
         shotRate: 2500,
         dashRate: 2500,
+        wingRate: 3.4696207e-18, // i spent 30 minutes on this easter egg no one will decipher
         patterns: ["basicTracker", "basicRadial"],
         script: (enemy, ms) => {
             const DECELERATION = 0.9;
             if (enemy.moveCooldown <= 0) {
-                if (enemy.lifetime < enemy.screenTime) {
+                if (enemy.lifetime > enemy.screenTime && enemy.lifetime > 500) {
                     if (!enemy.despawning) {
                         enemy.pickDespawnPoint();
                         enemy.despawning = true;
@@ -337,7 +339,7 @@ const types = {
                 else if (enemy.x < 20) enemy.leftDash();
                 else if (enemy.x > Global.BOARD_WIDTH - 20) enemy.rightDash();
                 else enemy.randomDash();
-
+                
                 enemy.moveCooldown = enemy.moveRate;
             } else if (enemy.velX > 1 || enemy.velY > 1 || enemy.velX < -1 || enemy.velY < -1) {
                 enemy.velX *= (DECELERATION * ms / 1000) / (ms / 1000);
@@ -353,9 +355,14 @@ const types = {
         }
     }
 };
+// note to self:
+/*
+make like multiple variants of each enemy to add variety without needing more spritework
+(harder attacks, faster, whatever)
+*/
 
 function makeEnemy(x, y, type, waveId) {
-    new Enemy(x, y, types[type].size, types[type].score, types[type].hp, types[type].screenTime, types[type].patterns, types[type].script, waveId, type, types[type].shotRate, types[type].dashRate);
+    new Enemy(x, y, types[type].size, types[type].score, types[type].hp, types[type].screenTime, types[type].patterns, types[type].script, waveId, type, types[type].shotRate, types[type].dashRate, types[type].wingRate);
     //pickDespawnPoint(x, y); why is this here???
 }
 

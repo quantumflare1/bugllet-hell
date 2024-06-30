@@ -27,7 +27,7 @@ const fontSheet = new Image();
 const bulletSheet = new Image();
 
 // temp
-const title = "Introduction?";
+const title = "1-1: Instigation";
 
 function fullscreen() {
     document.body.requestFullscreen({ navigationUI: "hide" });
@@ -45,7 +45,7 @@ function pause(e) {
             drawText(gpctx, "Paused", gameplayCanvas.width / 2 - 7 * 3 * 3, gameplayCanvas.height / 2, 3);
             gpctx.font = "20px monospace";
             drawText(gpctx, "Press Z to resume", gameplayCanvas.width / 2 - 7 * 9 * 2, gameplayCanvas.height / 2 + 70, 2);
-            drawText(gpctx, "idk why the text looks so crusty it looks fine in the ui", 20, 20, 1);
+            drawText(gpctx, "idk why the pause text looks so crusty it looks fine in the ui", 20, 20, 1);
         }
 
         Global.setPaused(true);
@@ -121,7 +121,9 @@ function draw() {
     gpctx.fillStyle = "rgb(255, 0, 0)";
     for (const i of Enemy.enemies) { // i am very good at naming variables
         gpctx.drawImage(spriteImages.enemy[i.type], Math.floor(i.x - spriteImages.enemy[i.type].width / 2), Math.floor(i.y - spriteImages.enemy[i.type].height / 2));
-        gpctx.drawImage(spriteImages.enemy[`${i.type}Wings${i.wingState}`], Math.floor(i.x - spriteImages.enemy[`${i.type}Wings${i.wingState}`].width / 2), Math.floor(i.y - spriteImages.enemy[`${i.type}Wings${i.wingState}`].height / 2));
+        if (spriteImages.enemy.hasOwnProperty(`${i.type}Wings${i.wingState}`)) {
+            gpctx.drawImage(spriteImages.enemy[`${i.type}Wings${i.wingState}`], Math.floor(i.x - spriteImages.enemy[`${i.type}Wings${i.wingState}`].width / 2), Math.floor(i.y - spriteImages.enemy[`${i.type}Wings${i.wingState}`].height / 2));   
+        }
         //circle(gpctx, i.x, i.y, i.size);
     }
 }

@@ -25,6 +25,11 @@
     "enemy": {
         "drone": "basic_drone.png",
         "droneWings0": "basic_rotor.png",
-        "droneWings1": "basic_rotor2.png"
+        "droneWings1": "basic_rotor2.png",
+        "aggroDrone": "fighter_drone.png",
+        "aggroDroneWings0": "booster_fire.png",
+        "aggroDroneWings1": "booster_fire2.png",
+        "bigDrone": "tank_drone.png",
+        "princessDrone": "princess_drone.png"
     }
 }
