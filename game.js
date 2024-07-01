@@ -5,9 +5,13 @@ import * as Pattern from "./modules/pattern.mjs";
 import * as Enemy from "./modules/enemy.mjs";
 import * as Level from "./modules/level.mjs";
 import * as Pickup from "./modules/pickup.mjs";
+import * as Menu from "./modules/menu.mjs";
 import sprites from "./sprites.json" assert { type: "json" }
 import font from "./assets/ui/font.json" assert { type: "json" }
 import bullet from "./assets/enemy/bullets.json" assert { type: "json" }
+
+// extremely rushed music stuff
+const bgm = new Audio("./assets/sounds/placeholder_bgm.ogg");
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
@@ -33,31 +37,51 @@ function fullscreen() {
     document.body.requestFullscreen({ navigationUI: "hide" });
 }
 
-function pause(e) {
-    if (e.key === "Escape") {
-        if (!Global.paused) {
-            gpctx.fillStyle = "rgba(0, 0, 0, 0.8)";
-            gpctx.fillRect(0, 0, gameplayCanvas.width, gameplayCanvas.height);
-    
-            gpctx.font = "60px monospace";
-            gpctx.textAlign = "center";
-            gpctx.fillStyle = "rgb(255, 255, 255)";
-            drawText(gpctx, "Paused", gameplayCanvas.width / 2 - 7 * 3 * 3, gameplayCanvas.height / 2, 3);
-            gpctx.font = "20px monospace";
-            drawText(gpctx, "Press Z to resume", gameplayCanvas.width / 2 - 7 * 9 * 2, gameplayCanvas.height / 2 + 70, 2);
-            drawText(gpctx, "idk why the pause text looks so crusty it looks fine in the ui", 20, 20, 1);
-        }
+function keydown(e) {
+    initEventListeners();
+    lastFrameTime = document.timeline.currentTime;
+    requestAnimationFrame(tick);
+    removeEventListener("keydown", keydown);
+}
 
-        Global.setPaused(true);
-    } else if (e.key.toLowerCase() === "z") {
-        Global.setPaused(false);
+function retryKeyDown(e) {
+    if (e.key.toLowerCase() === "r" && Global.gameOver) {
+        Global.setGameState(false);
+        Player.init();
+        Level.init();
+        Enemy.enemies.clear();
+        Bullets.bullets.clear();
+        Bullets.playerBullets.clear();
+        Pickup.pickups.clear();
+
+        lastFrameTime = document.timeline.currentTime;
+        requestAnimationFrame(tick);
     }
 }
 
-function circle(context, x, y, r) {
-    if (r < 0) {
-        return;
+function loadMenu(name) {
+    let lastMenuFrameTime = document.timeline.currentTime;
+    function render(ms) {
+        const elapsed = ms - lastMenuFrameTime;
+        gpctx.globalAlpha = elapsed / (1000 * Menu[name].transition);  // note: this is bugged and doesn't work properly with alpha channel not 1
+        gpctx.fillStyle = Menu[name].bgCol;
+        gpctx.fillRect(0, 0, Global.BOARD_WIDTH, Global.BOARD_HEIGHT);
+    
+        Object.keys(Menu[name].content).forEach((v) => {
+            if (v === "bgCol") return;
+            drawText(gpctx, ...Menu[name].content[v].label);
+        });
+        if (Menu[name].transition !== 0 && elapsed / (1000 * Menu[name].transition) < 1) {
+            requestAnimationFrame(render);
+        } else {
+            gpctx.globalAlpha = 1;
+        }
     }
+    requestAnimationFrame(render);
+}
+
+function circle(context, x, y, r) {
+    if (r < 0) return;
     context.beginPath();
     context.arc(x, y, r, 0, 2 * Math.PI);
     context.fill();
@@ -65,9 +89,8 @@ function circle(context, x, y, r) {
 }
 
 function drawText(context, text, sx, sy, scale) {
-    for (let i = 0; i < text.length; i++) {
+    for (let i = 0; i < text.length; i++)
         context.drawImage(fontSheet, font[text[i]][0], font[text[i]][1], 7, 17, sx + i * 7 * scale, sy, 7 * scale, 17 * scale);
-    }
 }
 function drawBullet(b) {
     const sprData = bullet[b.type][b.variety];
@@ -84,8 +107,6 @@ function fillPowerMeter(scale) {
 }
 
 function draw() {
-    //gpctx.fillStyle = "#333";
-    //gpctx.fillRect(0, 0, 648, 864);
     gpctx.drawImage(spriteImages.ui.gameBg, 0, bgScroll - Global.BOARD_HEIGHT);
     gpctx.drawImage(spriteImages.ui.gameBg, 0, bgScroll);
     gpctx.drawImage(spriteImages.ui.vignette, 0, 0);
@@ -93,76 +114,59 @@ function draw() {
     gpctx.fillStyle = "rgba(255, 255, 255, 0.2)";
     circle(gpctx, Player.x, Player.y, Player.bombRadius);
 
-    gpctx.fillStyle = "rgb(80, 112, 128)";
-    for (const i of Bullets.playerBullets) {
+    for (const i of Bullets.playerBullets)
         gpctx.drawImage(spriteImages.player.bullet, Math.floor(i.x - spriteImages.player.bullet.width / 2), Math.floor(i.y - spriteImages.player.bullet.height / 2));
-        //circle(gpctx, i.x, i.y, i.size);
-    }
 
-    if (Player.blinkState === 1) {
-        gpctx.globalAlpha = 0.2;
-    }
+    if (Player.blinkState === 1) gpctx.globalAlpha = 0.2;
     gpctx.drawImage(spriteImages.player.body, Math.floor(Player.x - spriteImages.player.body.width / 2), Math.floor(Player.y - 23));
     gpctx.drawImage(spriteImages.player[`wings${Player.wingState}`], Math.floor(Player.x - spriteImages.player[`wings${Player.wingState}`].width / 2), Math.floor(Player.y - 10));
-    gpctx.fillStyle = "rgb(150, 240, 255)";
     gpctx.globalAlpha = 1;
-    //circle(gpctx, Player.x, Player.y, Player.size);
 
-    gpctx.fillStyle = "rgb(0, 0, 255)";
-    for (const i of Pickup.pickups) {
+    for (const i of Pickup.pickups)
         gpctx.drawImage(spriteImages.pickup[i.type], Math.floor(i.x - i.size / 2), Math.floor(i.y - i.size / 2));
-        //circle(gpctx, i.x, i.y, i.size);
-    }
-    gpctx.fillStyle = "rgb(180, 0, 0)";
-    for (const i of Bullets.bullets) {
+
+    for (const i of Bullets.bullets)
         drawBullet(i);
-        //circle(gpctx, i.x, i.y, i.size);
-    }
-    gpctx.fillStyle = "rgb(255, 0, 0)";
+
     for (const i of Enemy.enemies) { // i am very good at naming variables
         gpctx.drawImage(spriteImages.enemy[i.type], Math.floor(i.x - spriteImages.enemy[i.type].width / 2), Math.floor(i.y - spriteImages.enemy[i.type].height / 2));
-        if (spriteImages.enemy.hasOwnProperty(`${i.type}Wings${i.wingState}`)) {
-            gpctx.drawImage(spriteImages.enemy[`${i.type}Wings${i.wingState}`], Math.floor(i.x - spriteImages.enemy[`${i.type}Wings${i.wingState}`].width / 2), Math.floor(i.y - spriteImages.enemy[`${i.type}Wings${i.wingState}`].height / 2));   
-        }
-        //circle(gpctx, i.x, i.y, i.size);
+        if (spriteImages.enemy.hasOwnProperty(`${i.type}Wings${i.wingState}`))
+            gpctx.drawImage(spriteImages.enemy[`${i.type}Wings${i.wingState}`], Math.floor(i.x - spriteImages.enemy[`${i.type}Wings${i.wingState}`].width / 2), Math.floor(i.y - spriteImages.enemy[`${i.type}Wings${i.wingState}`].height / 2));
     }
 }
 
 function drawUI() {
-    const scaleFactor = 3;
+    const sf = 3; // was originally scaleFactor but everything became unreadably long so it got shortened
     ctx.drawImage(spriteImages.ui.bg, 0, 0);
 
-    drawText(ctx, title, 700, 40, scaleFactor);
+    drawText(ctx, title, 700, 40, sf);
 
-    ctx.drawImage(spriteImages.ui.scoreDisplay, 700, 100, spriteImages.ui.scoreDisplay.width * scaleFactor, spriteImages.ui.scoreDisplay.height * scaleFactor);
-    for (let i = 0; i < 9; i++) {
-        drawText(ctx, `${Math.floor((Player.score / (10 ** (8 - i))) % 10)}`, 700 + 4 * scaleFactor + 7 * scaleFactor * i, 100 + 13 * scaleFactor, scaleFactor);
-    }
+    ctx.drawImage(spriteImages.ui.scoreDisplay, 700, 100, spriteImages.ui.scoreDisplay.width * sf, spriteImages.ui.scoreDisplay.height * sf);
+    for (let i = 0; i < 9; i++)
+        drawText(ctx, `${Math.floor((Player.score / (10 ** (8 - i))) % 10)}`, 700 + 4 * sf + 7 * sf * i, 100 + 13 * sf, sf);
     
-    ctx.font = "20px monospace";
-    ctx.drawImage(spriteImages.ui.lifeDisplay, 700, 240, spriteImages.ui.lifeDisplay.width * scaleFactor, spriteImages.ui.lifeDisplay.height * scaleFactor);
+    ctx.drawImage(spriteImages.ui.lifeDisplay, 700, 240, spriteImages.ui.lifeDisplay.width * sf, spriteImages.ui.lifeDisplay.height * sf);
     for (let i = 0; i < Player.lives; i++) {
-        if (i % 2 === 0) {
-            ctx.drawImage(spriteImages.ui.life, 700 + 4 * scaleFactor + i * 8 * scaleFactor, 240 + 12 * scaleFactor, spriteImages.ui.life.width * scaleFactor, spriteImages.ui.life.height * scaleFactor);
-        } else {
-            ctx.drawImage(spriteImages.ui.life, 700 + 4 * scaleFactor + i * 8 * scaleFactor, 240 + 23 * scaleFactor, spriteImages.ui.life.width * scaleFactor, spriteImages.ui.life.height * scaleFactor);
-        }
+        if (i % 2 === 0)
+            ctx.drawImage(spriteImages.ui.life, 700 + 4 * sf + i * 8 * sf, 240 + 12 * sf, spriteImages.ui.life.width * sf, spriteImages.ui.life.height * sf);
+        else
+            ctx.drawImage(spriteImages.ui.life, 700 + 4 * sf + i * 8 * sf, 240 + 23 * sf, spriteImages.ui.life.width * sf, spriteImages.ui.life.height * sf);
     }
 
-    ctx.drawImage(spriteImages.ui.bombDisplay, 700, 400, spriteImages.ui.bombDisplay.width * scaleFactor, spriteImages.ui.bombDisplay.height * scaleFactor);
+    ctx.drawImage(spriteImages.ui.bombDisplay, 700, 400, spriteImages.ui.bombDisplay.width * sf, spriteImages.ui.bombDisplay.height * sf);
     for (let i = 0; i < Player.bombs; i++) {
         if (i % 2 === 0) {
-            ctx.drawImage(spriteImages.ui.bomb, 700 + 4 * scaleFactor + i * 8 * scaleFactor, 400 + 12 * scaleFactor, spriteImages.ui.bomb.width * scaleFactor, spriteImages.ui.bomb.height * scaleFactor);
+            ctx.drawImage(spriteImages.ui.bomb, 700 + 4 * sf + i * 8 * sf, 400 + 12 * sf, spriteImages.ui.bomb.width * sf, spriteImages.ui.bomb.height * sf);
         } else {
-            ctx.drawImage(spriteImages.ui.bomb, 700 + 4 * scaleFactor + i * 8 * scaleFactor, 400 + 23 * scaleFactor, spriteImages.ui.bomb.width * scaleFactor, spriteImages.ui.bomb.height * scaleFactor);
+            ctx.drawImage(spriteImages.ui.bomb, 700 + 4 * sf + i * 8 * sf, 400 + 23 * sf, spriteImages.ui.bomb.width * sf, spriteImages.ui.bomb.height * sf);
         }
     }
 
-    fillPowerMeter(scaleFactor);
-    ctx.drawImage(spriteImages.ui.powerMeter, 700, 560, spriteImages.ui.powerMeter.width * scaleFactor, spriteImages.ui.powerMeter.height * scaleFactor);
-    drawText(ctx, Player.power.toFixed(2), 700 + 26 * scaleFactor, 560 + 6 * scaleFactor, scaleFactor);
+    fillPowerMeter(sf);
+    ctx.drawImage(spriteImages.ui.powerMeter, 700, 560, spriteImages.ui.powerMeter.width * sf, spriteImages.ui.powerMeter.height * sf);
+    drawText(ctx, Player.power.toFixed(2), 700 + 26 * sf, 560 + 6 * sf, sf);
 
-    drawText(ctx, `${fps.toFixed(2)} fps`, 700, 870 - 10 * scaleFactor, scaleFactor);
+    drawText(ctx, `${fps.toFixed(2)} fps`, 700, 870 - 10 * sf, sf);
 }
 
 function tick(ms) {
@@ -195,13 +199,39 @@ function tick(ms) {
         for (const i of Pickup.pickups) {
             i.tick(timeElapsed);
         }
-        Level.level.tick(timeElapsed);
+        Level.tick(timeElapsed);
         draw();
     }
 
     lastFrameTime = ms;
-    if (Player.lives >= 0)
-    requestAnimationFrame(tick);
+    if (Player.lives < 0) Global.setGameState(true);
+    if (Global.gameOver) {
+        loadMenu("death");
+        addEventListener("keydown", retryKeyDown);
+    } else if (Global.gameWon) {
+        loadMenu("win");
+    } else {
+        requestAnimationFrame(tick);
+    }
+}
+
+function initEventListeners() {
+    addEventListener("keydown", Player.keydown);
+    addEventListener("keyup", Player.keyup);
+    addEventListener("game_statupdate", drawUI);
+    addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !Global.gameOver) {
+            if (!Global.paused) loadMenu("pause");
+            Global.setPaused(true);
+        } else if (e.key.toLowerCase() === "z") {
+            Global.setPaused(false);
+        }
+    });
+    // func could use better name (also draws UI and starts music)
+    drawUI();
+    bgm.play();
+    bgm.volume = 0.1;
+    bgm.loop = true;
 }
 
 function load() {
@@ -209,12 +239,12 @@ function load() {
     canvas.height = 900;
     document.getElementById("game").appendChild(canvas);
     ctx.imageSmoothingEnabled = false;
-    gpctx.imageSmoothingEnabled = false;
 
     gameplayCanvas.width = Global.BOARD_WIDTH;
     gameplayCanvas.height = Global.BOARD_HEIGHT;
     gameplayCanvas.id = "gameplay";
     document.getElementById("game").appendChild(gameplayCanvas);
+    gpctx.imageSmoothingEnabled = false;
 
     Object.keys(sprites).forEach((v) => {
         spriteImages[v] = {};
@@ -224,19 +254,17 @@ function load() {
         });
     });
     fontSheet.src = "./assets/ui/font.png";
-    fontSheet.addEventListener("load", drawUI);
+    fontSheet.addEventListener("load", () => { loadMenu("startMenu"); });
 
     bulletSheet.src = "./assets/enemy/bullets.png";
 
     Player.init();
+    Level.init();
     //addEventListener("click", fullscreen);
-    addEventListener("keydown", Player.keydown);
-    addEventListener("keyup", Player.keyup);
-    addEventListener("game_statupdate", drawUI);
-    addEventListener("keydown", pause);
 
     console.log(`${performance.measure("loadtime").duration.toFixed(1)}ms load time`);
-    requestAnimationFrame(tick);
+    //requestAnimationFrame(tick);
+    addEventListener("keydown", keydown);
 }
 
 addEventListener("load", load);

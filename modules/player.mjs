@@ -2,13 +2,12 @@ import * as Bullets from "./bullets.mjs";
 import * as Global from "./global.mjs";
 import * as Pickup from "./pickup.mjs";
 
-const BASE_MOVEMENT = 140;
-const BASE_RUN = 252;
+const BASE_MOVEMENT = 252;
+const BASE_RUN = 140;
 const BORDER_SIZE = 20;
 const WINGBEATS_PER_SECOND = 20;
 const BLINKS_PER_SECOND = 15;
 const GRAZE_RADIUS = 10;
-const GRAZE_DECAY_RATE = 0.08;
 const GRAZE_PER_BULLET = 0.02;
 const BOMB_BLAST_SPEED = 2000;
 
@@ -16,7 +15,7 @@ let x, y, size;
 let movingLeft, movingRight, movingUp, movingDown, isFiring;
 let moveSpeed;
 let lives, bombs, score, power;
-let grazeMultiplier, timeSinceLastGraze;
+let grazeMultiplier;
 let timeSinceLastBullet, fireCooldown;
 let invTime, bombCooldown, bombRadius;
 let wingTimer, wingState;
@@ -52,7 +51,7 @@ function keydown(e = new KeyboardEvent()) {
             moveSpeed = BASE_RUN;
             break;
         case "x":
-            if (!Global.paused)
+            if (!Global.paused && !Global.gameOver)
             bomb();
             break;
         case "z":
@@ -159,13 +158,6 @@ function tick(ms) {
         x = Global.BOARD_WIDTH - BORDER_SIZE;
     }
 
-    timeSinceLastGraze += ms;
-    if (timeSinceLastGraze > 1000) {
-        grazeMultiplier -= GRAZE_DECAY_RATE * ms / 1000;
-        if (grazeMultiplier < 1) {
-            grazeMultiplier = 1;
-        }
-    }
     if (bombCooldown > 3500) {
         bombRadius += BOMB_BLAST_SPEED * ms / 1000;
         //Bullets.bullets.clear();
@@ -180,45 +172,42 @@ function tick(ms) {
         points += (bombs - 9) * 4000;
         bombs = 9;
     }
-    if (invTime <= 0)
+
     for (const i of Bullets.bullets) {
         const dist = Math.sqrt((i.x - x) ** 2 + (i.y - y) ** 2);
-        if (dist < i.size + size) {
-            lives--;
-            const oldPower = power;
-            power = power > 0.2 ? power - 0.2 : 0;
-            const powerDiff = oldPower - power;
-            grazeMultiplier = 1;
-            if (bombs < 2) {
-                bombs = 2;
-            }
-            invTime = 2000;
-            dispatchEvent(new Event("game_statupdate"));
-
-            if (power !== 0) {
-                function pickupBehavior(ms) {
-                    if (this.lifetime > 400) {
-                        this.velX = 0;
-                        this.velY = 120;
-                    } else {
-                        this.velX -= 300 * ms / 1000;
-                        this.velY += 300 * ms / 1000;
+        if (invTime <= 0) {
+            if (dist < i.size + size) {
+                lives--;
+                const oldPower = power;
+                power = power > 0.2 ? power - 0.2 : 0;
+                const powerDiff = oldPower - power;
+                grazeMultiplier = 1;
+                if (bombs < 2) bombs = 2;
+                invTime = 2000;
+                dispatchEvent(new Event("game_statupdate"));
+    
+                if (power !== 0) {
+                    function pickupBehavior(ms) {
+                        if (this.lifetime > 400) {
+                            this.velX = 0;
+                            this.velY = 120;
+                        } else {
+                            this.velX -= 300 * ms / 1000;
+                            this.velY += 300 * ms / 1000;
+                        }
                     }
+    
+                    const pickupVelX = Math.random() > 0.5 ? Math.random() * 60 + 270 : Math.random() * 60 - 270;
+                    const pickupVelY = Math.random() * 160 - 270;
+                    new Pickup.Pickup("power", x, y, 15, powerDiff - 0.05, pickupVelX, pickupVelY, pickupBehavior);
                 }
-
-                const pickupVelX = Math.random() > 0.5 ? Math.random() * 60 + 270 : Math.random() * 60 - 270;
-                const pickupVelY = Math.random() * 160 - 270;
-                new Pickup.Pickup("power", x, y, 15, powerDiff - 0.05, pickupVelX, pickupVelY, pickupBehavior);
+                break;
             }
-            break;
+            if (dist < i.size + GRAZE_RADIUS) 
+                grazeMultiplier += GRAZE_PER_BULLET;
         }
-        if (dist < i.size + GRAZE_RADIUS) {
-            grazeMultiplier += GRAZE_PER_BULLET;
-            timeSinceLastGraze = 0;
-        }
-        if (dist < i.size + bombRadius) {
+        if (dist < i.size + bombRadius)
             Bullets.bullets.delete(i);
-        }
     }
 
     invTime -= ms;
@@ -236,9 +225,7 @@ function tick(ms) {
         blinkTimer = 0;
         blinkState = blinkState === 1 ? 0 : 1;
     }
-    if (invTime <= 0) {
-        blinkState = 0;
-    }
+    if (invTime <= 0) blinkState = 0;
 
     //power -= Math.sqrt(power) * ms / 1000 * POWER_LOSS_FACTOR;
 
@@ -288,13 +275,12 @@ function init() {
     size = 5;
     moveSpeed = BASE_MOVEMENT;
 
-    lives = 5;
+    lives = 0;
     bombs = 3;
     score = 0;
     power = 0;
 
     grazeMultiplier = 1;
-    timeSinceLastGraze = 0;
 
     timeSinceLastBullet = 0;
     fireCooldown = 66;

@@ -1,4 +1,5 @@
 import * as Enemy from "./enemy.mjs";
+import * as Global from "./global.mjs";
 
 function randomEnemy(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -18,52 +19,58 @@ class Wave {
     }
 }
 
-const level = {
-    waves: [
-        new Wave(500, ["drone", "drone", "drone"], [
-            { x: 216, y: -10 },
-            { x: 324, y: -10 },
-            { x: 432, y: -10 }
-        ]),
-        new Wave(20000, ["drone", "aggroDrone", "drone"], [
-            { x: 135, y: -10 },
-            { x: 270, y: -10 },
-            { x: 405, y: -10 }
-        ]),
-        new Wave(22000, ["drone", "bigDrone", "aggroDrone", "drone"], [
-            { x: 50, y: -10 },
-            { x: 270, y: -10 },
-            { x: 360, y: -10 },
-            { x: 440, y: -10 }
-        ])
-    ],
-    nextWave: 0,
-    levelTime: 0,
-    waveTime: 0,
-    transitionTime: 0,
-    tick(ms) {
-        this.levelTime += ms;
-        this.waveTime += ms;
+const waves = [
+    new Wave(500, ["drone", "drone", "drone"], [
+        { x: 216, y: -10 },
+        { x: 324, y: -10 },
+        { x: 432, y: -10 }
+    ]),
+    new Wave(20000, ["drone", "aggroDrone", "drone"], [
+        { x: 135, y: -10 },
+        { x: 270, y: -10 },
+        { x: 405, y: -10 }
+    ]),
+    new Wave(22000, ["drone", "bigDrone", "aggroDrone", "drone"], [
+        { x: 50, y: -10 },
+        { x: 270, y: -10 },
+        { x: 360, y: -10 },
+        { x: 440, y: -10 }
+    ])
+];
+let nextWave, levelTime, waveTime, transitionTime;
 
-        if (this.nextWave < this.waves.length && (this.waveTime >= this.waves[this.nextWave].delay || (this.nextWave !== 0 && this.waves[this.nextWave-1].enemiesLeft === 0))) {
-            this.transitionTime += ms;
-            if (this.transitionTime > 1000) {
-                this.nextWave++;
-                this.waveTime = 0;
-                this.waves[level.nextWave-1].generate(level.nextWave-1);
-                this.transitionTime = 0;
-            }
-        }
-        if (this.nextWave !== 0) {
-            let curWaveEnemies = 0;
-            for (const i of Enemy.enemies) {
-                if (i.waveId === this.nextWave - 1) {
-                    curWaveEnemies++;
-                }
-            }
-            this.waves[this.nextWave-1].enemiesLeft = curWaveEnemies;
+function tick(ms) {
+    levelTime += ms;
+    waveTime += ms;
+
+    if (nextWave < waves.length && (waveTime >= waves[nextWave].delay || (nextWave !== 0 && waves[nextWave-1].enemiesLeft === 0))) {
+        transitionTime += ms;
+        if (transitionTime > 1000) {
+            nextWave++;
+            waveTime = 0;
+            waves[nextWave-1].generate(nextWave-1);
+            transitionTime = 0;
         }
     }
-};
+    if (nextWave !== 0) {
+        let curWaveEnemies = 0;
+        for (const i of Enemy.enemies) {
+            if (i.waveId === nextWave - 1) {
+                curWaveEnemies++;
+            }
+        }
+        waves[nextWave-1].enemiesLeft = curWaveEnemies;
+    }
+    if (nextWave >= waves.length && waves[nextWave-1].enemiesLeft === 0) {
+        Global.setWinState(true);
+    }
+}
 
-export { level };
+function init() {
+    nextWave = 0;
+    levelTime = 0;
+    waveTime = 0;
+    transitionTime = 0;
+}
+
+export { init, tick };

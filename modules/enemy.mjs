@@ -34,6 +34,7 @@ class Enemy {
         this.wingRate = wingRate;
         this.wingState = 0;
         this.wingTimer = 0;
+        this.variance = 50;
 
         enemies.add(this);
     }
@@ -77,15 +78,13 @@ class Enemy {
             enemies.delete(this);
         }
         if (this.x + this.size < -10 || this.x - this.size > Global.BOARD_WIDTH + 10 ||
-            this.y + this.size < -10 || this.y - this.size > Global.BOARD_HEIGHT + 10) {
+            this.y + this.size < -10 || this.y - this.size > Global.BOARD_HEIGHT + 10)
             enemies.delete(this);
-        }
     }
     generatePickup() {
         function pickupFall(ms) {
-            if (this.lifetime < 600) {
+            if (this.lifetime < 600)
                 this.velY += (-this.baseVelY + 120) * ms / 600;
-            }
         }
         if (Player.power < 4 && Math.random() < 1 - (Player.power / 5)) {
             const rand = Math.random();
@@ -95,9 +94,8 @@ class Enemy {
                 new Pickup.Pickup("power", this.x, this.y, 15, 0.12, 0, -230 + Math.random() * 60, pickupFall);
         }
         else if (Math.random() < 0.5) {
-            if (Player.power < 4 && Math.random() < 0.75) {
+            if (Player.power < 4 && Math.random() < 0.75)
                 new Pickup.Pickup("power", this.x, this.y, 15, 0.12, 0, -230 + Math.random() * 60, pickupFall);
-            }
             else
                 new Pickup.Pickup("point", this.x, this.y, 15, 2000, 0, -230 + Math.random() * 60, pickupFall);
         }
@@ -157,14 +155,13 @@ class Enemy {
         this.despawnY = despawnY;
     }
     basicFire() {
-        this.shotCooldown = this.shotRate;
+        this.shotCooldown = this.shotRate + (Math.random() * 2 - 1) * this.variance;
         Pattern[randomPattern(this.patterns)](this);
     }
     basicDash(direction, vel) {
         const vec = getVel(vel, direction);
         this.velX = vec.velX;
         this.velY = vec.velY;
-        
     }
     downDash() {
         this.basicDash(Math.PI / 2, 350);
@@ -188,29 +185,23 @@ class Enemy {
             if (this.x < 80) {
                 moveDirection = Math.random() * Math.PI - (Math.PI / 2);
     
-                if (this.y < 80) {
+                if (this.y < 80)
                     moveDirection = Math.random() * (Math.PI / 2);
-                }
-                else if (this.y > Global.BOARD_HEIGHT - 80) {
+                else if (this.y > Global.BOARD_HEIGHT - 80)
                     moveDirection = Math.random() * (Math.PI / 2) - (Math.PI / 2);
-                }
             }
             else if (this.x > Global.BOARD_WIDTH - 80) {
                 moveDirection = Math.random() * Math.PI + (Math.PI / 2);
     
-                if (this.y < 80) {
+                if (this.y < 80)
                     moveDirection = Math.random() * (Math.PI / 2) + (Math.PI / 2);
-                }
-                else if (this.y > Global.BOARD_HEIGHT - 80) {
+                else if (this.y > Global.BOARD_HEIGHT - 80)
                     moveDirection = Math.random() * (Math.PI / 2) + Math.PI;
-                }
             }
-            else if (this.y < 80) {
+            else if (this.y < 80)
                 moveDirection = Math.random() * Math.PI;
-            }
-            else if (this.y > Global.BOARD_HEIGHT - 80) {
+            else if (this.y > Global.BOARD_HEIGHT - 80)
                 moveDirection = Math.random() * Math.PI + Math.PI;
-            }
         }
     
         this.basicDash(moveDirection, 250);
@@ -219,11 +210,10 @@ class Enemy {
 
 
 function aimAtDespawnPoint(enemy) {
-    if (enemy.despawnY - enemy.y < 0) {
+    if (enemy.despawnY - enemy.y < 0)
         return -Math.acos((enemy.despawnX - enemy.x) / Math.sqrt((enemy.despawnX - enemy.x) ** 2 + (enemy.despawnY - enemy.y) ** 2));
-    } else {
+    else
         return Math.acos((enemy.despawnX - enemy.x) / Math.sqrt((enemy.despawnX - enemy.x) ** 2 + (enemy.despawnY - enemy.y) ** 2));
-    }
 }
 
 function randomPattern(arr) {
@@ -262,7 +252,7 @@ const types = {
                 else if (enemy.x > Global.BOARD_WIDTH - 20) enemy.rightDash();
                 else enemy.randomDash();
                 
-                enemy.moveCooldown = enemy.moveRate;
+                enemy.moveCooldown = enemy.moveRate + (Math.random() * 2 - 1) * enemy.variance;
             } else if (enemy.velX > 1 || enemy.velY > 1 || enemy.velX < -1 || enemy.velY < -1) {
                 enemy.velX *= (DECELERATION * ms / 1000) / (ms / 1000);
                 enemy.velY *= (DECELERATION * ms / 1000) / (ms / 1000);
@@ -270,10 +260,8 @@ const types = {
                 enemy.velX = 0;
                 enemy.velY = 0;
             }
-            if (enemy.shotCooldown <= 0) {
+            if (enemy.shotCooldown <= 0) 
                 enemy.basicFire();
-                enemy.shotCooldown = enemy.shotRate;
-            }   
         }
     },
     aggroDrone: {
@@ -301,7 +289,7 @@ const types = {
                 else if (enemy.x > Global.BOARD_WIDTH - 20) enemy.rightDash();
                 else enemy.randomDash();
                 
-                enemy.moveCooldown = enemy.moveRate;
+                enemy.moveCooldown = enemy.moveRate + (Math.random() * 2 - 1) * enemy.variance;
             } else if (enemy.velX > 1 || enemy.velY > 1 || enemy.velX < -1 || enemy.velY < -1) {
                 enemy.velX *= (DECELERATION * ms / 1000) / (ms / 1000);
                 enemy.velY *= (DECELERATION * ms / 1000) / (ms / 1000);
@@ -311,7 +299,6 @@ const types = {
             }
             if (enemy.shotCooldown <= 0) {
                 enemy.basicFire();
-                enemy.shotCooldown = enemy.shotRate;
             }
         }
     },
@@ -340,7 +327,7 @@ const types = {
                 else if (enemy.x > Global.BOARD_WIDTH - 20) enemy.rightDash();
                 else enemy.randomDash();
                 
-                enemy.moveCooldown = enemy.moveRate;
+                enemy.moveCooldown = enemy.moveRate + (Math.random() * 2 - 1) * enemy.variance;
             } else if (enemy.velX > 1 || enemy.velY > 1 || enemy.velX < -1 || enemy.velY < -1) {
                 enemy.velX *= (DECELERATION * ms / 1000) / (ms / 1000);
                 enemy.velY *= (DECELERATION * ms / 1000) / (ms / 1000);
@@ -350,7 +337,6 @@ const types = {
             }
             if (enemy.shotCooldown <= 0) {
                 enemy.basicFire();
-                enemy.shotCooldown = enemy.shotRate;
             }
         }
     }
