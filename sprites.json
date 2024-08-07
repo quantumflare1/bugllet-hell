@@ -23,13 +23,23 @@
         "bomb": "bomb.png"
     },
     "enemy": {
-        "drone": "basic_drone.png",
-        "droneWings0": "basic_rotor.png",
-        "droneWings1": "basic_rotor2.png",
-        "aggroDrone": "fighter_drone.png",
-        "aggroDroneWings0": "booster_fire.png",
-        "aggroDroneWings1": "booster_fire2.png",
-        "bigDrone": "tank_drone.png",
-        "princessDrone": "princess_drone.png"
+        "basicDrone1": "basic_drone.png",
+        "basicDrone1Wings0": "basic_rotor.png",
+        "basicDrone1Wings1": "basic_rotor2.png",
+        "basicDrone2": "basic_drone.png",
+        "basicDrone2Wings0": "basic_rotor.png",
+        "basicDrone2Wings1": "basic_rotor2.png",
+        "basicDrone3": "basic_drone.png",
+        "basicDrone3Wings0": "basic_rotor.png",
+        "basicDrone3Wings1": "basic_rotor2.png",
+        "fighterDrone1": "fighter_drone.png",
+        "fighterDrone1Wings0": "booster_fire.png",
+        "fighterDrone1Wings1": "booster_fire2.png",
+        "fighterDrone2": "fighter_drone.png",
+        "fighterDrone2Wings0": "booster_fire.png",
+        "fighterDrone2Wings1": "booster_fire2.png",
+        "tankDrone1": "tank_drone.png",
+        "tankDrone2": "tank_drone.png",
+        "princessBee": "princess_drone.png"
     }
 }

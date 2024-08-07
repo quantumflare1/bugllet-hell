@@ -2,8 +2,8 @@ import * as Bullets from "./bullets.mjs";
 import * as Global from "./global.mjs";
 import * as Pickup from "./pickup.mjs";
 
-const BASE_MOVEMENT = 252;
-const BASE_RUN = 140;
+const BASE_MOVEMENT = 280;
+const BASE_FOCUS = 145;
 const BORDER_SIZE = 20;
 const WINGBEATS_PER_SECOND = 20;
 const BLINKS_PER_SECOND = 15;
@@ -13,7 +13,7 @@ const BOMB_BLAST_SPEED = 2000;
 
 let x, y, size;
 let movingLeft, movingRight, movingUp, movingDown, isFiring;
-let moveSpeed;
+let moveSpeed, focused;
 let lives, bombs, score, power;
 let grazeMultiplier;
 let timeSinceLastBullet, fireCooldown;
@@ -48,7 +48,8 @@ function keydown(e = new KeyboardEvent()) {
             movingRight = true;
             break;
         case "shift":
-            moveSpeed = BASE_RUN;
+            moveSpeed = BASE_FOCUS;
+            focused = true;
             break;
         case "x":
             if (!Global.paused && !Global.gameOver)
@@ -56,11 +57,11 @@ function keydown(e = new KeyboardEvent()) {
             break;
         case "z":
             isFiring = true;
-            break;
+            break;/*
         case "\\":
             lives++;
             power++;
-            break;
+            break;*/
     }
 }
 
@@ -79,6 +80,7 @@ function keyup(e = new KeyboardEvent()) {
             movingRight = false;
             break;
         case "Shift":
+            focused = false;
             moveSpeed = BASE_MOVEMENT;
             break;
         case "Z":
@@ -231,38 +233,74 @@ function tick(ms) {
 
     timeSinceLastBullet += ms;
     if (timeSinceLastBullet > fireCooldown && isFiring && invTime <= 0) {
-        if (power >= 4) {
-            fireBullet(6, 180, -1920, 10, 0);
-            fireBullet(6, -180, -1920, -10, 0);
-            fireBullet(6, 100, -1960, 8, 0);
-            fireBullet(6, -100, -1960, -8, 0);
-            fireBullet(6, 20, -2000, 8, -5);
-            fireBullet(6, -20, -2000, -8, -5);
-            fireBullet(6, 0, -2000, 0, -10);
-            fireCooldown = 45;
-        }
-        if (power >= 3) {
-            fireBullet(6, 120, -1760, 10, 0);
-            fireBullet(6, -120, -1760, -10, 0);
-            fireBullet(6, 40, -1800, 6, -5);
-            fireBullet(6, -40, -1800, -6, -5);
-            fireBullet(6, 0, -1800, 0, -10);
-            fireCooldown = 50;
-        }
-        else if (power >= 2) {
-            fireBullet(6, 80, -1560, 8, 0);
-            fireBullet(6, -80, -1560, -8, 0);
-            fireBullet(6, 10, -1600, 4, -6);
-            fireBullet(6, -10, -1600, -4, -6);
-            fireCooldown = 55;
-        }
-        else if (power >= 1) {
-            fireBullet(6, 20, -1400, 2, -8);
-            fireBullet(6, -20, -1400, -2, -8);
-            fireCooldown = 60;
+        if (focused) {
+            if (power >= 4) {
+                fireBullet(6, 20, -2000, 10, 0);
+                fireBullet(6, -20, -2000, -10, 0);
+                fireBullet(6, 14, -2000, 8, 0);
+                fireBullet(6, -14, -2000, -8, 0);
+                fireBullet(6, 6, -2000, 8, -5);
+                fireBullet(6, -6, -2000, -8, -5);
+                fireBullet(6, 0, -2000, 0, -10);
+                fireCooldown = 45;
+            }
+            if (power >= 3) {
+                fireBullet(6, 16, -1800, 10, 0);
+                fireBullet(6, -16, -1800, -10, 0);
+                fireBullet(6, 8, -1800, 6, -5);
+                fireBullet(6, -8, -1800, -6, -5);
+                fireBullet(6, 0, -1800, 0, -10);
+                fireCooldown = 50;
+            }
+            else if (power >= 2) {
+                fireBullet(6, 10, -1600, 8, 0);
+                fireBullet(6, -10, -1600, -8, 0);
+                fireBullet(6, 3, -1600, 4, -6);
+                fireBullet(6, -3, -1600, -4, -6);
+                fireCooldown = 55;
+            }
+            else if (power >= 1) {
+                fireBullet(6, 5, -1400, 2, -8);
+                fireBullet(6, -5, -1400, -2, -8);
+                fireCooldown = 60;
+            } else {
+                fireBullet(6, 0, -1200, 0, -8);
+                fireCooldown = 66;
+            }
         } else {
-            fireBullet(6, 0, -1200, 0, -8);
-            fireCooldown = 66;
+            if (power >= 4) {
+                fireBullet(6, 180, -1920, 10, 0);
+                fireBullet(6, -180, -1920, -10, 0);
+                fireBullet(6, 100, -1960, 8, 0);
+                fireBullet(6, -100, -1960, -8, 0);
+                fireBullet(6, 20, -2000, 8, -5);
+                fireBullet(6, -20, -2000, -8, -5);
+                fireBullet(6, 0, -2000, 0, -10);
+                fireCooldown = 45;
+            }
+            if (power >= 3) {
+                fireBullet(6, 120, -1760, 10, 0);
+                fireBullet(6, -120, -1760, -10, 0);
+                fireBullet(6, 40, -1800, 6, -5);
+                fireBullet(6, -40, -1800, -6, -5);
+                fireBullet(6, 0, -1800, 0, -10);
+                fireCooldown = 50;
+            }
+            else if (power >= 2) {
+                fireBullet(6, 80, -1560, 8, 0);
+                fireBullet(6, -80, -1560, -8, 0);
+                fireBullet(6, 10, -1600, 4, -6);
+                fireBullet(6, -10, -1600, -4, -6);
+                fireCooldown = 55;
+            }
+            else if (power >= 1) {
+                fireBullet(6, 20, -1400, 2, -8);
+                fireBullet(6, -20, -1400, -2, -8);
+                fireCooldown = 60;
+            } else {
+                fireBullet(6, 0, -1200, 0, -8);
+                fireCooldown = 66;
+            }
         }
         timeSinceLastBullet = 0;
     }
@@ -275,10 +313,10 @@ function init() {
     size = 5;
     moveSpeed = BASE_MOVEMENT;
 
-    lives = 0;
+    lives = 5;
     bombs = 3;
     score = 0;
-    power = 0;
+    power = 4;
 
     grazeMultiplier = 1;
 

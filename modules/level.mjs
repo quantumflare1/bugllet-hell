@@ -20,20 +20,28 @@ class Wave {
 }
 
 const waves = [
-    new Wave(500, ["drone", "drone", "drone"], [
-        { x: 216, y: -10 },
-        { x: 324, y: -10 },
-        { x: 432, y: -10 }
+    new Wave(500, ["basicDrone1"], [
+        { x: 440, y: -10 }
     ]),
-    new Wave(20000, ["drone", "aggroDrone", "drone"], [
-        { x: 135, y: -10 },
-        { x: 270, y: -10 },
-        { x: 405, y: -10 }
+    new Wave(20000, ["basicDrone2"], [
+        { x: 440, y: -10 }
     ]),
-    new Wave(22000, ["drone", "bigDrone", "aggroDrone", "drone"], [
-        { x: 50, y: -10 },
-        { x: 270, y: -10 },
-        { x: 360, y: -10 },
+    new Wave(22000, ["basicDrone3"], [
+        { x: 440, y: -10 }
+    ]),
+    new Wave(22000, ["fighterDrone1"], [
+        { x: 440, y: -10 }
+    ]),
+    new Wave(22000, ["fighterDrone2"], [
+        { x: 440, y: -10 }
+    ]),
+    new Wave(22000, ["tankDrone1"], [
+        { x: 440, y: -20 }
+    ]),
+    new Wave(22000, ["tankDrone2"], [
+        { x: 440, y: -10 }
+    ]),
+    new Wave(22000, ["princessBee"], [
         { x: 440, y: -10 }
     ])
 ];

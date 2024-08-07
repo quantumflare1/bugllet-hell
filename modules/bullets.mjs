@@ -1,7 +1,7 @@
 import * as Global from "./global.mjs";
+import * as Player from "./player.mjs";
 
-// todo: add bullet spread (inaccuracy)
-// also todo: maybe tick bullets twice per frame? (more accurate collision)
+// todo: maybe tick bullets twice per frame? (more accurate collision)
 class Bullet {
     constructor(x, y, size, velX, velY, rot, expireTime, script = () => {}, type, variety) {
         this.x = x;
@@ -57,51 +57,158 @@ class Bullet {
 const bullets = new Set();
 const playerBullets = new Set();
 
+function aimAtPoint(x, y) {
+    if (y < 0)
+        return -Math.acos(x / Math.sqrt(x ** 2 + y ** 2));
+    else
+        return Math.acos(x / Math.sqrt(x ** 2 + y ** 2));
+}
+
 const types = {
     basic: {
         size: 6,
         vel: 300,
         rot: 0,
-        expireTime: 3000,
+        expireTime: 10000,
         script: () => {}
     },
     small: {
         size: 3,
         vel: 360,
         rot: 0,
-        expireTime: 2500,
+        expireTime: 9000,
         script: () => {}
     },
     large: {
         size: 10,
-        vel: 250,
+        vel: 260,
         rot: 0,
-        expireTime: 4000,
+        expireTime: 12000,
         script: () => {}
     },
     massive: {
         size: 24,
-        vel: 170,
+        vel: 210,
         rot: 0,
-        expireTime: 5000,
+        expireTime: 15000,
         script: () => {}
     },
     spiral: {
         size: 8,
         vel: 90,
         rot: 15,
-        expireTime: 3500,
+        expireTime: 13000,
         script: (bullet, ms) => {
             const SPEED_MULTIPLIER = 3;
             bullet.x += bullet.baseVelX * ms / 1000 * SPEED_MULTIPLIER;
             bullet.y += bullet.baseVelY * ms / 1000 * SPEED_MULTIPLIER;
         }
+    },
+    dart: {
+        size: 6,
+        vel: 400,
+        rot: 0,
+        expireTime: 10000,
+        script: () => {}
+    },
+    grow1: {
+        size: 3,
+        vel: 360,
+        rot: 0,
+        expireTime: 9000,
+        script: (bullet, ms) => {
+            if (bullet.lifetime > 700) {
+                bullets.delete(bullet);
+                makeBullet("grow2", bullet.x, bullet.y, aimAtPoint(bullet.velX, bullet.velY), bullet.variety, Math.sqrt(bullet.velX ** 2 + bullet.velY ** 2));
+            }
+        }
+    },
+    grow2: {
+        size: 6,
+        vel: 300,
+        rot: 0,
+        expireTime: 10000,
+        script: (bullet, ms) => {
+            if (bullet.lifetime > 700) {
+                bullets.delete(bullet);
+                makeBullet("large", bullet.x, bullet.y, aimAtPoint(bullet.velX, bullet.velY), bullet.variety, Math.sqrt(bullet.velX ** 2 + bullet.velY ** 2));
+            }
+        }
+    },
+    burst: {
+        size: 10,
+        vel: 220,
+        rot: 0,
+        expireTime: 10000,
+        script: (bullet, ms) => {
+            if (bullet.lifetime > 700) {
+                const angle = Math.random() * 2 * Math.PI;
+                const variety = Math.floor(Math.random() * 10);
+                bullets.delete(bullet);
+                for (let i = 0; i < 8; i++) {
+                    makeBullet("basic", bullet.x, bullet.y, angle + (i / 8) * 2 * Math.PI, variety, Math.sqrt(bullet.velX ** 2 + bullet.velY ** 2));
+                }
+            }
+        }
+    },
+    burst1: {
+        size: 10,
+        vel: 220,
+        rot: 0,
+        expireTime: 10000,
+        script: (bullet, ms) => {
+            if (bullet.lifetime > 700) {
+                const angle = Math.random() * 2 * Math.PI;
+                const variety = Math.floor(Math.random() * 10);
+                bullets.delete(bullet);
+                for (let i = 0; i < 4; i++) {
+                    makeBullet("burst2", bullet.x, bullet.y, angle + (i / 8) * 2 * Math.PI, variety, Math.sqrt(bullet.velX ** 2 + bullet.velY ** 2));
+                }
+            }
+        }
+    },
+    burst2: {
+        size: 6,
+        vel: 260,
+        rot: 0,
+        expireTime: 10000,
+        script: (bullet, ms) => {
+            if (bullet.lifetime > 700) {
+                const angle = Math.random() * 2 * Math.PI;
+                const variety = Math.floor(Math.random() * 10);
+                bullets.delete(bullet);
+                for (let i = 0; i < 3; i++) {
+                    makeBullet("small", bullet.x, bullet.y, angle + (i / 8) * 2 * Math.PI, variety, Math.sqrt(bullet.velX ** 2 + bullet.velY ** 2));
+                }
+            }
+        }
+    },
+    homing: {
+        size: 6,
+        vel: 300,
+        rot: 0,
+        expireTime: 10000,
+        script: (bullet, ms) => {
+            if (bullet.lifetime < 4000) {
+                const angleToPlayer = aimAtPoint(Player.x, Player.y);
+                const netVel = Math.sqrt(bullet.velX ** 2 + bullet.velY ** 2); // lot of unnecessary expensive math going on, maybe optimize that out
+                bullet.velX = netVel * Math.cos(angleToPlayer);
+                bullet.velY = netVel * Math.sin(angleToPlayer);
+            }
+        }
+    },
+    slowSpiral: {
+        size: 8,
+        vel: 270,
+        rot: 0.7,
+        expireTime: 5000,
+        script: () => {}
     }
 }
 
-function makeBullet(type, x, y, dir, variety) {
-    const velX = types[type].vel * Math.cos(dir);
-    const velY = types[type].vel * Math.sin(dir);
+function makeBullet(type, x, y, dir, variety, vel = types[type].vel) {
+    const velX = vel * Math.cos(dir);
+    const velY = vel * Math.sin(dir);
     new Bullet(x, y, types[type].size, velX, velY, types[type].rot, types[type].expireTime, types[type].script, type, variety);
 }
 

@@ -14,13 +14,13 @@ const startMenu = {
             "label": ["Arrow keys to move", 40, 140, 2]
         },
         focusTutorial: {
-            "label": ["Shift to focus", 40, 140, 2]
+            "label": ["Shift to focus", 40, 180, 2]
         },
         pauseTutorial: {
-            "label": ["Esc to pause", 40, 180, 2]
+            "label": ["Esc to pause", 40, 220, 2]
         },
         startTutorial: {
-            "label": ["Any key to start", 40, 220, 2]
+            "label": ["Any key* to start", 40, 260, 2]
         },
         explanation1: {
             "label": ["\"you gotta explain this better man i didn\'t even know you could use space to jump", 40, 800, 1]
@@ -36,7 +36,7 @@ const startMenu = {
 
 const death = {
     bgCol: "rgb(0, 0, 0)",
-    transition: 0.5,
+    transition: 1,
     content: {
         gameOver: {
             "label": ["Game Over", Math.floor(Global.BOARD_WIDTH / 2 - 7 * 4.5 * 3), Global.BOARD_HEIGHT / 2, 3]
@@ -49,7 +49,7 @@ const death = {
 
 const win = {
     bgCol: "rgb(255, 220, 0)",
-    transition: 1,
+    transition: 5,
     content: {
         gameOver: {
             "label": ["You win!!!", Global.BOARD_WIDTH / 2 - 7 * 5 * 3, Global.BOARD_HEIGHT / 2 - 130, 3]

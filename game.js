@@ -38,10 +38,12 @@ function fullscreen() {
 }
 
 function keydown(e) {
-    initEventListeners();
-    lastFrameTime = document.timeline.currentTime;
-    requestAnimationFrame(tick);
-    removeEventListener("keydown", keydown);
+    if (!e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        initEventListeners();
+        lastFrameTime = document.timeline.currentTime;
+        requestAnimationFrame(tick);
+        removeEventListener("keydown", keydown);
+    }
 }
 
 function retryKeyDown(e) {
@@ -62,10 +64,12 @@ function retryKeyDown(e) {
 function loadMenu(name) {
     let lastMenuFrameTime = document.timeline.currentTime;
     function render(ms) {
+        draw();
         const elapsed = ms - lastMenuFrameTime;
-        gpctx.globalAlpha = elapsed / (1000 * Menu[name].transition);  // note: this is bugged and doesn't work properly with alpha channel not 1
+        gpctx.globalAlpha = elapsed / (1000 * Menu[name].transition);
         gpctx.fillStyle = Menu[name].bgCol;
         gpctx.fillRect(0, 0, Global.BOARD_WIDTH, Global.BOARD_HEIGHT);
+        console.log(elapsed);
     
         Object.keys(Menu[name].content).forEach((v) => {
             if (v === "bgCol") return;
@@ -93,11 +97,22 @@ function drawText(context, text, sx, sy, scale) {
         context.drawImage(fontSheet, font[text[i]][0], font[text[i]][1], 7, 17, sx + i * 7 * scale, sy, 7 * scale, 17 * scale);
 }
 function drawBullet(b) {
-    const sprData = bullet[b.type][b.variety];
+    let sprData = bullet[b.type][b.variety];
+    if (!sprData) sprData = bullet["basic"][2];
+
     gpctx.setTransform(1, 0, 0, 1, b.x, b.y);
     gpctx.rotate(Math.atan(b.velX / b.velY));
     gpctx.drawImage(bulletSheet, ...sprData, Math.floor(-sprData[2] / 2), Math.floor(-sprData[3] / 2), sprData[2], sprData[3]);
     gpctx.rotate(-Math.atan(b.velX / b.velY));
+    gpctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+// actually implement this??
+function drawEnemy(e) {
+    gpctx.setTransform(1, 0, 0, 1, e.x, e.y);
+    gpctx.rotate(Math.atan(e.velX / e.velY));
+    gpctx.drawImage(spriteImages.enemy[e.type], -spriteImages.enemy[e.type].width / 2, -spriteImages.enemy[e.type].height / 2);
+    gpctx.rotate(-Math.atan(e.velX / e.velY));
     gpctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
@@ -223,14 +238,16 @@ function initEventListeners() {
         if (e.key === "Escape" && !Global.gameOver) {
             if (!Global.paused) loadMenu("pause");
             Global.setPaused(true);
+            bgm.pause();
         } else if (e.key.toLowerCase() === "z") {
             Global.setPaused(false);
+            //bgm.play();
         }
     });
     // func could use better name (also draws UI and starts music)
     drawUI();
-    bgm.play();
-    bgm.volume = 0.1;
+    //bgm.play();
+    //bgm.volume = 0.1;
     bgm.loop = true;
 }
 
