@@ -20,7 +20,7 @@ class Wave {
 }
 
 const waves = [
-    new Wave(500, ["basicDrone1"], [
+    /*new Wave(500, ["basicDrone1"], [
         { x: 440, y: -10 }
     ]),
     new Wave(20000, ["basicDrone2"], [
@@ -40,8 +40,8 @@ const waves = [
     ]),
     new Wave(22000, ["tankDrone2"], [
         { x: 440, y: -10 }
-    ]),
-    new Wave(22000, ["princessBee"], [
+    ]),*/
+    new Wave(500, ["princessBee"], [
         { x: 440, y: -10 }
     ])
 ];

@@ -570,7 +570,7 @@ const types = {
         score: 20000,
         hp: 10000,
         screenTime: 9999999, // go on. dodge for 3 hours
-        shotRate: 2500,
+        shotRate: 2800,
         moveRate: 5000,
         wingRate: 10,
         useRotation: true,

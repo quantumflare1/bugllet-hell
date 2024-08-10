@@ -49,7 +49,7 @@ const death = {
 
 const win = {
     bgCol: "rgb(255, 220, 0)",
-    transition: 5,
+    transition: 2,
     content: {
         gameOver: {
             "label": ["You win!!!", Global.BOARD_WIDTH / 2 - 7 * 5 * 3, Global.BOARD_HEIGHT / 2 - 130, 3]

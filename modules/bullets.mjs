@@ -3,7 +3,7 @@ import * as Player from "./player.mjs";
 
 // todo: maybe tick bullets twice per frame? (more accurate collision)
 class Bullet {
-    constructor(x, y, size, velX, velY, rot, expireTime, script = () => {}, type, variety) {
+    constructor(x, y, size, velX, velY, rot, expireTime, script = () => {}, sprite, variety) {
         this.x = x;
         this.y = y;
         this.size = size;
@@ -16,10 +16,10 @@ class Bullet {
         this.lifetime = 0;
         this.grazed = false;
         this.script = script;
-        this.type = type;
+        this.sprite = sprite;
         this.variety = variety;
 
-        if (this.type === "player") {
+        if (this.sprite === "player") {
             playerBullets.add(this);
         } else {
             bullets.add(this);
@@ -67,30 +67,34 @@ function aimAtPoint(x, y) {
 const types = {
     basic: {
         size: 6,
-        vel: 300,
+        vel: 270,
         rot: 0,
         expireTime: 10000,
+        sprite: "basic",
         script: () => {}
     },
     small: {
         size: 3,
-        vel: 360,
+        vel: 320,
         rot: 0,
         expireTime: 9000,
+        sprite: "small",
         script: () => {}
     },
     large: {
         size: 10,
-        vel: 260,
+        vel: 240,
         rot: 0,
         expireTime: 12000,
+        sprite: "large",
         script: () => {}
     },
     massive: {
         size: 24,
-        vel: 210,
+        vel: 200,
         rot: 0,
         expireTime: 15000,
+        sprite: "massive",
         script: () => {}
     },
     spiral: {
@@ -98,6 +102,7 @@ const types = {
         vel: 90,
         rot: 15,
         expireTime: 13000,
+        sprite: "spiral",
         script: (bullet, ms) => {
             const SPEED_MULTIPLIER = 3;
             bullet.x += bullet.baseVelX * ms / 1000 * SPEED_MULTIPLIER;
@@ -105,17 +110,19 @@ const types = {
         }
     },
     dart: {
-        size: 6,
-        vel: 400,
+        size: 5,
+        vel: 370,
         rot: 0,
         expireTime: 10000,
+        sprite: "dart",
         script: () => {}
     },
     grow1: {
         size: 3,
-        vel: 360,
+        vel: 320,
         rot: 0,
         expireTime: 9000,
+        sprite: "small",
         script: (bullet, ms) => {
             if (bullet.lifetime > 700) {
                 bullets.delete(bullet);
@@ -125,9 +132,10 @@ const types = {
     },
     grow2: {
         size: 6,
-        vel: 300,
+        vel: 270,
         rot: 0,
         expireTime: 10000,
+        sprite: "basic",
         script: (bullet, ms) => {
             if (bullet.lifetime > 700) {
                 bullets.delete(bullet);
@@ -137,9 +145,10 @@ const types = {
     },
     burst: {
         size: 10,
-        vel: 220,
+        vel: 200,
         rot: 0,
         expireTime: 10000,
+        sprite: "burst",
         script: (bullet, ms) => {
             if (bullet.lifetime > 700) {
                 const angle = Math.random() * 2 * Math.PI;
@@ -153,9 +162,10 @@ const types = {
     },
     burst1: {
         size: 10,
-        vel: 220,
+        vel: 200,
         rot: 0,
         expireTime: 10000,
+        sprite: "burst",
         script: (bullet, ms) => {
             if (bullet.lifetime > 700) {
                 const angle = Math.random() * 2 * Math.PI;
@@ -169,9 +179,10 @@ const types = {
     },
     burst2: {
         size: 6,
-        vel: 260,
+        vel: 240,
         rot: 0,
         expireTime: 10000,
+        sprite: "basic",
         script: (bullet, ms) => {
             if (bullet.lifetime > 700) {
                 const angle = Math.random() * 2 * Math.PI;
@@ -188,6 +199,7 @@ const types = {
         vel: 300,
         rot: 0,
         expireTime: 10000,
+        sprite: "basic",
         script: (bullet, ms) => {
             if (bullet.lifetime < 4000) {
                 const angleToPlayer = aimAtPoint(Player.x, Player.y);
@@ -202,6 +214,7 @@ const types = {
         vel: 270,
         rot: 0.7,
         expireTime: 5000,
+        sprite: "spiral",
         script: () => {}
     }
 }
@@ -209,7 +222,7 @@ const types = {
 function makeBullet(type, x, y, dir, variety, vel = types[type].vel) {
     const velX = vel * Math.cos(dir);
     const velY = vel * Math.sin(dir);
-    new Bullet(x, y, types[type].size, velX, velY, types[type].rot, types[type].expireTime, types[type].script, type, variety);
+    new Bullet(x, y, types[type].size, velX, velY, types[type].rot, types[type].expireTime, types[type].script, types[type].sprite, variety);
 }
 
 export { types, bullets, playerBullets, Bullet, makeBullet };

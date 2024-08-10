@@ -24,6 +24,7 @@ let fps = 0;
 let msSinceLastFpsCheck = 0;
 let framesSinceLastFpsCheck = 0;
 let bgScroll = 0;
+let nextTick, menuStartTime, activeMenu;
 const bgScrollRate = 50;
 
 const spriteImages = {};
@@ -41,7 +42,7 @@ function keydown(e) {
     if (!e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
         initEventListeners();
         lastFrameTime = document.timeline.currentTime;
-        requestAnimationFrame(tick);
+        nextTick = requestAnimationFrame(tick);
         removeEventListener("keydown", keydown);
     }
 }
@@ -57,14 +58,15 @@ function retryKeyDown(e) {
         Pickup.pickups.clear();
 
         lastFrameTime = document.timeline.currentTime;
-        requestAnimationFrame(tick);
+        nextTick = requestAnimationFrame(tick);
     }
 }
 
 function loadMenu(name) {
+    menuStartTime = document.timeline.currentTime;
+    activeMenu = name;
     let lastMenuFrameTime = document.timeline.currentTime;
     function render(ms) {
-        draw();
         const elapsed = ms - lastMenuFrameTime;
         gpctx.globalAlpha = elapsed / (1000 * Menu[name].transition);
         gpctx.fillStyle = Menu[name].bgCol;
@@ -78,6 +80,7 @@ function loadMenu(name) {
         if (Menu[name].transition !== 0 && elapsed / (1000 * Menu[name].transition) < 1) {
             requestAnimationFrame(render);
         } else {
+            cancelAnimationFrame(nextTick);
             gpctx.globalAlpha = 1;
         }
     }
@@ -97,14 +100,20 @@ function drawText(context, text, sx, sy, scale) {
         context.drawImage(fontSheet, font[text[i]][0], font[text[i]][1], 7, 17, sx + i * 7 * scale, sy, 7 * scale, 17 * scale);
 }
 function drawBullet(b) {
-    let sprData = bullet[b.type][b.variety];
-    if (!sprData) sprData = bullet["basic"][2];
-
-    gpctx.setTransform(1, 0, 0, 1, b.x, b.y);
-    gpctx.rotate(Math.atan(b.velX / b.velY));
-    gpctx.drawImage(bulletSheet, ...sprData, Math.floor(-sprData[2] / 2), Math.floor(-sprData[3] / 2), sprData[2], sprData[3]);
-    gpctx.rotate(-Math.atan(b.velX / b.velY));
-    gpctx.setTransform(1, 0, 0, 1, 0, 0);
+    try {
+        let sprData = bullet[b.sprite][b.variety];
+        if (!sprData) sprData = bullet["basic"][2];
+    
+        gpctx.setTransform(1, 0, 0, 1, b.x, b.y);
+        gpctx.rotate(Math.atan(b.velX / b.velY));
+        gpctx.drawImage(bulletSheet, ...sprData, Math.floor(-sprData[2] / 2), Math.floor(-sprData[3] / 2), sprData[2], sprData[3]);
+        gpctx.rotate(-Math.atan(b.velX / b.velY));
+        gpctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    catch (e) {
+        console.log(bullet[b.sprite], b.variety);
+        throw e;
+    }
 }
 
 // actually implement this??
@@ -148,6 +157,8 @@ function draw() {
         if (spriteImages.enemy.hasOwnProperty(`${i.type}Wings${i.wingState}`))
             gpctx.drawImage(spriteImages.enemy[`${i.type}Wings${i.wingState}`], Math.floor(i.x - spriteImages.enemy[`${i.type}Wings${i.wingState}`].width / 2), Math.floor(i.y - spriteImages.enemy[`${i.type}Wings${i.wingState}`].height / 2));
     }
+
+    // render menu!! yippee!!
 }
 
 function drawUI() {
@@ -225,9 +236,8 @@ function tick(ms) {
         addEventListener("keydown", retryKeyDown);
     } else if (Global.gameWon) {
         loadMenu("win");
-    } else {
-        requestAnimationFrame(tick);
     }
+    nextTick = requestAnimationFrame(tick);
 }
 
 function initEventListeners() {

@@ -199,15 +199,15 @@ const patterns = {
         }, 100);
     },
     bigSmallRadial(enemy) {
-        const NUM_BULLETS = 18;
+        const NUM_BULLETS = 25;
         for (let i = 0; i < NUM_BULLETS; i++) {
-            Bullets.makeBullet("massive", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS, 1);
+            Bullets.makeBullet("massive", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS, 8);
         }
 
         setTimeout(() => {
             if (Enemy.enemies.has(enemy)) {
                 for (let i = 0; i < NUM_BULLETS; i++) {
-                    Bullets.makeBullet("basic", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS - Math.PI * 2 / (NUM_BULLETS * 2), 0, 230);
+                    Bullets.makeBullet("basic", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS - Math.PI * 2 / (NUM_BULLETS * 2), 7, 230);
                 }
             }
         }, 300);
@@ -233,26 +233,27 @@ const patterns = {
     },
     longRadialWave(enemy) {
         let wavesShot = 0;
-        const NUM_BULLETS = 6;
+        const NUM_BULLETS = 12;
+        const rotationDir = Math.random() > 0.5 ? 1 : -1;
         const interval = setInterval(() => {
             wavesShot++;
     
             for (let i = 0; i < NUM_BULLETS; i++) {
-                Bullets.makeBullet("basic", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS + (wavesShot / 17) * 2 * Math.PI, 5);
+                Bullets.makeBullet("basic", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS + (wavesShot / 27) * 2 * Math.PI * rotationDir, 5);
             }
             if (wavesShot >= 30 || !Enemy.enemies.has(enemy)) {
                 clearInterval(interval);
             }
-        }, 40);
+        }, 80);
     },
     slowSpiralRadialWave(enemy) {
         let wavesShot = 0;
-        const NUM_BULLETS = 16;
+        const NUM_BULLETS = 12;
         const interval = setInterval(() => {
             wavesShot++;
 
             for (let i = 0; i < NUM_BULLETS; i++) {
-                Bullets.makeBullet("slowSpiral", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS + enemy.rotation, 4);
+                Bullets.makeBullet("slowSpiral", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS + enemy.rotation + wavesShot, 4);
             }
             if (wavesShot >= 20 || !Enemy.enemies.has(enemy)) {
                 clearInterval(interval);
