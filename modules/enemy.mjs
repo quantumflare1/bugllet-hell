@@ -393,7 +393,7 @@ const types = {
     fighterDrone1: {
         size: 14,
         score: 500,
-        hp: 120,
+        hp: 130,
         screenTime: 11000,
         shotRate: 900,
         moveRate: 400,
@@ -442,7 +442,7 @@ const types = {
     fighterDrone2: {
         size: 14,
         score: 800,
-        hp: 80,
+        hp: 90,
         screenTime: 10000,
         shotRate: 200,
         moveRate: 440,
@@ -491,7 +491,7 @@ const types = {
     tankDrone1: {
         size: 20,
         score: 1500,
-        hp: 1200,
+        hp: 900,
         screenTime: 40000,
         shotRate: 4000,
         moveRate: 3000,
@@ -530,7 +530,7 @@ const types = {
     tankDrone2: {
         size: 20,
         score: 2200,
-        hp: 2100,
+        hp: 1600,
         screenTime: 80000,
         shotRate: 4500,
         moveRate: 2000,

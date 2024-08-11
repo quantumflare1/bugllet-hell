@@ -119,7 +119,7 @@ const types = {
     },
     grow1: {
         size: 3,
-        vel: 320,
+        vel: 270,
         rot: 0,
         expireTime: 9000,
         sprite: "small",

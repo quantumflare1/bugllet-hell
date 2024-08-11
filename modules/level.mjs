@@ -20,7 +20,7 @@ class Wave {
 }
 
 const waves = [
-    /*new Wave(500, ["basicDrone1"], [
+    new Wave(500, ["basicDrone1"], [
         { x: 440, y: -10 }
     ]),
     new Wave(20000, ["basicDrone2"], [
@@ -40,8 +40,8 @@ const waves = [
     ]),
     new Wave(22000, ["tankDrone2"], [
         { x: 440, y: -10 }
-    ]),*/
-    new Wave(500, ["princessBee"], [
+    ]),
+    new Wave(22000, ["princessBee"], [
         { x: 440, y: -10 }
     ])
 ];
@@ -63,15 +63,13 @@ function tick(ms) {
     if (nextWave !== 0) {
         let curWaveEnemies = 0;
         for (const i of Enemy.enemies) {
-            if (i.waveId === nextWave - 1) {
+            if (i.waveId === nextWave - 1)
                 curWaveEnemies++;
-            }
         }
         waves[nextWave-1].enemiesLeft = curWaveEnemies;
     }
-    if (nextWave >= waves.length && waves[nextWave-1].enemiesLeft === 0) {
-        Global.setWinState(true);
-    }
+    if (nextWave >= waves.length && waves[nextWave-1].enemiesLeft === 0)
+        setTimeout(Global.setWinState, 2000, true);
 }
 
 function init() {

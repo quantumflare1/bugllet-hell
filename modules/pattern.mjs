@@ -18,7 +18,7 @@ class Pattern {
     }
     tick(ms) {
         this.lifetime += ms;
-        if (this.wave > this.lastWave || !Enemy.enemies.has(this.parent)) patterns.delete(this);
+        if (this.lastWave === 0 || this.wave > this.lastWave || !Enemy.enemies.has(this.parent)) patterns.delete(this);
         
         this.script(this);
     }
@@ -63,8 +63,8 @@ const types = {
                 case 1:
                     if (pat.lifetime >= 250) {
                         const angle = aimAtPlayer(pat.parent.x, pat.parent.y);
-                        Bullets.makeBullet("basic", this.parent.x, this.parent.y, angle + 0.1, 2);
-                        Bullets.makeBullet("basic", this.parent.x, this.parent.y, angle - 0.1, 2);
+                        Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle + 0.1, 2);
+                        Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle - 0.1, 2);
                         pat.wave++;
                     }
                     break;
@@ -72,7 +72,7 @@ const types = {
         }
     },
     machineGunFire: {
-        lastWave: 15,
+        lastWave: 14,
         script: (pat) => {
             if (pat.lifetime > pat.wave * 70) {
                 pat.wave++;
@@ -85,7 +85,7 @@ const types = {
         script: (pat) => {
             if (pat.lifetime > pat.wave * 70) {
                 pat.wave++;
-                Bullets.makeBullet("grow1", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y) + Math.random() * 0.3 - 0.15, randBulletStyle(7, 3));
+                Bullets.makeBullet("grow1", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y) + Math.random() * 0.44 - 0.22, randBulletStyle(7, 3));
             }
         }
     },
@@ -98,36 +98,32 @@ const types = {
                     pat.persistent[0] = pat.parent.x; // initial firing location
                     pat.persistent[1] = pat.parent.y;
                     pat.persistent[2] = aimAtPlayer(pat.parent.x, pat.parent.y); // angle
+                    pat.persistent[3] = Math.sin(pat.persistent[2]); // offsets
+                    pat.persistent[4] = Math.cos(pat.persistent[2]);
                     Bullets.makeBullet("dart", pat.persistent[0], pat.persistent[1], pat.persistent[2], 2);
                     pat.wave++;
                     break;
                 case 1:
                     if (pat.lifetime >= 80) {
-                        const xOffset = Math.sin(pat.persistent[2]);
-                        const yOffset = Math.cos(pat.persistent[2]);
-                        Bullets.makeBullet("dart", pat.persistent[0] + xOffset * spread, pat.persistent[1] - yOffset * spread, pat.persistent[2], 3);
-                        Bullets.makeBullet("dart", pat.persistent[0] - xOffset * spread, pat.persistent[1] + yOffset * spread, pat.persistent[2], 3);
+                        Bullets.makeBullet("dart", pat.persistent[0] + pat.persistent[3] * spread, pat.persistent[1] - pat.persistent[4] * spread, pat.persistent[2], 3);
+                        Bullets.makeBullet("dart", pat.persistent[0] - pat.persistent[3] * spread, pat.persistent[1] + pat.persistent[4] * spread, pat.persistent[2], 3);
                         pat.wave++;
                     }
                     break;
                 case 2:
                     if (pat.lifetime >= 160) {
-                        const xOffset = Math.sin(pat.persistent[2]);
-                        const yOffset = Math.cos(pat.persistent[2]);
-                        Bullets.makeBullet("dart", pat.persistent[0] + xOffset * spread * 2, pat.persistent[1] - yOffset * spread * 2, pat.persistent[2], 4);
+                        Bullets.makeBullet("dart", pat.persistent[0] + pat.persistent[3] * spread * 2, pat.persistent[1] - pat.persistent[4] * spread * 2, pat.persistent[2], 4);
                         Bullets.makeBullet("dart", pat.persistent[0], pat.persistent[1], pat.persistent[2], 4);
-                        Bullets.makeBullet("dart", pat.persistent[0] - xOffset * spread * 2, pat.persistent[1] + yOffset * spread * 2, pat.persistent[2], 4);
+                        Bullets.makeBullet("dart", pat.persistent[0] - pat.persistent[3] * spread * 2, pat.persistent[1] + pat.persistent[4] * spread * 2, pat.persistent[2], 4);
                         pat.wave++;
                     }
                     break;
                 case 3:
                     if (pat.lifetime >= 240) {
-                        const xOffset = Math.sin(pat.persistent[2]);
-                        const yOffset = Math.cos(pat.persistent[2]);
-                        Bullets.makeBullet("dart", pat.persistent[0] + xOffset * spread * 3, pat.persistent[1] - yOffset * spread * 3, pat.persistent[2], 5);
-                        Bullets.makeBullet("dart", pat.persistent[0] + xOffset * spread, pat.persistent[1] - yOffset * spread, pat.persistent[2], 5);
-                        Bullets.makeBullet("dart", pat.persistent[0] - xOffset * spread, pat.persistent[1] + yOffset * spread, pat.persistent[2], 5);
-                        Bullets.makeBullet("dart", pat.persistent[0] - xOffset * spread * 3, pat.persistent[1] + yOffset * spread * 3, pat.persistent[2], 5);
+                        Bullets.makeBullet("dart", pat.persistent[0] + pat.persistent[3] * spread * 3, pat.persistent[1] - pat.persistent[4] * spread * 3, pat.persistent[2], 5);
+                        Bullets.makeBullet("dart", pat.persistent[0] + pat.persistent[3] * spread, pat.persistent[1] - pat.persistent[4] * spread, pat.persistent[2], 5);
+                        Bullets.makeBullet("dart", pat.persistent[0] - pat.persistent[3] * spread, pat.persistent[1] + pat.persistent[4] * spread, pat.persistent[2], 5);
+                        Bullets.makeBullet("dart", pat.persistent[0] - pat.persistent[3] * spread * 3, pat.persistent[1] + pat.persistent[4] * spread * 3, pat.persistent[2], 5);
                         pat.wave++;
                     }
                     break;
@@ -148,7 +144,7 @@ const types = {
         script: (pat) => {
             if (pat.lifetime > pat.wave * 100) {
                 pat.wave++;
-                Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y) * 0.3 - 0.15, randBulletStyle(6, 3));
+                Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y) + Math.random() * 0.3 - 0.15, randBulletStyle(5, 5));
             }
         }
     },
@@ -195,7 +191,7 @@ const types = {
         lastWave: 0,
         script: (pat) => {
             const vel = Math.sqrt(pat.parent.velX ** 2 + pat.parent.velY ** 2);
-            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimWithEnemy(pat.parent.velX, pat.parent.velY), randBulletStyle(5, 3), vel + Bullets.types.basic.vel);
+            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimWithEnemy(pat.parent.velX, pat.parent.velY), randBulletStyle(5, 3), vel + Bullets.types.basic.vel * 0.8);
             pat.wave++;
         }
     },
@@ -203,8 +199,8 @@ const types = {
         lastWave: 0,
         script: (pat) => {
             const style = randBulletStyle(1, 4);
-            for (let i = 0; i < 5; i++)
-                Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y), style, 420 - 70 * i);
+            for (let i = 0; i < 4; i++)
+                Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y), style, 350 - 70 * i);
             pat.wave++;
         }
     },
@@ -213,7 +209,7 @@ const types = {
         script: (pat) => {
             const style = randBulletStyle(1, 4);
             for (let i = 0; i < 3; i++)
-                Bullets.makeBullet("dart", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y), style, 360 - 100 * i);
+                Bullets.makeBullet("dart", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y), style, 320 - 100 * i);
             pat.wave++;
         }
     },

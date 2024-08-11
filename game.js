@@ -100,11 +100,12 @@ function drawBullet(b) {
     try {
         let sprData = bullet[b.sprite][b.variety];
         if (!sprData) sprData = bullet["basic"][2];
+        const rotation = (Math.atan(b.velY / b.velX) + Math.PI / 2) + (b.velX > 0 ? Math.PI : 0);
     
         gpctx.setTransform(1, 0, 0, 1, b.x, b.y);
-        gpctx.rotate(Math.atan(b.velX / b.velY));
+        gpctx.rotate(rotation);
         gpctx.drawImage(bulletSheet, ...sprData, Math.floor(-sprData[2] / 2), Math.floor(-sprData[3] / 2), sprData[2], sprData[3]);
-        gpctx.rotate(-Math.atan(b.velX / b.velY));
+        gpctx.rotate(-rotation);
         gpctx.setTransform(1, 0, 0, 1, 0, 0);
     }
     catch (e) {
@@ -123,7 +124,7 @@ function drawEnemy(e) {
 }
 
 function fillPowerMeter(scale) {
-    ctx.fillStyle = "rgb(192, 151, 74)";
+    ctx.fillStyle = "rgb(233, 102, 76)";
     ctx.fillRect(700 + 3 * scale, 560 + 10 * scale, Math.floor(Player.power / 4 * (spriteImages.ui.powerMeter.width * scale - 4 * scale) / scale) * scale, 4 * scale);
 }
 
