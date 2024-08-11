@@ -4,6 +4,7 @@ const startMenu = {
     bgCol: "rgb(0, 0, 0)",
     transition: 0,
     content: {
+        // todo: maybe stick these all in an array named "labels" or something
         fireTutorial: { // these can actually be named literally anything
             "label": ["Z to fire", 40, 60, 2]
         },
@@ -30,7 +31,10 @@ const startMenu = {
         },
         explanation2: {
             "label": ["- TheMobile, Feb 28 2024 (this screen is for you)", 40, 840, 1]
-        }
+        },
+        startCaveat: {
+            "label": ["*any key that isn't Shift, Alt, Ctrl or Win/Cmd", 40, 300, 1]
+        },
     }
 };
 

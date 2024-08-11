@@ -24,7 +24,7 @@ let fps = 0;
 let msSinceLastFpsCheck = 0;
 let framesSinceLastFpsCheck = 0;
 let bgScroll = 0;
-let nextTick, menuStartTime, activeMenu;
+let nextTick;
 const bgScrollRate = 50;
 
 const spriteImages = {};
@@ -40,7 +40,7 @@ function fullscreen() {
 
 function keydown(e) {
     if (!e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        initEventListeners();
+        initGame();
         lastFrameTime = document.timeline.currentTime;
         nextTick = requestAnimationFrame(tick);
         removeEventListener("keydown", keydown);
@@ -63,15 +63,13 @@ function retryKeyDown(e) {
 }
 
 function loadMenu(name) {
-    menuStartTime = document.timeline.currentTime;
-    activeMenu = name;
     let lastMenuFrameTime = document.timeline.currentTime;
     function render(ms) {
+        draw();
         const elapsed = ms - lastMenuFrameTime;
         gpctx.globalAlpha = elapsed / (1000 * Menu[name].transition);
         gpctx.fillStyle = Menu[name].bgCol;
         gpctx.fillRect(0, 0, Global.BOARD_WIDTH, Global.BOARD_HEIGHT);
-        console.log(elapsed);
     
         Object.keys(Menu[name].content).forEach((v) => {
             if (v === "bgCol") return;
@@ -80,7 +78,6 @@ function loadMenu(name) {
         if (Menu[name].transition !== 0 && elapsed / (1000 * Menu[name].transition) < 1) {
             requestAnimationFrame(render);
         } else {
-            cancelAnimationFrame(nextTick);
             gpctx.globalAlpha = 1;
         }
     }
@@ -157,8 +154,6 @@ function draw() {
         if (spriteImages.enemy.hasOwnProperty(`${i.type}Wings${i.wingState}`))
             gpctx.drawImage(spriteImages.enemy[`${i.type}Wings${i.wingState}`], Math.floor(i.x - spriteImages.enemy[`${i.type}Wings${i.wingState}`].width / 2), Math.floor(i.y - spriteImages.enemy[`${i.type}Wings${i.wingState}`].height / 2));
     }
-
-    // render menu!! yippee!!
 }
 
 function drawUI() {
@@ -209,9 +204,8 @@ function tick(ms) {
 
     if (!Global.paused) {
         bgScroll += bgScrollRate * timeElapsed / 1000;
-        if (bgScroll >= Global.BOARD_HEIGHT) {
-            bgScroll = 0;
-        }
+        if (bgScroll >= Global.BOARD_HEIGHT) bgScroll = 0;
+
         Player.tick(timeElapsed);
         for (const i of Bullets.playerBullets) {
             i.tick(timeElapsed);
@@ -220,6 +214,9 @@ function tick(ms) {
             i.tick(timeElapsed);
         }
         for (const i of Enemy.enemies) {
+            i.tick(timeElapsed);
+        }
+        for (const i of Pattern.patterns) {
             i.tick(timeElapsed);
         }
         for (const i of Pickup.pickups) {
@@ -236,11 +233,12 @@ function tick(ms) {
         addEventListener("keydown", retryKeyDown);
     } else if (Global.gameWon) {
         loadMenu("win");
+    } else {
+        nextTick = requestAnimationFrame(tick);
     }
-    nextTick = requestAnimationFrame(tick);
 }
 
-function initEventListeners() {
+function initGame() {
     addEventListener("keydown", Player.keydown);
     addEventListener("keyup", Player.keyup);
     addEventListener("game_statupdate", drawUI);
@@ -254,7 +252,6 @@ function initEventListeners() {
             //bgm.play();
         }
     });
-    // func could use better name (also draws UI and starts music)
     drawUI();
     //bgm.play();
     //bgm.volume = 0.1;
@@ -290,7 +287,6 @@ function load() {
     //addEventListener("click", fullscreen);
 
     console.log(`${performance.measure("loadtime").duration.toFixed(1)}ms load time`);
-    //requestAnimationFrame(tick);
     addEventListener("keydown", keydown);
 }
 

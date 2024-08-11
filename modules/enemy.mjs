@@ -18,6 +18,7 @@ class Enemy {
         this.velX = 0;
         this.velY = 0;
         this.hp = hp;
+        this.maxHp = hp;
         this.screenTime = screenTime;
         this.patterns = patterns;
         this.script = script;
@@ -199,14 +200,14 @@ class Enemy {
     }
     basicFire() {
         this.shotCooldown = this.shotRate + (Math.random() * 2 - 1) * this.variance;
-        Pattern.patterns[randomPattern(this.patterns)](this);
+        Pattern.makePattern(this, randomPattern(this.patterns));
     }
     fireSpecificNoCooldown(pattern) {
-        Pattern.patterns[pattern](this);
+        Pattern.makePattern(this, pattern);
     }
     fireSpecific(pattern) {
         this.shotCooldown = this.shotRate + (Math.random() * 2 - 1) * this.variance;
-        Pattern.patterns[pattern](this);
+        Pattern.makePattern(this, pattern);
     }
     basicDash(direction, vel) {
         const vec = getVel(vel, direction);
@@ -291,7 +292,7 @@ const types = {
         moveRate: 18000,
         wingRate: 30,
         useRotation: false,
-        patterns: ["singleAimedVariantShot"],
+        patterns: ["singleAimedInaccurateShot"],
         script: (enemy, ms) => {
             const DECELERATION = 0.9;
             const DASH_VEL = 500;
@@ -330,7 +331,7 @@ const types = {
         moveRate: 1500,
         wingRate: 30,
         useRotation: false,
-        patterns: ["basicSpread", "shortVeryVariantTracker"],
+        patterns: ["basicSpread", "shortVInaccurateTracker"],
         script: (enemy, ms) => {
             const DECELERATION = 0.9; // maybe these can be moved out as an object property
             const DASH_VEL = 500; // investigate later
@@ -581,7 +582,7 @@ const types = {
             const INITIAL_DASH_VEL = 800;
             const DASH_VEL = 600;
             const THRESHOLD = 70;
-            const phase = enemy.hp > 2000 ? 1 : 2;
+            const phase = enemy.hp > enemy.maxHp/2 ? 1 : 2;
             const phasePatterns = [
                 [0, 1, 3, 4],
                 [5, 6, 7]
@@ -614,17 +615,11 @@ const types = {
         }
     }
 };
-// note to self:
-/*
-make like multiple variants of each enemy to add variety without needing more spritework
-(harder attacks, faster, whatever)
-*/
 
 function makeEnemy(x, y, type, waveId) {
     new Enemy(x, y,
         types[type].size, types[type].score, types[type].hp, types[type].screenTime, types[type].patterns, types[type].script,
         waveId, type, types[type].shotRate, types[type].moveRate, types[type].wingRate, types[type].useRotation);
-    //pickDespawnPoint(x, y); why is this here???
 }
 
 export { enemies, types, makeEnemy };

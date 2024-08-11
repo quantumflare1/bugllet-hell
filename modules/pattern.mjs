@@ -2,317 +2,381 @@ import * as Bullets from "./bullets.mjs";
 import * as Enemy from "./enemy.mjs";
 import * as Player from "./player.mjs";
 
-// todo: pausing currently fucks up all patterns that rely on a delay
-const patterns = {
-    singleAimedShot(enemy) {
-        const angle = aimAtPlayer(enemy.x, enemy.y);
-        Bullets.makeBullet("basic", enemy.x, enemy.y, angle, 8);
-    },
-    singleAimedBigShot(enemy) {
-        const angle = aimAtPlayer(enemy.x, enemy.y);
-        Bullets.makeBullet("massive", enemy.x, enemy.y, angle, 1);
-    },
-    singleAimedVariantShot(enemy) {
-        const angle = aimAtPlayer(enemy.x, enemy.y) + Math.random() * 0.1 - 0.05;
-        Bullets.makeBullet("basic", enemy.x, enemy.y, angle, 8);
-    },
-    basicSpread(enemy) {
-        const angle = aimAtPlayer(enemy.x, enemy.y);
-        Bullets.makeBullet("basic", enemy.x, enemy.y, angle, 2);
-        Bullets.makeBullet("basic", enemy.x, enemy.y, angle + 0.2, 2);
-        Bullets.makeBullet("basic", enemy.x, enemy.y, angle - 0.2, 2);
-    
-        setTimeout(() => {
-            if (Enemy.enemies.has(enemy)) {
-                Bullets.makeBullet("basic", enemy.x, enemy.y, angle + 0.1, 2);
-                Bullets.makeBullet("basic", enemy.x, enemy.y, angle - 0.1, 2);
-            }
-        }, 250);
-    },
-    machineGunFire(enemy) {
-        let bulletsShot = 0;
-        const interval = setInterval(() => {
-            bulletsShot++;
-    
-            Bullets.makeBullet("small", enemy.x, enemy.y, aimAtPlayer(enemy.x, enemy.y) + Math.random() * 0.4 - 0.2, 0);
-    
-            if (bulletsShot >= 16 || !Enemy.enemies.has(enemy)) {
-                clearInterval(interval);
-            }
-        }, 70);
-    },
-    expandingMachineGunFire(enemy) {
-        let bulletsShot = 0;
-        const interval = setInterval(() => {
-            bulletsShot++;
-    
-            Bullets.makeBullet("grow1", enemy.x, enemy.y, aimAtPlayer(enemy.x, enemy.y) + Math.random() * 0.3 - 0.15, 0);
-    
-            if (bulletsShot >= 10 || !Enemy.enemies.has(enemy)) {
-                clearInterval(interval);
-            }
-        }, 70);
-    },
-    dartTriangle(enemy) {
-        const angle = aimAtPlayer(enemy.x, enemy.y);
-        Bullets.makeBullet("dart", enemy.x, enemy.y, angle, 2);
-        const instantX = enemy.x;
-        const instantY = enemy.y;
-    
-        const spreadFactor = 12;
-        setTimeout(() => {
-            if (Enemy.enemies.has(enemy)) {
-                Bullets.makeBullet("dart", instantX + Math.sin(angle) * spreadFactor, instantY - Math.cos(angle) * spreadFactor, angle, 4);
-                Bullets.makeBullet("dart", instantX - Math.sin(angle) * spreadFactor, instantY + Math.cos(angle) * spreadFactor, angle, 4);
-            }
-        }, 80);
-    
-        setTimeout(() => {
-            if (Enemy.enemies.has(enemy)) {
-                Bullets.makeBullet("dart", instantX + Math.sin(angle) * spreadFactor * 2, instantY - Math.cos(angle) * spreadFactor * 2, angle, 5);
-                Bullets.makeBullet("dart", instantX, instantY, angle, 5);
-                Bullets.makeBullet("dart", instantX - Math.sin(angle) * spreadFactor * 2, instantY + Math.cos(angle) * spreadFactor * 2, angle, 5);
-            }
-        }, 160);
-    
-        setTimeout(() => {
-            if (Enemy.enemies.has(enemy)) {
-                Bullets.makeBullet("dart", instantX + Math.sin(angle) * spreadFactor * 3, instantY - Math.cos(angle) * spreadFactor * 3, angle, 8);
-                Bullets.makeBullet("dart", instantX + Math.sin(angle) * spreadFactor, instantY - Math.cos(angle) * spreadFactor, angle, 8);
-                Bullets.makeBullet("dart", instantX - Math.sin(angle) * spreadFactor, instantY + Math.cos(angle) * spreadFactor, angle, 8);
-                Bullets.makeBullet("dart", instantX - Math.sin(angle) * spreadFactor * 3, instantY + Math.cos(angle) * spreadFactor * 3, angle, 8);
-            }
-        }, 240);
-    },
-    basicTracker(enemy) {
-        let bulletsShot = 0;
-        const interval = setInterval(() => {
-            bulletsShot++;
-    
-            Bullets.makeBullet("basic", enemy.x, enemy.y, aimAtPlayer(enemy.x, enemy.y), 7);
-    
-            if (bulletsShot >= 10 || !Enemy.enemies.has(enemy)) {
-                clearInterval(interval);
-            }
-        }, 120);
-    },
-    shortVeryVariantTracker(enemy) {
-        let bulletsShot = 0;
-        const interval = setInterval(() => {
-            bulletsShot++;
-    
-            Bullets.makeBullet("basic", enemy.x, enemy.y, aimAtPlayer(enemy.x, enemy.y) + Math.random() * 0.3 - 0.15, 7);
-    
-            if (bulletsShot >= 4 || !Enemy.enemies.has(enemy)) {
-                clearInterval(interval);
-            }
-        }, 100);
-    },
-    basicRadial(enemy) {
-        const NUM_BULLETS = 20;
-        for (let i = 0; i < NUM_BULLETS; i++) {
-            Bullets.makeBullet("basic", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS, 2);
+const patterns = new Set();
+const TAU = Math.PI * 2;
+
+class Pattern {
+    constructor(parent, script, lastWave) {
+        this.parent = parent;
+        this.script = script;
+        this.lifetime = 0;
+        this.lastWave = lastWave;
+        this.wave = 0;
+        this.persistent = [];
+
+        patterns.add(this);
+    }
+    tick(ms) {
+        this.lifetime += ms;
+        if (this.wave > this.lastWave || !Enemy.enemies.has(this.parent)) patterns.delete(this);
+        
+        this.script(this);
+    }
+}
+
+const types = {
+    singleAimedShot: {
+        lastWave: 0,
+        script: (pat) => {
+            const angle = aimAtPlayer(pat.parent.x, pat.parent.y);
+            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle, 8);
+            pat.wave++;
         }
     },
-    sparseDoubleRadial(enemy) {
-        const NUM_BULLETS = 12;
-        for (let i = 0; i < NUM_BULLETS; i++) {
-            Bullets.makeBullet("basic", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS, 2);
+    singleAimedBigShot: {
+        lastWave: 0,
+        script: (pat) => {
+            const angle = aimAtPlayer(pat.parent.x, pat.parent.y);
+            Bullets.makeBullet("massive", pat.parent.x, pat.parent.y, angle, 5);
+            pat.wave++;
         }
-        setTimeout(() => {
-            if (Enemy.enemies.has(enemy)) {
+    },
+    singleAimedInaccurateShot: {
+        lastWave: 0,
+        script: (pat) => {
+            const angle = aimAtPlayer(pat.parent.x, pat.parent.y);
+            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle, 2);
+            pat.wave++;
+        }
+    },
+    basicSpread: {
+        lastWave: 1,
+        script: (pat) => {
+            switch (pat.wave) {
+                case 0:
+                    const angle = aimAtPlayer(pat.parent.x, pat.parent.y);
+                    Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle, 2);
+                    Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle + 0.2, 2);
+                    Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle - 0.2, 2);
+                    pat.wave++;
+                    break;
+                case 1:
+                    if (pat.lifetime >= 250) {
+                        const angle = aimAtPlayer(pat.parent.x, pat.parent.y);
+                        Bullets.makeBullet("basic", this.parent.x, this.parent.y, angle + 0.1, 2);
+                        Bullets.makeBullet("basic", this.parent.x, this.parent.y, angle - 0.1, 2);
+                        pat.wave++;
+                    }
+                    break;
+            }
+        }
+    },
+    machineGunFire: {
+        lastWave: 15,
+        script: (pat) => {
+            if (pat.lifetime > pat.wave * 70) {
+                pat.wave++;
+                Bullets.makeBullet("small", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y) + Math.random() * 0.4 - 0.2, randBulletStyle(5, 4));
+            }
+        }
+    },
+    expandingMachineGunFire: {
+        lastWave: 9,
+        script: (pat) => {
+            if (pat.lifetime > pat.wave * 70) {
+                pat.wave++;
+                Bullets.makeBullet("grow1", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y) + Math.random() * 0.3 - 0.15, randBulletStyle(7, 3));
+            }
+        }
+    },
+    dartTriangle: {
+        lastWave: 3,
+        script: (pat) => {
+            const spread = 12;
+            switch (pat.wave) {
+                case 0:
+                    pat.persistent[0] = pat.parent.x; // initial firing location
+                    pat.persistent[1] = pat.parent.y;
+                    pat.persistent[2] = aimAtPlayer(pat.parent.x, pat.parent.y); // angle
+                    Bullets.makeBullet("dart", pat.persistent[0], pat.persistent[1], pat.persistent[2], 2);
+                    pat.wave++;
+                    break;
+                case 1:
+                    if (pat.lifetime >= 80) {
+                        const xOffset = Math.sin(pat.persistent[2]);
+                        const yOffset = Math.cos(pat.persistent[2]);
+                        Bullets.makeBullet("dart", pat.persistent[0] + xOffset * spread, pat.persistent[1] - yOffset * spread, pat.persistent[2], 3);
+                        Bullets.makeBullet("dart", pat.persistent[0] - xOffset * spread, pat.persistent[1] + yOffset * spread, pat.persistent[2], 3);
+                        pat.wave++;
+                    }
+                    break;
+                case 2:
+                    if (pat.lifetime >= 160) {
+                        const xOffset = Math.sin(pat.persistent[2]);
+                        const yOffset = Math.cos(pat.persistent[2]);
+                        Bullets.makeBullet("dart", pat.persistent[0] + xOffset * spread * 2, pat.persistent[1] - yOffset * spread * 2, pat.persistent[2], 4);
+                        Bullets.makeBullet("dart", pat.persistent[0], pat.persistent[1], pat.persistent[2], 4);
+                        Bullets.makeBullet("dart", pat.persistent[0] - xOffset * spread * 2, pat.persistent[1] + yOffset * spread * 2, pat.persistent[2], 4);
+                        pat.wave++;
+                    }
+                    break;
+                case 3:
+                    if (pat.lifetime >= 240) {
+                        const xOffset = Math.sin(pat.persistent[2]);
+                        const yOffset = Math.cos(pat.persistent[2]);
+                        Bullets.makeBullet("dart", pat.persistent[0] + xOffset * spread * 3, pat.persistent[1] - yOffset * spread * 3, pat.persistent[2], 5);
+                        Bullets.makeBullet("dart", pat.persistent[0] + xOffset * spread, pat.persistent[1] - yOffset * spread, pat.persistent[2], 5);
+                        Bullets.makeBullet("dart", pat.persistent[0] - xOffset * spread, pat.persistent[1] + yOffset * spread, pat.persistent[2], 5);
+                        Bullets.makeBullet("dart", pat.persistent[0] - xOffset * spread * 3, pat.persistent[1] + yOffset * spread * 3, pat.persistent[2], 5);
+                        pat.wave++;
+                    }
+                    break;
+            }
+        }
+    },
+    basicTracker: {
+        lastWave: 9,
+        script: (pat) => {
+            if (pat.lifetime > pat.wave * 120) {
+                pat.wave++;
+                Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y), randBulletStyle(7, 2));
+            }
+        }
+    },
+    shortVInaccurateTracker: {
+        lastWave: 4,
+        script: (pat) => {
+            if (pat.lifetime > pat.wave * 100) {
+                pat.wave++;
+                Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y) * 0.3 - 0.15, randBulletStyle(6, 3));
+            }
+        }
+    },
+    basicRadial: {
+        lastWave: 0,
+        script: (pat) => {
+            const NUM_BULLETS = 20;
+            const style = randBulletStyle(2, 8);
+            for (let i = 0; i < NUM_BULLETS; i++)
+                Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS, style);
+            pat.wave++;
+        }
+    },
+    sparseDoubleRadial: {
+        lastWave: 1,
+        script: (pat) => {
+            const NUM_BULLETS = 12;
+            switch (pat.wave) {
+                case 0:
+                    pat.persistent[0] = randBulletStyle(0, 4);
+                    for (let i = 0; i < NUM_BULLETS; i++)
+                        Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS, pat.persistent[0]);
+                    pat.wave++;
+                    break;
+                case 1:
+                    if (pat.lifetime > 300) {
+                        for (let i = 0; i < NUM_BULLETS; i++)
+                            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS - Math.PI / NUM_BULLETS, pat.persistent[0]);
+                        pat.wave++;
+                    }
+                    break;
+            }
+        }
+    },
+    basicTrail: {
+        lastWave: 0,
+        script: (pat) => {
+            const vel = Math.sqrt(pat.parent.velX ** 2 + pat.parent.velY ** 2);
+            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimWithEnemy(pat.parent.velX, pat.parent.velY), 3, vel * 0.3);
+            pat.wave++;
+        }
+    },
+    basicForward: {
+        lastWave: 0,
+        script: (pat) => {
+            const vel = Math.sqrt(pat.parent.velX ** 2 + pat.parent.velY ** 2);
+            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimWithEnemy(pat.parent.velX, pat.parent.velY), randBulletStyle(5, 3), vel + Bullets.types.basic.vel);
+            pat.wave++;
+        }
+    },
+    basicRay: {
+        lastWave: 0,
+        script: (pat) => {
+            const style = randBulletStyle(1, 4);
+            for (let i = 0; i < 5; i++)
+                Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y), style, 420 - 70 * i);
+            pat.wave++;
+        }
+    },
+    smallDartRay: {
+        lastWave: 0,
+        script: (pat) => {
+            const style = randBulletStyle(1, 4);
+            for (let i = 0; i < 3; i++)
+                Bullets.makeBullet("dart", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y), style, 360 - 100 * i);
+            pat.wave++;
+        }
+    },
+    doubleSmallDartRay: {
+        lastWave: 1,
+        script: (pat) => {
+            switch (pat.wave) {
+                case 0:
+                    pat.persistent[0] = randBulletStyle(1, 4); // style
+                    for (let i = 0; i < 3; i++)
+                        Bullets.makeBullet("dart", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y), pat.persistent[0], 360 - 100 * i);
+                    pat.wave++;
+                    break;
+                case 1:
+                    if (pat.lifetime > 800) {
+                        for (let i = 0; i < 3; i++)
+                            Bullets.makeBullet("dart", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y), pat.persistent[0], 360 - 100 * i);
+                        pat.wave++;
+                    }
+                    break;
+            }
+        }
+    },
+    erraticBurst: {
+        lastWave: 0,
+        script: (pat) => {
+            const angle = aimAtPlayer(pat.parent.x, pat.parent.y);
+
+            for (let i = 0; i < 2; i++) {
+                const deviation = (Math.random() * Math.PI / 6) - Math.PI / 12;
+                Bullets.makeBullet("massive", pat.parent.x, pat.parent.y, angle + deviation, randBulletStyle(0, 10));
+            }
+            for (let i = 0; i < 4; i++) {
+                const deviation = (Math.random() * Math.PI / 6) - Math.PI / 12;
+                Bullets.makeBullet("large", pat.parent.x, pat.parent.y, angle + deviation, randBulletStyle(0, 10));
+            }
+            for (let i = 0; i < 4; i++) {
+                const deviation = (Math.random() * Math.PI / 6) - Math.PI / 12;
+                Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle + deviation, randBulletStyle(0, 10));
+            }
+            pat.wave++;
+        }
+    },
+    clusterRadial: {
+        lastWave: 0,
+        script: (pat) => {
+            const NUM_BULLETS = 14;
+            const offset = Math.random() * TAU;
+            for (let i = 0; i < NUM_BULLETS; i++)
+                Bullets.makeBullet("burst", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS + offset, randBulletStyle(0, 10));
+            pat.wave++;
+        }
+    },
+    recursiveClusterRadial: {
+        lastWave: 4,
+        script: (pat) => {
+            if (pat.lifetime > pat.wave * 100) {
+                pat.wave++;
+                const NUM_BULLETS = 5;
+                const offset = Math.random() * TAU;
+
+                for (let i = 0; i < NUM_BULLETS; i++)
+                    Bullets.makeBullet("burst1", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS + offset, randBulletStyle(0, 10));
+            }
+        }
+    },
+    bigSmallRadial: {
+        lastWave: 1,
+        script: (pat) => {
+            const NUM_BULLETS = 25;
+            switch (pat.wave) {
+                case 0:
+                    for (let i = 0; i < NUM_BULLETS; i++)
+                        Bullets.makeBullet("massive", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS, 8);
+                    pat.wave++;
+                    break;
+                case 1:
+                    if (pat.lifetime > 300) {
+                        for (let i = 0; i < NUM_BULLETS; i++)
+                            Bullets.makeBullet("large", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS - Math.PI / NUM_BULLETS, 7, 230);
+                        pat.wave++;
+                    }
+                    break;
+            }
+        }
+    },
+    bigSmallRadialWave: {
+        lastWave: 3,
+        script: (pat) => {
+            const NUM_BULLETS = 20;
+            if (pat.lifetime > pat.wave * 400) {
+                pat.wave++;
                 for (let i = 0; i < NUM_BULLETS; i++) {
-                    Bullets.makeBullet("basic", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS - Math.PI * 2 / (NUM_BULLETS * 2), 2);
+                    Bullets.makeBullet("massive", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS + (pat.wave / 12) * TAU, 1);
+                    Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS - Math.PI / NUM_BULLETS + (pat.wave / 12) * TAU, 0, 230);
                 }
             }
-        }, 300);
-    },
-    basicTrail(enemy) {
-        const vel = Math.sqrt(enemy.velX ** 2 + enemy.velY ** 2);
-        Bullets.makeBullet("basic", enemy.x, enemy.y, aimWithEnemy(enemy.velX, enemy.velY), 3, vel * 0.3);
-    },
-    basicForward(enemy) {
-        const vel = Math.sqrt(enemy.velX ** 2 + enemy.velY ** 2);
-        Bullets.makeBullet("basic", enemy.x, enemy.y, aimWithEnemy(enemy.velX, enemy.velY), 6, vel + Bullets.types.basic.vel);
-    },
-    basicRay(enemy) {
-        Bullets.makeBullet("basic", enemy.x, enemy.y, aimAtPlayer(enemy.x, enemy.y), 1, 450);
-        Bullets.makeBullet("basic", enemy.x, enemy.y, aimAtPlayer(enemy.x, enemy.y), 1, 360);
-        Bullets.makeBullet("basic", enemy.x, enemy.y, aimAtPlayer(enemy.x, enemy.y), 1, 270);
-        Bullets.makeBullet("basic", enemy.x, enemy.y, aimAtPlayer(enemy.x, enemy.y), 1, 180);
-        Bullets.makeBullet("basic", enemy.x, enemy.y, aimAtPlayer(enemy.x, enemy.y), 1, 90);
-    },
-    smallDartRay(enemy) {
-        Bullets.makeBullet("dart", enemy.x, enemy.y, aimAtPlayer(enemy.x, enemy.y), 1, 330);
-        Bullets.makeBullet("dart", enemy.x, enemy.y, aimAtPlayer(enemy.x, enemy.y), 1, 220);
-        Bullets.makeBullet("dart", enemy.x, enemy.y, aimAtPlayer(enemy.x, enemy.y), 1, 110);
-    },
-    doubleSmallDartRay(enemy) {
-        this.smallDartRay(enemy);
-        setTimeout(() => {
-            if (Enemy.enemies.has(enemy))
-                this.smallDartRay(enemy);
-        }, 800);
-    },
-    erraticBurst(enemy) {
-        const NUM_MASSIVE = 2;
-        const NUM_LARGE = 4;
-        const NUM_MEDIUM = 4;
-    
-        const angle = aimAtPlayer(enemy.x, enemy.y);
-    
-        for (let i = 0; i < NUM_MASSIVE; i++) {
-            //const randVel = (Math.random() * 100) + Bullets.types.massive.vel - 50;
-            const deviation = (Math.random() * Math.PI / 6) - Math.PI / 12;
-            Bullets.makeBullet("massive", enemy.x, enemy.y, angle + deviation, 1);
-        }
-        for (let i = 0; i < NUM_LARGE; i++) {
-            //const randVel = (Math.random() * 100) + Bullets.types.large.vel - 50;
-            const deviation = (Math.random() * Math.PI / 6) - Math.PI / 12;
-            Bullets.makeBullet("large", enemy.x, enemy.y, angle + deviation, 1);
-        }
-        for (let i = 0; i < NUM_MEDIUM; i++) {
-            //const randVel = (Math.random() * 100) + Bullets.types.basic.vel - 50;
-            const deviation = (Math.random() * Math.PI / 6) - Math.PI / 12;
-            Bullets.makeBullet("basic", enemy.x, enemy.y, angle + deviation, 1);
         }
     },
-    clusterRadial(enemy) {
-        const NUM_BULLETS = 16;
-        for (let i = 0; i < NUM_BULLETS; i++) {
-            Bullets.makeBullet("burst", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS, 1);
-        }
-    },
-    recursiveClusterRadial(enemy) {
-        const NUM_BULLETS = 6;
-        let wavesShot = 0;
-
-        const interval = setInterval(() => {
-            wavesShot++;
-    
-            for (let i = 0; i < NUM_BULLETS; i++) {
-                Bullets.makeBullet("burst1", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS + (wavesShot / 8) * 2 * Math.PI, 1);
+    longRadialWave: {
+        lastWave: 26,
+        script: (pat) => {
+            const NUM_BULLETS = 12;
+            if (pat.wave === 0) {
+                pat.persistent[0] = Math.random() > 0.5 ? 1 : -1; // spin direction
+                pat.persistent[1] = randBulletStyle(5, 3); // style
             }
-            if (wavesShot >= 4 || !Enemy.enemies.has(enemy)) {
-                clearInterval(interval);
+            if (pat.lifetime > pat.wave * 90) {
+                pat.wave++;
+                for (let i = 0; i < NUM_BULLETS; i++)
+                    Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, ((i * TAU) / NUM_BULLETS + (pat.wave / 27) * TAU) * pat.persistent[0], pat.persistent[1]);
             }
-        }, 100);
-    },
-    bigSmallRadial(enemy) {
-        const NUM_BULLETS = 25;
-        for (let i = 0; i < NUM_BULLETS; i++) {
-            Bullets.makeBullet("massive", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS, 8);
         }
-
-        setTimeout(() => {
-            if (Enemy.enemies.has(enemy)) {
-                for (let i = 0; i < NUM_BULLETS; i++) {
-                    Bullets.makeBullet("basic", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS - Math.PI * 2 / (NUM_BULLETS * 2), 7, 230);
+    },
+    slowSpiralRadialWave: {
+        lastWave: 20,
+        script: (pat) => {
+            const NUM_BULLETS = 12;
+            if (pat.wave === 0) pat.persistent[0] = randBulletStyle(2, 3); // style
+            if (pat.lifetime > pat.wave * 100) {
+                pat.wave++;
+                for (let i = 0; i < NUM_BULLETS; i++)
+                    Bullets.makeBullet("slowSpiral", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS + pat.parent.rotation + pat.wave, pat.persistent[0]);
+            }
+        }
+    },
+    variantRadialWave: {
+        lastWave: 19,
+        script: (pat) => {
+            const NUM_BULLETS = 18;
+            if (pat.lifetime > pat.wave * 50) {
+                pat.wave++;
+                pat.parent.rotation += Math.random() * 0.2 + 0.6;
+                for (let i = 0; i < NUM_BULLETS; i++)
+                    Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS + pat.parent.rotation, 5);
+            }
+        }
+    },
+    spiralDouble: {
+        lastWave: 1,
+        script: (pat) => {
+            switch (pat.wave) {
+                case 0:
+                    const angle = aimAtPlayer(pat.parent.x, pat.parent.y); // angle
+                    Bullets.makeBullet("spiral", pat.parent.x, pat.parent.y, angle, 6);
+                    pat.wave++;
+                    break;
+                case 1:
+                    if (pat.lifetime > 500) {
+                        const angle = aimAtPlayer(pat.parent.x, pat.parent.y);
+                        Bullets.makeBullet("spiral", pat.parent.x, pat.parent.y, angle, 6);
+                        pat.wave++;
+                    }
+                    break;
                 }
-            }
-        }, 300);
-    },
-    bigSmallRadialWave(enemy) {
-        const NUM_BULLETS = 20;
-        let wavesShot = 0;
-
-        const interval = setInterval(() => {
-            wavesShot++;
-            if (Enemy.enemies.has(enemy)) {
-                for (let i = 0; i < NUM_BULLETS; i++) {
-                    Bullets.makeBullet("massive", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS + (wavesShot / 12) * 2 * Math.PI, 1);
-                }
-                for (let i = 0; i < NUM_BULLETS; i++) {
-                    Bullets.makeBullet("basic", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS - Math.PI * 2 / (NUM_BULLETS * 2) + (wavesShot / 12) * 2 * Math.PI, 0, 230);
-                }
-            }
-            if (wavesShot >= 4 || !Enemy.enemies.has(enemy)) {
-                clearInterval(interval);
-            }
-        }, 400);
-    },
-    longRadialWave(enemy) {
-        let wavesShot = 0;
-        const NUM_BULLETS = 12;
-        const rotationDir = Math.random() > 0.5 ? 1 : -1;
-        const interval = setInterval(() => {
-            wavesShot++;
-    
-            for (let i = 0; i < NUM_BULLETS; i++) {
-                Bullets.makeBullet("basic", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS + (wavesShot / 27) * 2 * Math.PI * rotationDir, 5);
-            }
-            if (wavesShot >= 30 || !Enemy.enemies.has(enemy)) {
-                clearInterval(interval);
-            }
-        }, 80);
-    },
-    slowSpiralRadialWave(enemy) {
-        let wavesShot = 0;
-        const NUM_BULLETS = 12;
-        const interval = setInterval(() => {
-            wavesShot++;
-
-            for (let i = 0; i < NUM_BULLETS; i++) {
-                Bullets.makeBullet("slowSpiral", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS + enemy.rotation + wavesShot, 4);
-            }
-            if (wavesShot >= 20 || !Enemy.enemies.has(enemy)) {
-                clearInterval(interval);
-            }
-        }, 100);
-    },
-    // broken
-    reverseRadialWave(enemy) {
-        let wavesShot = 0;
-        const NUM_BULLETS = 16;
-        const interval = setInterval(() => {
-            wavesShot++;
-
-            const angle = (i * Math.PI * 2) / NUM_BULLETS;
-            for (let i = 0; i < NUM_BULLETS; i++) {
-                Bullets.makeBullet("basic", enemy.x * Math.cos(angle) * -500 /* placeholder number */, enemy.y * Math.sin(angle) * -500, (i * Math.PI * 2) / NUM_BULLETS, 5);
-            }
-            if (wavesShot >= 20 || !Enemy.enemies.has(enemy)) {
-                clearInterval(interval);
-            }
-        }, 100);
-    },
-    variantRadialWave(enemy) {
-        let wavesShot = 0;
-        const NUM_BULLETS = 15;
-        const interval = setInterval(() => {
-            wavesShot++;
-
-            enemy.rotation += Math.random() * 0.2 + 0.6;
-            for (let i = 0; i < NUM_BULLETS; i++) {
-                Bullets.makeBullet("basic", enemy.x, enemy.y, (i * Math.PI * 2) / NUM_BULLETS + enemy.rotation, 5);
-            }
-            if (wavesShot >= 20 || !Enemy.enemies.has(enemy)) {
-                clearInterval(interval);
-            }
-        }, 50);
-    },
-    // broken
-    basicHomingShot(enemy) {
-        const spreadFactor = 14;
-        const angle = aimAtPlayer(enemy.x, enemy.y);
-        Bullets.makeBullet("homing", enemy.x + Math.sin(angle) * spreadFactor * 2, enemy.y - Math.cos(angle) * spreadFactor, angle, 9);
-        Bullets.makeBullet("homing", enemy.x + Math.sin(angle) * spreadFactor, enemy.y - Math.cos(angle) * spreadFactor * 2, angle, 9);
-        Bullets.makeBullet("homing", enemy.x, enemy.y, angle, 5);
-        Bullets.makeBullet("homing", enemy.x - Math.sin(angle) * spreadFactor, enemy.y + Math.cos(angle) * spreadFactor, angle, 9);
-        Bullets.makeBullet("homing", enemy.x - Math.sin(angle) * spreadFactor * 2, enemy.y - Math.cos(angle) * spreadFactor * 2, angle, 9);
-    },
-    spiralDouble(enemy) {
-        const angle = aimAtPlayer(enemy.x, enemy.y);
-        Bullets.makeBullet("spiral", enemy.x, enemy.y, angle, 6);
-    
-        setTimeout(() => {
-            if (Enemy.enemies.has(enemy)) {
-                const angle = aimAtPlayer(enemy.x, enemy.y);
-                Bullets.makeBullet("spiral", enemy.x, enemy.y, angle, 6);
-            }
-        }, 500);
+        }
     }
 };
+// note to self for later: also rewrite menu system
+
+function randBulletStyle(lower, range) {
+    return (Math.floor(Math.random() * range) + lower) % 10;
+}
 
 function aimAtPlayer(x, y) {
     if (Player.y - y < 0) {
@@ -330,4 +394,9 @@ function aimWithEnemy(velX, velY) {
     }
 }
 
-export { patterns };
+function makePattern(parent, type) {
+    new Pattern(parent, types[type].script, types[type].lastWave);
+}
+
+// recall: patterns is the set of patterns, types is the object of pattern data (old patterns)
+export { patterns, makePattern };
