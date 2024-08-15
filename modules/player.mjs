@@ -49,8 +49,8 @@ function keydown(e = new KeyboardEvent()) {
             movingRight = true;
             break;
         case "shift":
-            moveSpeed = BASE_FOCUS * (isFiring? SHOOTING_MOVEMENT_PENALTY : 1);
             focused = true;
+            setSpeed();
             break;
         case "x":
             if (!Global.paused && !Global.gameOver)
@@ -58,7 +58,7 @@ function keydown(e = new KeyboardEvent()) {
             break;
         case "z":
             isFiring = true;
-            moveSpeed *= SHOOTING_MOVEMENT_PENALTY;
+            setSpeed();
             break;/*
         case "\\":
             lives++;
@@ -83,14 +83,18 @@ function keyup(e = new KeyboardEvent()) {
             break;
         case "Shift":
             focused = false;
-            moveSpeed = BASE_MOVEMENT * (isFiring? SHOOTING_MOVEMENT_PENALTY : 1);
+            setSpeed();
             break;
         case "Z":
         case "z":
             isFiring = false;
-            moveSpeed /= SHOOTING_MOVEMENT_PENALTY;
+            setSpeed();
             break;
     }
+}
+
+function setSpeed() {
+    moveSpeed = (focused? BASE_FOCUS : BASE_MOVEMENT) * (isFiring? SHOOTING_MOVEMENT_PENALTY : 1);
 }
 
 function powerUp(pow) {

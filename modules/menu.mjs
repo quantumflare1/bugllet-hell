@@ -5,6 +5,8 @@ const startMenu = {
     transition: 0,
     content: {
         // todo: maybe stick these all in an array named "labels" or something
+        // yeah and then have an array of scripts that are linked to specific actions
+        // track things like positions??? idfk
         fireTutorial: { // these can actually be named literally anything
             "label": ["Z to fire", 40, 60, 2]
         },

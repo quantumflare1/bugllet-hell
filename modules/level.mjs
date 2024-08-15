@@ -6,11 +6,12 @@ function randomEnemy(arr) {
 }
 
 class Wave {
-    constructor(delay, enemies, positions) {
+    constructor(delay, enemies, positions, boss = false) {
         this.delay = delay;
         this.enemiesLeft = enemies.length;
         this.enemies = enemies;
         this.positions = positions;
+        this.boss = boss;
     }
     generate(waveNum) {
         for (let i = 0; i < this.enemies.length; i++) {
@@ -43,7 +44,7 @@ const waves = [
     ]),
     new Wave(22000, ["princessBee"], [
         { x: 440, y: -10 }
-    ])
+    ], true)
 ];
 let nextWave, levelTime, waveTime, transitionTime;
 
@@ -56,6 +57,11 @@ function tick(ms) {
         if (transitionTime > 1000) {
             nextWave++;
             waveTime = 0;
+            
+            if (waves[nextWave-1].boss) 
+                for (const i of Enemy.enemies)
+                    i.lifetime = i.screenTime; // immediately force all enemies to despawn
+
             waves[nextWave-1].generate(nextWave-1);
             transitionTime = 0;
         }
