@@ -2,8 +2,9 @@ import * as Bullets from "./bullets.mjs";
 import * as Global from "./global.mjs";
 import * as Pickup from "./pickup.mjs";
 
-const BASE_MOVEMENT = 280;
-const BASE_FOCUS = 145;
+const BASE_MOVEMENT = 400;
+const BASE_FOCUS = 210;
+const SHOOTING_MOVEMENT_PENALTY = 0.7;
 const BORDER_SIZE = 20;
 const WINGBEATS_PER_SECOND = 20;
 const BLINKS_PER_SECOND = 15;
@@ -48,7 +49,7 @@ function keydown(e = new KeyboardEvent()) {
             movingRight = true;
             break;
         case "shift":
-            moveSpeed = BASE_FOCUS;
+            moveSpeed = BASE_FOCUS * (isFiring? SHOOTING_MOVEMENT_PENALTY : 1);
             focused = true;
             break;
         case "x":
@@ -57,6 +58,7 @@ function keydown(e = new KeyboardEvent()) {
             break;
         case "z":
             isFiring = true;
+            moveSpeed *= SHOOTING_MOVEMENT_PENALTY;
             break;/*
         case "\\":
             lives++;
@@ -81,11 +83,12 @@ function keyup(e = new KeyboardEvent()) {
             break;
         case "Shift":
             focused = false;
-            moveSpeed = BASE_MOVEMENT;
+            moveSpeed = BASE_MOVEMENT * (isFiring? SHOOTING_MOVEMENT_PENALTY : 1);
             break;
         case "Z":
         case "z":
             isFiring = false;
+            moveSpeed /= SHOOTING_MOVEMENT_PENALTY;
             break;
     }
 }
