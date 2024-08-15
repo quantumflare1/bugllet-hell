@@ -264,7 +264,7 @@ const types = {
         }
     },
     recursiveClusterRadial: {
-        lastWave: 4,
+        lastWave: 3,
         script: (pat) => {
             if (pat.lifetime > pat.wave * 100) {
                 pat.wave++;
@@ -272,7 +272,7 @@ const types = {
                 const offset = Math.random() * TAU;
 
                 for (let i = 0; i < NUM_BULLETS; i++)
-                    Bullets.makeBullet("burst1", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS + offset, randBulletStyle(0, 10));
+                    Bullets.makeBullet("burst1", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS + offset + pat.wave, randBulletStyle(0, 10));
             }
         }
     },
@@ -337,14 +337,17 @@ const types = {
         }
     },
     variantRadialWave: {
-        lastWave: 19,
+        lastWave: 20,
         script: (pat) => {
             const NUM_BULLETS = 18;
-            if (pat.lifetime > pat.wave * 50) {
+            if (pat.lifetime > pat.wave * 50 && pat.wave < 20) {
                 pat.wave++;
                 pat.parent.rotation += Math.random() * 0.2 + 0.6;
                 for (let i = 0; i < NUM_BULLETS; i++)
                     Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS + pat.parent.rotation, 5);
+            } else if (pat.wave === 20) {
+                pat.wave++;
+                pat.parent.rotation = 0;
             }
         }
     },

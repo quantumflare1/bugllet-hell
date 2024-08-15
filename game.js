@@ -114,13 +114,25 @@ function drawBullet(b) {
     }
 }
 
-// actually implement this??
 function drawEnemy(e) {
-    gpctx.setTransform(1, 0, 0, 1, e.x, e.y);
-    gpctx.rotate(Math.atan(e.velX / e.velY));
-    gpctx.drawImage(spriteImages.enemy[e.type], -spriteImages.enemy[e.type].width / 2, -spriteImages.enemy[e.type].height / 2);
-    gpctx.rotate(-Math.atan(e.velX / e.velY));
-    gpctx.setTransform(1, 0, 0, 1, 0, 0);
+    const wingId = `${e.type}Wings${e.wingState}`;
+    if (e.useRotation) {
+        gpctx.setTransform(1, 0, 0, 1, e.x, e.y);
+        gpctx.rotate(e.rotation);
+        
+        gpctx.drawImage(spriteImages.enemy[e.type], -spriteImages.enemy[e.type].width / 2, -spriteImages.enemy[e.type].height / 2);
+        if (spriteImages.enemy.hasOwnProperty(wingId))
+            gpctx.drawImage(spriteImages.enemy[wingId], Math.floor(-spriteImages.enemy[wingId].width / 2), Math.floor(-spriteImages.enemy[wingId].height / 2));
+
+        gpctx.rotate(-e.rotation);
+        gpctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    else {
+        gpctx.drawImage(spriteImages.enemy[e.type], e.x - spriteImages.enemy[e.type].width / 2, e.y - spriteImages.enemy[e.type].height / 2);
+        if (spriteImages.enemy.hasOwnProperty(wingId))
+            gpctx.drawImage(spriteImages.enemy[wingId], Math.floor(e.x - spriteImages.enemy[wingId].width / 2), Math.floor(e.y - spriteImages.enemy[wingId].height / 2));
+    }
+
 }
 
 function fillPowerMeter(scale) {
@@ -150,10 +162,11 @@ function draw() {
     for (const i of Bullets.bullets)
         drawBullet(i);
 
-    for (const i of Enemy.enemies) { // i am very good at naming variables
-        gpctx.drawImage(spriteImages.enemy[i.type], Math.floor(i.x - spriteImages.enemy[i.type].width / 2), Math.floor(i.y - spriteImages.enemy[i.type].height / 2));
-        if (spriteImages.enemy.hasOwnProperty(`${i.type}Wings${i.wingState}`))
-            gpctx.drawImage(spriteImages.enemy[`${i.type}Wings${i.wingState}`], Math.floor(i.x - spriteImages.enemy[`${i.type}Wings${i.wingState}`].width / 2), Math.floor(i.y - spriteImages.enemy[`${i.type}Wings${i.wingState}`].height / 2));
+    for (const i of Enemy.enemies) {
+        //gpctx.drawImage(spriteImages.enemy[i.type], Math.floor(i.x - spriteImages.enemy[i.type].width / 2), Math.floor(i.y - spriteImages.enemy[i.type].height / 2));
+        drawEnemy(i);
+        //if (spriteImages.enemy.hasOwnProperty(`${i.type}Wings${i.wingState}`))
+        //    gpctx.drawImage(spriteImages.enemy[`${i.type}Wings${i.wingState}`], Math.floor(i.x - spriteImages.enemy[`${i.type}Wings${i.wingState}`].width / 2), Math.floor(i.y - spriteImages.enemy[`${i.type}Wings${i.wingState}`].height / 2));
     }
 }
 

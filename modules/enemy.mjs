@@ -186,18 +186,6 @@ class Enemy {
         this.despawnX = despawnX;
         this.despawnY = despawnY;
     }
-    pickFighterDespawnPoint() {
-        let despawnX = this.x;
-        let despawnY = this.y;
-
-        if (this.x < 0) despawnX = Global.BOARD_WIDTH + 25;
-        else if (this.x > Global.BOARD_WIDTH) despawnX = -25;
-        if (this.y < 0) despawnY = Global.BOARD_HEIGHT + 25;
-        else if (this.y > Global.BOARD_HEIGHT) despawnY = -25;
-
-        this.despawnX = despawnX;
-        this.despawnY = despawnY;
-    }
     basicFire() {
         this.shotCooldown = this.shotRate + (Math.random() * 2 - 1) * this.variance;
         Pattern.makePattern(this, randomPattern(this.patterns));
@@ -257,6 +245,19 @@ class Enemy {
     
         this.basicDash(moveDirection, 250);
     }
+}
+
+function pickFighterDespawnPoint(e) {
+    let despawnX = e.x;
+    let despawnY = e.y;
+
+    if (e.x < 0) despawnX = Global.BOARD_WIDTH + 25;
+    else if (e.x > Global.BOARD_WIDTH) despawnX = -25;
+    if (e.y < 0) despawnY = Global.BOARD_HEIGHT + 25;
+    else if (e.y > Global.BOARD_HEIGHT) despawnY = -25;
+
+    e.despawnX = despawnX;
+    e.despawnY = despawnY;
 }
 
 function aimAtPoint(enemy, x, y) {
@@ -369,7 +370,7 @@ const types = {
         shotRate: 900,
         moveRate: 99999,
         wingRate: 30,
-        useRotation: false,
+        useRotation: true,
         patterns: ["sparseDoubleRadial", "dartTriangle"],
         script: (enemy, ms) => {
             if (enemy.moveCooldown <= 0) {
@@ -377,9 +378,11 @@ const types = {
                     enemy.pickRandomDespawnPoint();
 
                 const dist = Math.sqrt((enemy.x - enemy.despawnX) ** 2 + (enemy.y - enemy.despawnY) ** 2);
-                const vec = getVel(dist / enemy.screenTime * 1000, aimAtDespawnPoint(enemy));
+                const rotation = aimAtDespawnPoint(enemy);
+                const vec = getVel(dist / enemy.screenTime * 1000, rotation);
                 enemy.velX = vec.velX;
                 enemy.velY = vec.velY;
+                enemy.rotation = rotation - Math.PI / 2;
                 
                 if (enemy.lifetime > 500 && !enemy.despawning)
                     enemy.despawning = true;
@@ -398,12 +401,12 @@ const types = {
         shotRate: 900,
         moveRate: 400,
         wingRate: 10,
-        useRotation: true,
+        useRotation: false,
         patterns: ["basicRay"],
         script: (enemy, ms) => {
             if (enemy.moveCooldown <= 0) {
                 if (enemy.despawnX === 0 && enemy.despawnY === 0){
-                    enemy.pickFighterDespawnPoint();
+                    pickFighterDespawnPoint(enemy);
 
                     const vec = getVel(enemy.moveRate, aimAtDespawnPoint(enemy));
                     enemy.velX = vec.velX;
@@ -447,12 +450,12 @@ const types = {
         shotRate: 200,
         moveRate: 440,
         wingRate: 10,
-        useRotation: true,
+        useRotation: false,
         patterns: ["basicForward"],
         script: (enemy, ms) => {
             if (enemy.moveCooldown <= 0) {
                 if (enemy.despawnX === 0 && enemy.despawnY === 0){
-                    enemy.pickFighterDespawnPoint();
+                    pickFighterDespawnPoint(enemy);
                     
                     const vec = getVel(enemy.moveRate, aimAtDespawnPoint(enemy));
                     enemy.velX = vec.velX;
@@ -496,7 +499,7 @@ const types = {
         shotRate: 4000,
         moveRate: 3000,
         wingRate: 10,
-        useRotation: true,
+        useRotation: false,
         patterns: ["machineGunFire", "singleAimedBigShot"],
         script: (enemy, ms) => {
             const DECELERATION = 0.9;
@@ -535,7 +538,7 @@ const types = {
         shotRate: 4500,
         moveRate: 2000,
         wingRate: 10,
-        useRotation: true,
+        useRotation: false,
         patterns: ["expandingMachineGunFire", "basicRadial", "doubleSmallDartRay"],
         script: (enemy, ms) => {
             const DECELERATION = 0.94;
