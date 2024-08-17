@@ -165,7 +165,9 @@ function draw() {
     gpctx.drawImage(spriteImages.ui.gameBg, 0, bgScroll);
     gpctx.drawImage(spriteImages.ui.vignette, 0, 0);
 
-    gpctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+    const bombBlastOpacity = Player.bombRadius < 0 ? 1 : -Player.bombRadius / 1050 + 1;
+    console.log(`rgba(255, 255, 255, ${0.5 * bombBlastOpacity})`)
+    gpctx.fillStyle = `rgba(255, 255, 255, ${0.5 * bombBlastOpacity})`;
     circle(gpctx, Player.x, Player.y, Player.bombRadius);
 
     for (const i of Bullets.playerBullets)
