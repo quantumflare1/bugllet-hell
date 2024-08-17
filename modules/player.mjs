@@ -11,6 +11,8 @@ const BLINKS_PER_SECOND = 15;
 const GRAZE_RADIUS = 10;
 const GRAZE_PER_BULLET = 0.02;
 const BOMB_BLAST_SPEED = 2000;
+const BASE_LIVES = 0;
+const BASE_BOMBS = 3;
 
 let x, y, size;
 let movingLeft, movingRight, movingUp, movingDown, isFiring;
@@ -23,7 +25,7 @@ let wingTimer, wingState;
 let blinkTimer, blinkState;
 
 function fireBullet(size, velX, velY, offsetX, offsetY) {
-    // this is a test bullet that gets smaller
+    // this is (update: was) a test bullet that shrinks
     new Bullets.Bullet(x + offsetX, y + offsetY, size, velX, velY, 0, 2000, /*(bullet, ms) => {
         const GROW_DELAY = 300;
         const GROW_RATE = 8;
@@ -313,6 +315,28 @@ function tick(ms) {
     }
 }
 
+function reset() {
+    moveSpeed = BASE_MOVEMENT;
+
+    lives = BASE_LIVES;
+    bombs = BASE_BOMBS;
+    score = 0;
+    power = 4;
+
+    grazeMultiplier = 1;
+
+    timeSinceLastBullet = 0;
+    fireCooldown = 66;
+
+    invTime = 0;
+    bombCooldown = 0;
+    bombRadius = 0;
+    wingTimer = 0;
+    wingState = 0;
+    blinkTimer = 0;
+    blinkState = 1;
+}
+
 function init() {
     // board size is 540x864
     x = Global.BOARD_WIDTH / 2;
@@ -320,8 +344,8 @@ function init() {
     size = 5;
     moveSpeed = BASE_MOVEMENT;
 
-    lives = 5;
-    bombs = 3;
+    lives = BASE_LIVES;
+    bombs = BASE_BOMBS;
     score = 0;
     power = 4;
 
@@ -338,10 +362,13 @@ function init() {
     blinkTimer = 0;
     blinkState = 1;
 
+    addEventListener("keydown", keydown);
+    addEventListener("keyup", keyup);
+
     addEventListener("game_pickuppower", pickUpPower);
     addEventListener("game_pickuppoint", pickUpPoints);
     addEventListener("game_pickuplife", pickUpLife);
     addEventListener("game_pickupbomb", pickUpBomb);
 }
 
-export { x, y, size, lives, bombs, score, power, wingState, blinkState, bombRadius, init, tick, keydown, keyup, powerUp, scoreUp };
+export { x, y, size, lives, bombs, score, power, wingState, blinkState, bombRadius, reset, init, tick, keydown, keyup, powerUp, scoreUp };

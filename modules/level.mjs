@@ -57,7 +57,7 @@ function tick(ms) {
         if (transitionTime > 1000) {
             nextWave++;
             waveTime = 0;
-            
+
             if (waves[nextWave-1].boss) 
                 for (const i of Enemy.enemies)
                     i.lifetime = i.screenTime; // immediately force all enemies to despawn
@@ -75,7 +75,7 @@ function tick(ms) {
         waves[nextWave-1].enemiesLeft = curWaveEnemies;
     }
     if (nextWave >= waves.length && waves[nextWave-1].enemiesLeft === 0)
-        setTimeout(Global.setWinState, 2000, true);
+        setTimeout(Global.setGameState, 2000, Global.game.WON);
 }
 
 function init() {

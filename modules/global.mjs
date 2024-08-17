@@ -1,17 +1,21 @@
 const BOARD_WIDTH = 648;
 const BOARD_HEIGHT = 864;
-let paused = false;
-let gameOver = false;
-let gameWon = false;
 
-function setPaused(state) {
-    paused = state;
+const game = {
+    NONE: 0,
+    PLAY: 1,
+    PAUSED: 2,
+    WON: 3,
+    LOST: 4
 }
+let gameState = game.NONE;
+let prevGameState;
+
 function setGameState(state) {
-    gameOver = state;
-}
-function setWinState(state) {
-    gameWon = state;
+    const gameStateChange = new Event("game_statechange");
+    prevGameState = gameState;
+    gameState = state;
+    dispatchEvent(gameStateChange);
 }
 
-export { BOARD_HEIGHT, BOARD_WIDTH, paused, gameOver, gameWon, setPaused, setGameState, setWinState };
+export { BOARD_HEIGHT, BOARD_WIDTH, game, prevGameState, gameState, setGameState };

@@ -38,27 +38,48 @@ function fullscreen() {
     document.body.requestFullscreen({ navigationUI: "hide" });
 }
 
-function keydown(e) {
-    if (!e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        initGame();
-        lastFrameTime = document.timeline.currentTime;
-        nextTick = requestAnimationFrame(tick);
-        removeEventListener("keydown", keydown);
-    }
-}
+// note to self: incredible bug happening where despawning guys do not start the next wave
 
-function retryKeyDown(e) {
-    if (e.key.toLowerCase() === "r" && Global.gameOver) {
-        Global.setGameState(false);
-        Player.init();
-        Level.init();
-        Enemy.enemies.clear();
-        Bullets.bullets.clear();
-        Bullets.playerBullets.clear();
-        Pickup.pickups.clear();
-
-        lastFrameTime = document.timeline.currentTime;
-        nextTick = requestAnimationFrame(tick);
+function checkGameState(e) {
+    switch (Global.gameState) {
+        case Global.game.PLAY:
+            switch (Global.prevGameState) {
+                case Global.game.NONE:
+                    initGame();
+                    lastFrameTime = document.timeline.currentTime;
+                    nextTick = requestAnimationFrame(tick);
+                    break;
+                case Global.game.LOST:
+                    Player.reset();
+                    Level.init();
+                    Enemy.enemies.clear();
+                    Bullets.bullets.clear();
+                    Bullets.playerBullets.clear();
+                    Pickup.pickups.clear();
+                    lastFrameTime = document.timeline.currentTime;
+                    nextTick = requestAnimationFrame(tick);
+                    break;
+                case Global.game.PAUSED:
+                    function pause(e) {
+                        if (e.key === "Escape") {
+                            Global.setGameState(Global.game.PAUSED);
+                            removeEventListener("keydown", pause);
+                        }
+                    }
+                    addEventListener("keydown", pause);
+                    //bgm.play();
+                    break;
+            }
+            break;
+        case Global.game.PAUSED:
+            loadMenu("pause");
+            bgm.pause();
+            break;
+        case Global.game.LOST:
+            break;
+        case Global.game.WON:
+            loadMenu("win");
+            break;
     }
 }
 
@@ -67,20 +88,17 @@ function loadMenu(name) {
     function render(ms) {
         draw();
         const elapsed = ms - lastMenuFrameTime;
-        gpctx.globalAlpha = elapsed / (1000 * Menu[name].transition);
+        const transitionPercentComplete = elapsed / (1000 * Menu[name].transition);
+        gpctx.globalAlpha = transitionPercentComplete;
         gpctx.fillStyle = Menu[name].bgCol;
         gpctx.fillRect(0, 0, Global.BOARD_WIDTH, Global.BOARD_HEIGHT);
-    
-        Object.keys(Menu[name].content).forEach((v) => {
-            if (v === "bgCol") return;
-            drawText(gpctx, ...Menu[name].content[v].label);
-        });
-        if (Menu[name].transition !== 0 && elapsed / (1000 * Menu[name].transition) < 1) {
-            requestAnimationFrame(render);
-        } else {
-            gpctx.globalAlpha = 1;
-        }
+
+        for (const i of Menu[name].labels) drawText(gpctx, ...i);
+
+        if (Menu[name].transition !== 0 && transitionPercentComplete < 1) requestAnimationFrame(render);
+        else gpctx.globalAlpha = 1;
     }
+    Menu[name].onload();
     requestAnimationFrame(render);
 }
 
@@ -116,21 +134,23 @@ function drawBullet(b) {
 
 function drawEnemy(e) {
     const wingId = `${e.type}Wings${e.wingState}`;
+    const enemySprite = spriteImages.enemy[e.type];
+    const wingSprite = spriteImages.enemy[wingId];
     if (e.useRotation) {
         gpctx.setTransform(1, 0, 0, 1, e.x, e.y);
         gpctx.rotate(e.rotation);
-        
-        gpctx.drawImage(spriteImages.enemy[e.type], -spriteImages.enemy[e.type].width / 2, -spriteImages.enemy[e.type].height / 2);
+
+        gpctx.drawImage(enemySprite, -enemySprite.width / 2, -enemySprite.height / 2);
         if (spriteImages.enemy.hasOwnProperty(wingId))
-            gpctx.drawImage(spriteImages.enemy[wingId], Math.floor(-spriteImages.enemy[wingId].width / 2), Math.floor(-spriteImages.enemy[wingId].height / 2));
+            gpctx.drawImage(wingSprite, Math.floor(-wingSprite.width / 2), Math.floor(-wingSprite.height / 2));
 
         gpctx.rotate(-e.rotation);
         gpctx.setTransform(1, 0, 0, 1, 0, 0);
     }
     else {
-        gpctx.drawImage(spriteImages.enemy[e.type], e.x - spriteImages.enemy[e.type].width / 2, e.y - spriteImages.enemy[e.type].height / 2);
+        gpctx.drawImage(enemySprite, e.x - enemySprite.width / 2, e.y - enemySprite.height / 2);
         if (spriteImages.enemy.hasOwnProperty(wingId))
-            gpctx.drawImage(spriteImages.enemy[wingId], Math.floor(e.x - spriteImages.enemy[wingId].width / 2), Math.floor(e.y - spriteImages.enemy[wingId].height / 2));
+            gpctx.drawImage(wingSprite, Math.floor(e.x - wingSprite.width / 2), Math.floor(e.y - wingSprite.height / 2));
     }
 
 }
@@ -162,12 +182,8 @@ function draw() {
     for (const i of Bullets.bullets)
         drawBullet(i);
 
-    for (const i of Enemy.enemies) {
-        //gpctx.drawImage(spriteImages.enemy[i.type], Math.floor(i.x - spriteImages.enemy[i.type].width / 2), Math.floor(i.y - spriteImages.enemy[i.type].height / 2));
+    for (const i of Enemy.enemies)
         drawEnemy(i);
-        //if (spriteImages.enemy.hasOwnProperty(`${i.type}Wings${i.wingState}`))
-        //    gpctx.drawImage(spriteImages.enemy[`${i.type}Wings${i.wingState}`], Math.floor(i.x - spriteImages.enemy[`${i.type}Wings${i.wingState}`].width / 2), Math.floor(i.y - spriteImages.enemy[`${i.type}Wings${i.wingState}`].height / 2));
-    }
 }
 
 function drawUI() {
@@ -176,29 +192,30 @@ function drawUI() {
 
     drawText(ctx, title, 700, 40, sf);
 
-    ctx.drawImage(spriteImages.ui.scoreDisplay, 700, 100, spriteImages.ui.scoreDisplay.width * sf, spriteImages.ui.scoreDisplay.height * sf);
+    const scoreDisplay = spriteImages.ui.scoreDisplay;
+    ctx.drawImage(scoreDisplay, 700, 100, scoreDisplay.width * sf, scoreDisplay.height * sf);
     for (let i = 0; i < 9; i++)
         drawText(ctx, `${Math.floor((Player.score / (10 ** (8 - i))) % 10)}`, 700 + 4 * sf + 7 * sf * i, 100 + 13 * sf, sf);
     
-    ctx.drawImage(spriteImages.ui.lifeDisplay, 700, 240, spriteImages.ui.lifeDisplay.width * sf, spriteImages.ui.lifeDisplay.height * sf);
+    const lifeDisplay = spriteImages.ui.lifeDisplay;
+    const life = spriteImages.ui.life;
+    ctx.drawImage(lifeDisplay, 700, 240, lifeDisplay.width * sf, lifeDisplay.height * sf);
     for (let i = 0; i < Player.lives; i++) {
-        if (i % 2 === 0)
-            ctx.drawImage(spriteImages.ui.life, 700 + 4 * sf + i * 8 * sf, 240 + 12 * sf, spriteImages.ui.life.width * sf, spriteImages.ui.life.height * sf);
-        else
-            ctx.drawImage(spriteImages.ui.life, 700 + 4 * sf + i * 8 * sf, 240 + 23 * sf, spriteImages.ui.life.width * sf, spriteImages.ui.life.height * sf);
+        if (i % 2 === 0) ctx.drawImage(life, 700 + 4 * sf + i * 8 * sf, 240 + 12 * sf, life.width * sf, life.height * sf);
+        else ctx.drawImage(life, 700 + 4 * sf + i * 8 * sf, 240 + 23 * sf, life.width * sf, life.height * sf);
     }
 
-    ctx.drawImage(spriteImages.ui.bombDisplay, 700, 400, spriteImages.ui.bombDisplay.width * sf, spriteImages.ui.bombDisplay.height * sf);
+    const bombDisplay = spriteImages.ui.bombDisplay;
+    const bomb = spriteImages.ui.bomb;
+    ctx.drawImage(bombDisplay, 700, 400, bombDisplay.width * sf, bombDisplay.height * sf);
     for (let i = 0; i < Player.bombs; i++) {
-        if (i % 2 === 0) {
-            ctx.drawImage(spriteImages.ui.bomb, 700 + 4 * sf + i * 8 * sf, 400 + 12 * sf, spriteImages.ui.bomb.width * sf, spriteImages.ui.bomb.height * sf);
-        } else {
-            ctx.drawImage(spriteImages.ui.bomb, 700 + 4 * sf + i * 8 * sf, 400 + 23 * sf, spriteImages.ui.bomb.width * sf, spriteImages.ui.bomb.height * sf);
-        }
+        if (i % 2 === 0) ctx.drawImage(bomb, 700 + 4 * sf + i * 8 * sf, 400 + 12 * sf, bomb.width * sf, bomb.height * sf);
+        else ctx.drawImage(bomb, 700 + 4 * sf + i * 8 * sf, 400 + 23 * sf, bomb.width * sf, bomb.height * sf);
     }
 
+    const powerMeter = spriteImages.ui.powerMeter;
     fillPowerMeter(sf);
-    ctx.drawImage(spriteImages.ui.powerMeter, 700, 560, spriteImages.ui.powerMeter.width * sf, spriteImages.ui.powerMeter.height * sf);
+    ctx.drawImage(powerMeter, 700, 560, powerMeter.width * sf, powerMeter.height * sf);
     drawText(ctx, Player.power.toFixed(2), 700 + 26 * sf, 560 + 6 * sf, sf);
 
     drawText(ctx, `${fps.toFixed(2)} fps`, 700, 870 - 10 * sf, sf);
@@ -216,56 +233,33 @@ function tick(ms) {
         drawUI();
     }
 
-    if (!Global.paused) {
+    if (Global.gameState === Global.game.PLAY) {
         bgScroll += bgScrollRate * timeElapsed / 1000;
         if (bgScroll >= Global.BOARD_HEIGHT) bgScroll = 0;
 
         Player.tick(timeElapsed);
-        for (const i of Bullets.playerBullets) {
-            i.tick(timeElapsed);
-        }
-        for (const i of Bullets.bullets) {
-            i.tick(timeElapsed);
-        }
-        for (const i of Enemy.enemies) {
-            i.tick(timeElapsed);
-        }
-        for (const i of Pattern.patterns) {
-            i.tick(timeElapsed);
-        }
-        for (const i of Pickup.pickups) {
-            i.tick(timeElapsed);
-        }
         Level.tick(timeElapsed);
+        for (const i of Bullets.playerBullets)
+            i.tick(timeElapsed);
+        for (const i of Bullets.bullets)
+            i.tick(timeElapsed);
+        for (const i of Enemy.enemies)
+            i.tick(timeElapsed);
+        for (const i of Pattern.patterns)
+            i.tick(timeElapsed);
+        for (const i of Pickup.pickups)
+            i.tick(timeElapsed);
+
         draw();
     }
 
     lastFrameTime = ms;
-    if (Player.lives < 0) Global.setGameState(true);
-    if (Global.gameOver) {
-        loadMenu("death");
-        addEventListener("keydown", retryKeyDown);
-    } else if (Global.gameWon) {
-        loadMenu("win");
-    } else {
-        nextTick = requestAnimationFrame(tick);
-    }
+    if (Player.lives < 0) loadMenu("death");
+    if (Global.gameState !== Global.game.LOST && Global.gameState !== Global.game.WON) nextTick = requestAnimationFrame(tick);
 }
 
 function initGame() {
-    addEventListener("keydown", Player.keydown);
-    addEventListener("keyup", Player.keyup);
     addEventListener("game_statupdate", drawUI);
-    addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && !Global.gameOver) {
-            if (!Global.paused) loadMenu("pause");
-            Global.setPaused(true);
-            bgm.pause();
-        } else if (e.key.toLowerCase() === "z") {
-            Global.setPaused(false);
-            //bgm.play();
-        }
-    });
     drawUI();
     //bgm.play();
     //bgm.volume = 0.1;
@@ -293,15 +287,13 @@ function load() {
     });
     fontSheet.src = "./assets/ui/font.png";
     fontSheet.addEventListener("load", () => { loadMenu("startMenu"); });
-
     bulletSheet.src = "./assets/enemy/bullets.png";
 
     Player.init();
     Level.init();
-    //addEventListener("click", fullscreen);
 
+    addEventListener("game_statechange", checkGameState);
     console.log(`${performance.measure("loadtime").duration.toFixed(1)}ms load time`);
-    addEventListener("keydown", keydown);
 }
 
 addEventListener("load", load);
