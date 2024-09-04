@@ -11,7 +11,7 @@ const BLINKS_PER_SECOND = 15;
 const GRAZE_RADIUS = 10;
 const GRAZE_PER_BULLET = 0.02;
 const BOMB_BLAST_SPEED = 2000;
-const BASE_LIVES = 0;
+const BASE_LIVES = 5;
 const BASE_BOMBS = 3;
 
 let x, y, size;
@@ -321,7 +321,7 @@ function reset() {
     lives = BASE_LIVES;
     bombs = BASE_BOMBS;
     score = 0;
-    power = 4;
+    power = 0;
 
     grazeMultiplier = 1;
 
@@ -347,7 +347,7 @@ function init() {
     lives = BASE_LIVES;
     bombs = BASE_BOMBS;
     score = 0;
-    power = 4;
+    power = Global.START_POWER;
 
     grazeMultiplier = 1;
 

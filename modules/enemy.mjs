@@ -60,19 +60,17 @@ class Enemy {
         for (const i of Bullets.playerBullets) {
             const dist = Math.sqrt((i.x - this.x) ** 2 + (i.y - this.y) ** 2);
             if (dist < i.size + this.size) {
-                const damage = Math.ceil(Math.log2(i.size));
+                const damage = 3;
                 this.hp -= damage;
                 Bullets.playerBullets.delete(i);
                 //Player.powerUp(damage / 1000);
-                Player.scoreUp(damage);
-                break;
+                Player.scoreUp(1);
             }
         }
         const dist = Math.sqrt((Player.x - this.x) ** 2 + (Player.y - this.y) ** 2);
         if (dist < this.size + Player.bombRadius && this.bombImmunity < 0) {
             this.hp -= 60;
             this.bombImmunity = 1000;
-            // todo: make enemies bombable more than once
         }
         if (this.wingTimer > 1000 / this.wingRate) {
             this.wingTimer = 0;
@@ -94,14 +92,10 @@ class Enemy {
                 this.velY += (-this.baseVelY + 150) * ms / 600;
         }
         if (Player.power < 4 && Math.random() < 1 - (Player.power / 5)) {
-            const rand = Math.random();
-            if (rand < 0.2)
-                new Pickup.Pickup("point", this.x, this.y, 15, 2000, 0, -230 + Math.random() * 60, pickupFall);
-            else
-                new Pickup.Pickup("power", this.x, this.y, 15, 0.12, 0, -230 + Math.random() * 60, pickupFall);
+            new Pickup.Pickup("power", this.x, this.y, 15, 0.12, 0, -230 + Math.random() * 60, pickupFall);
         }
-        else if (Math.random() < 0.5) {
-            if (Player.power < 4 && Math.random() < 0.75)
+        else if (Math.random() < 0.7) {
+            if (Player.power < 4 && Math.random() < 0.6)
                 new Pickup.Pickup("power", this.x, this.y, 15, 0.12, 0, -230 + Math.random() * 60, pickupFall);
             else
                 new Pickup.Pickup("point", this.x, this.y, 15, 2000, 0, -230 + Math.random() * 60, pickupFall);
@@ -245,6 +239,20 @@ class Enemy {
     
         this.basicDash(moveDirection, 250);
     }
+    pickDashNormal(vel) {
+        if (this.lifetime > this.screenTime && this.lifetime > 500) {
+            if (!this.despawning) {
+                this.pickDespawnPoint();
+                this.despawning = true;
+            }
+            this.despawnDash(vel);
+        }
+        else if (this.y < 20) this.downDash(vel);
+        else if (this.y > Global.BOARD_HEIGHT - 20) this.upDash(vel);
+        else if (this.x < 20) this.rightDash(vel);
+        else if (this.x > Global.BOARD_WIDTH - 20) this.leftDash(vel);
+        else this.randomDash(vel);
+    }
 }
 
 function pickFighterDespawnPoint(e) {
@@ -286,30 +294,19 @@ function getVel(vel, dir) {
 const types = {
     basicDrone1: {
         size: 12,
-        score: 200,
+        score: 250,
         hp: 60,
         screenTime: 18000,
         shotRate: 2200,
         moveRate: 18000,
         wingRate: 30,
         useRotation: false,
-        patterns: ["singleAimedInaccurateShot"],
+        patterns: ["tripleAimedInaccurateShot"],
         script: (enemy, ms) => {
             const DECELERATION = 0.9;
-            const DASH_VEL = 500;
+            const DASH_VEL = 700;
             if (enemy.moveCooldown <= 0) {
-                if (enemy.lifetime > enemy.screenTime && enemy.lifetime > 500) {
-                    if (!enemy.despawning) {
-                        enemy.pickDespawnPoint();
-                        enemy.despawning = true;
-                    }
-                    enemy.despawnDash(DASH_VEL);
-                }
-                else if (enemy.y < 20) enemy.downDash(DASH_VEL);
-                else if (enemy.y > Global.BOARD_HEIGHT - 20) enemy.upDash(DASH_VEL);
-                else if (enemy.x < 20) enemy.leftDash(DASH_VEL);
-                else if (enemy.x > Global.BOARD_WIDTH - 20) enemy.rightDash(DASH_VEL);
-                else enemy.randomDash(DASH_VEL);
+                enemy.pickDashNormal(DASH_VEL);
                 
                 enemy.moveCooldown = enemy.moveRate + (Math.random() * 2 - 1) * enemy.variance;
             } else if (enemy.velX > 1 || enemy.velY > 1 || enemy.velX < -1 || enemy.velY < -1) {
@@ -325,11 +322,11 @@ const types = {
     },
     basicDrone2: {
         size: 12,
-        score: 400,
-        hp: 45,
+        score: 500,
+        hp: 80,
         screenTime: 1500,
-        shotRate: 800,
-        moveRate: 1500,
+        shotRate: 1400,
+        moveRate: 1600,
         wingRate: 30,
         useRotation: false,
         patterns: ["basicSpread", "shortVInaccurateTracker"],
@@ -337,18 +334,7 @@ const types = {
             const DECELERATION = 0.9; // maybe these can be moved out as an object property
             const DASH_VEL = 500; // investigate later
             if (enemy.moveCooldown <= 0) {
-                if (enemy.lifetime > enemy.screenTime && enemy.lifetime > 500) {
-                    if (!enemy.despawning) {
-                        enemy.pickDespawnPoint();
-                        enemy.despawning = true;
-                    }
-                    enemy.despawnDash(DASH_VEL);
-                }
-                else if (enemy.y < 20) enemy.downDash(DASH_VEL);
-                else if (enemy.y > Global.BOARD_HEIGHT - 20) enemy.upDash(DASH_VEL);
-                else if (enemy.x < 20) enemy.leftDash(DASH_VEL);
-                else if (enemy.x > Global.BOARD_WIDTH - 20) enemy.rightDash(DASH_VEL);
-                else enemy.randomDash(DASH_VEL);
+                enemy.pickDashNormal(DASH_VEL);
                 
                 enemy.moveCooldown = enemy.moveRate + (Math.random() * 2 - 1) * enemy.variance;
             } else if (enemy.velX > 1 || enemy.velY > 1 || enemy.velX < -1 || enemy.velY < -1) {
@@ -364,10 +350,10 @@ const types = {
     },
     basicDrone3: {
         size: 12,
-        score: 1000,
-        hp: 350,
-        screenTime: 12000,
-        shotRate: 900,
+        score: 2000,
+        hp: 480,
+        screenTime: 16000,
+        shotRate: 1000,
         moveRate: 99999,
         wingRate: 30,
         useRotation: true,
@@ -395,13 +381,13 @@ const types = {
     },
     fighterDrone1: {
         size: 14,
-        score: 500,
+        score: 800,
         hp: 130,
         screenTime: 11000,
-        shotRate: 900,
-        moveRate: 400,
+        shotRate: 1600,
+        moveRate: 330,
         wingRate: 10,
-        useRotation: false,
+        useRotation: true,
         patterns: ["basicRay"],
         script: (enemy, ms) => {
             if (enemy.moveCooldown <= 0) {
@@ -420,7 +406,7 @@ const types = {
             }
             if (enemy.shotCooldown <= 0)
                 enemy.basicFire();
-            if (enemy.lifetime / 200 >= enemy.extraAttribute) {
+            if (enemy.lifetime / 400 >= enemy.extraAttribute) {
                 enemy.fireSpecificNoCooldown("basicTrail");
                 enemy.extraAttribute++;
             }
@@ -433,8 +419,8 @@ const types = {
                     if (Player.x > enemy.x + 20) newX = enemy.spawnX + 60;
                 }
                 if (Math.floor(enemy.velY) === 0) {
-                    if (Player.y < enemy.y - 20) newY = enemy.spawnY - 60;
-                    if (Player.y > enemy.y + 20) newY = enemy.spawnY + 60;
+                    if (Player.y < enemy.y - 20) newY = enemy.spawnY - 40;
+                    if (Player.y > enemy.y + 20) newY = enemy.spawnY + 40;
                 }
                 new Enemy(newX, newY, enemy.size, enemy.score, enemy.hp, enemy.screenTime - enemy.lifetime,
                     enemy.patterns, enemy.script, enemy.waveId, enemy.type, enemy.shotRate, enemy.moveRate, enemy.wingRate);
@@ -444,14 +430,14 @@ const types = {
     },
     fighterDrone2: {
         size: 14,
-        score: 800,
-        hp: 90,
+        score: 2100,
+        hp: 170,
         screenTime: 10000,
         shotRate: 200,
         moveRate: 440,
         wingRate: 10,
-        useRotation: false,
-        patterns: ["basicForward"],
+        useRotation: true,
+        patterns: ["spreadForward"],
         script: (enemy, ms) => {
             if (enemy.moveCooldown <= 0) {
                 if (enemy.despawnX === 0 && enemy.despawnY === 0){
@@ -482,8 +468,8 @@ const types = {
                     if (Player.x > enemy.x + 20) newX = enemy.spawnX + 60;
                 }
                 if (Math.floor(enemy.velY) === 0) {
-                    if (Player.y < enemy.y - 20) newY = enemy.spawnY - 60;
-                    if (Player.y > enemy.y + 20) newY = enemy.spawnY + 60;
+                    if (Player.y < enemy.y - 20) newY = enemy.spawnY - 80;
+                    if (Player.y > enemy.y + 20) newY = enemy.spawnY + 80;
                 }
                 new Enemy(newX, newY, enemy.size, enemy.score, enemy.hp, enemy.screenTime - enemy.lifetime,
                     enemy.patterns, enemy.script, enemy.waveId, enemy.type, enemy.shotRate, enemy.moveRate, enemy.wingRate);
@@ -493,9 +479,9 @@ const types = {
     },
     tankDrone1: {
         size: 20,
-        score: 1500,
-        hp: 900,
-        screenTime: 40000,
+        score: 3500,
+        hp: 2800,
+        screenTime: 35000,
         shotRate: 4000,
         moveRate: 3000,
         wingRate: 10,
@@ -504,7 +490,7 @@ const types = {
         script: (enemy, ms) => {
             const DECELERATION = 0.9;
             const DASH_VEL = 400;
-            const THRESHOLD = 60;
+            const THRESHOLD = 100;
             if (enemy.moveCooldown <= 0) {
                 if (enemy.lifetime > enemy.screenTime && enemy.lifetime > 500) {
                     if (!enemy.despawning) {
@@ -515,8 +501,8 @@ const types = {
                 }
                 else if (enemy.y < THRESHOLD) enemy.downDash(DASH_VEL);
                 else if (enemy.y > Global.BOARD_HEIGHT - THRESHOLD) enemy.upDash(DASH_VEL);
-                else if (enemy.x < THRESHOLD) enemy.leftDash(DASH_VEL);
-                else if (enemy.x > Global.BOARD_WIDTH - THRESHOLD) enemy.rightDash(DASH_VEL);
+                else if (enemy.x < THRESHOLD) enemy.rightDash(DASH_VEL);
+                else if (enemy.x > Global.BOARD_WIDTH - THRESHOLD) enemy.leftDash(DASH_VEL);
                 
                 enemy.moveCooldown = enemy.moveRate + (Math.random() * 2 - 1) * enemy.variance;
             } else if (enemy.velX > 1 || enemy.velY > 1 || enemy.velX < -1 || enemy.velY < -1) {
@@ -532,9 +518,9 @@ const types = {
     },
     tankDrone2: {
         size: 20,
-        score: 2200,
-        hp: 1600,
-        screenTime: 80000,
+        score: 4200,
+        hp: 5000,
+        screenTime: 70000,
         shotRate: 4500,
         moveRate: 2000,
         wingRate: 10,
@@ -543,7 +529,7 @@ const types = {
         script: (enemy, ms) => {
             const DECELERATION = 0.94;
             const DASH_VEL = 600;
-            const THRESHOLD = 70;
+            const THRESHOLD = 120;
             if (enemy.moveCooldown <= 0) {
                 if (enemy.lifetime > enemy.screenTime && enemy.lifetime > 500) {
                     if (!enemy.despawning) {
@@ -571,8 +557,8 @@ const types = {
     },
     princessBee: {
         size: 28,
-        score: 20000,
-        hp: 10000,
+        score: 25000,
+        hp: 20000,
         screenTime: 9999999, // go on. dodge for 3 hours
         shotRate: 2800,
         moveRate: 5000,
@@ -580,16 +566,19 @@ const types = {
         useRotation: true,
         patterns: ["clusterRadial", "longRadialWave", "basicHomingShot", "slowSpiralRadialWave", "bigSmallRadial", "recursiveClusterRadial", "variantRadialWave", "bigSmallRadialWave"],
         script: (enemy, ms) => {
-            const INITIAL_DECEL = 0.95;
+            const INITIAL_DECEL = 0.93;
             const ENRAGED_DECEL = 0.9;
-            const INITIAL_DASH_VEL = 800;
-            const DASH_VEL = 600;
-            const THRESHOLD = 70;
+            const INITIAL_DASH_VEL = 600;
+            const DASH_VEL = 400;
+            const THRESHOLD_TOP = 70;
+            const THRESHOLD_BOTTOM = 450;
+            const THRESHOLD_SIDE = 150;
             const phase = enemy.hp > enemy.maxHp/2 ? 1 : 2;
             const phasePatterns = [
                 [0, 1, 3, 4],
                 [5, 6, 7]
             ];
+            if (enemy.extraAttribute === 0) enemy.extraAttribute = 1;
 
             if (enemy.moveCooldown <= 0) {
                 if (enemy.lifetime > enemy.screenTime && enemy.lifetime > 500) {
@@ -599,10 +588,11 @@ const types = {
                     }
                     enemy.despawnDash(phase === 2 ? DASH_VEL / 2 : DASH_VEL);
                 }
-                else if (enemy.y < THRESHOLD) enemy.downDash(INITIAL_DASH_VEL);
-                else if (enemy.y > Global.BOARD_HEIGHT - THRESHOLD) enemy.upDash(INITIAL_DASH_VEL);
-                else if (enemy.x < THRESHOLD) enemy.leftDash(INITIAL_DASH_VEL);
-                else if (enemy.x > Global.BOARD_WIDTH - THRESHOLD) enemy.rightDash(INITIAL_DASH_VEL);
+                else if (enemy.y < 0) enemy.downDash(INITIAL_DASH_VEL);
+                else if (enemy.y < THRESHOLD_TOP) enemy.downDash(DASH_VEL);
+                else if (enemy.y > Global.BOARD_HEIGHT - THRESHOLD_BOTTOM) enemy.upDash(DASH_VEL);
+                else if (enemy.x < THRESHOLD_SIDE) enemy.rightDash(DASH_VEL);
+                else if (enemy.x > Global.BOARD_WIDTH - THRESHOLD_SIDE) enemy.leftDash(DASH_VEL);
                 else enemy.randomDash(phase === 2 ? DASH_VEL / 2 : DASH_VEL);
                 
                 enemy.moveCooldown = enemy.moveRate + (Math.random() * 2 - 1) * enemy.variance;
@@ -615,6 +605,25 @@ const types = {
             }
             if (enemy.shotCooldown <= 0)
                 enemy.fireSpecific(enemy.patterns[randomPattern(phasePatterns[phase-1])]);
+            if (enemy.extraAttribute !== phase) {
+                enemy.extraAttribute = phase;
+
+                // copy/pasted from player.mjs
+                function pickupBehavior(ms) {
+                    if (this.lifetime > 400) {
+                        this.velX = 0;
+                        this.velY = 120;
+                    } else {
+                        this.velX -= 300 * ms / 1000;
+                        this.velY += 300 * ms / 1000;
+                    }
+                }
+                for (let i = 0; i < 5; i++) {
+                    const pickupVelX = Math.random() > 0.5 ? Math.random() * 60 + 270 : Math.random() * 60 - 270;
+                    const pickupVelY = Math.random() * 160 - 270;
+                    new Pickup.Pickup((Player.power === 4) ? "point" : "power", enemy.x, enemy.y, 15, 0.08, pickupVelX, pickupVelY, pickupBehavior);
+                }
+            }
         }
     }
 };

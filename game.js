@@ -10,7 +10,7 @@ import sprites from "./sprites.json" assert { type: "json" }
 import font from "./assets/ui/font.json" assert { type: "json" }
 import bullet from "./assets/enemy/bullets.json" assert { type: "json" }
 
-// extremely rushed music stuff
+// extremely lazy music stuff
 const bgm = new Audio("./assets/sounds/placeholder_bgm.ogg");
 
 const canvas = document.createElement("canvas");
@@ -166,7 +166,6 @@ function draw() {
     gpctx.drawImage(spriteImages.ui.vignette, 0, 0);
 
     const bombBlastOpacity = Player.bombRadius < 0 ? 1 : -Player.bombRadius / 1050 + 1;
-    console.log(`rgba(255, 255, 255, ${0.5 * bombBlastOpacity})`)
     gpctx.fillStyle = `rgba(255, 255, 255, ${0.5 * bombBlastOpacity})`;
     circle(gpctx, Player.x, Player.y, Player.bombRadius);
 
@@ -224,6 +223,7 @@ function drawUI() {
 }
 
 function tick(ms) {
+    //performance.mark("tickbegan"); // profiling yippee!
     const timeElapsed = ms - lastFrameTime;
     msSinceLastFpsCheck += timeElapsed;
     framesSinceLastFpsCheck++;
@@ -257,7 +257,10 @@ function tick(ms) {
 
     lastFrameTime = ms;
     if (Player.lives < 0) loadMenu("death");
-    if (Global.gameState !== Global.game.LOST && Global.gameState !== Global.game.WON) nextTick = requestAnimationFrame(tick);
+    if (Global.gameState !== Global.game.LOST && Global.gameState !== Global.game.WON)
+        nextTick = requestAnimationFrame(tick);
+    //console.log(`tick took ${performance.measure("ticklength", "tickbegan").duration.toFixed(3)}ms`);
+    // sep 3 2024 (0.1.0a v17): 0.1-1.0ms per tick on personal machine during normal gameplay
 }
 
 function initGame() {

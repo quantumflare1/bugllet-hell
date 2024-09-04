@@ -45,7 +45,17 @@ const types = {
         lastWave: 0,
         script: (pat) => {
             const angle = aimAtPlayer(pat.parent.x, pat.parent.y);
+            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle + (Math.random() * 0.1 - 0.05), 2);
+            pat.wave++;
+        }
+    },
+    tripleAimedInaccurateShot: {
+        lastWave: 0,
+        script: (pat) => {
+            const angle = aimAtPlayer(pat.parent.x, pat.parent.y) + (Math.random() * 0.1 - 0.05);
             Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle, 2);
+            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle - Math.PI / 4, 2);
+            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle + Math.PI / 4, 2);
             pat.wave++;
         }
     },
@@ -140,9 +150,9 @@ const types = {
         }
     },
     shortVInaccurateTracker: {
-        lastWave: 4,
+        lastWave: 3,
         script: (pat) => {
-            if (pat.lifetime > pat.wave * 100) {
+            if (pat.lifetime > pat.wave * 120) {
                 pat.wave++;
                 Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimAtPlayer(pat.parent.x, pat.parent.y) + Math.random() * 0.3 - 0.15, randBulletStyle(5, 5));
             }
@@ -161,7 +171,7 @@ const types = {
     sparseDoubleRadial: {
         lastWave: 1,
         script: (pat) => {
-            const NUM_BULLETS = 12;
+            const NUM_BULLETS = 9;
             switch (pat.wave) {
                 case 0:
                     pat.persistent[0] = randBulletStyle(0, 4);
@@ -192,6 +202,17 @@ const types = {
         script: (pat) => {
             const vel = Math.sqrt(pat.parent.velX ** 2 + pat.parent.velY ** 2);
             Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimWithEnemy(pat.parent.velX, pat.parent.velY), randBulletStyle(5, 3), vel + Bullets.types.basic.vel * 0.8);
+            pat.wave++;
+        }
+    },
+    spreadForward: {
+        lastWave: 0,
+        script: (pat) => {
+            const vel = Math.sqrt(pat.parent.velX ** 2 + pat.parent.velY ** 2);
+            const angle = aimWithEnemy(pat.parent.velX, pat.parent.velY);
+            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle, randBulletStyle(5, 3), vel + Bullets.types.basic.vel * 0.8);
+            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle - 0.4, randBulletStyle(5, 3), vel + Bullets.types.basic.vel * 0.8);
+            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, angle + 0.4, randBulletStyle(5, 3), vel + Bullets.types.basic.vel * 0.8);
             pat.wave++;
         }
     },
@@ -325,11 +346,11 @@ const types = {
         }
     },
     slowSpiralRadialWave: {
-        lastWave: 20,
+        lastWave: 17,
         script: (pat) => {
             const NUM_BULLETS = 12;
             if (pat.wave === 0) pat.persistent[0] = randBulletStyle(2, 3); // style
-            if (pat.lifetime > pat.wave * 100) {
+            if (pat.lifetime > pat.wave * 120) {
                 pat.wave++;
                 for (let i = 0; i < NUM_BULLETS; i++)
                     Bullets.makeBullet("slowSpiral", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS + pat.parent.rotation + pat.wave, pat.persistent[0]);
