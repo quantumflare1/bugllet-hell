@@ -96,7 +96,7 @@ function loadMenu(name) {
         for (const i of Menu[name].labels) drawText(gpctx, ...i);
 
         if (Menu[name].transition !== 0 && transitionPercentComplete < 1) requestAnimationFrame(render);
-        else gpctx.globalAlpha = 1;
+        gpctx.globalAlpha = 1;
     }
     Menu[name].onload();
     requestAnimationFrame(render);
@@ -161,6 +161,7 @@ function fillPowerMeter(scale) {
 }
 
 function draw() {
+    //performance.mark("drawbegan");
     gpctx.drawImage(spriteImages.ui.gameBg, 0, bgScroll - Global.BOARD_HEIGHT);
     gpctx.drawImage(spriteImages.ui.gameBg, 0, bgScroll);
     gpctx.drawImage(spriteImages.ui.vignette, 0, 0);
@@ -185,45 +186,48 @@ function draw() {
 
     for (const i of Enemy.enemies)
         drawEnemy(i);
+
+    //console.log(`draw took ${performance.measure("drawlength", "drawbegan").duration.toFixed(1)}ms`);
+    // sep 4 2024 (0.1.0a v18): 0.5-12.7ms per draw on personal machine during normal gameplay (battery saving mode used)
 }
 
 function drawUI() {
     const sf = 3; // was originally scaleFactor but everything became unreadably long so it got shortened
-    ctx.drawImage(spriteImages.ui.bg, 0, 0);
+    const offset = 18 + Global.BOARD_WIDTH;
+    ctx.drawImage(spriteImages.ui.bg, offset, 0, canvas.width - offset, canvas.height, offset, 0, canvas.width - offset, canvas.height);
 
-    drawText(ctx, title, 700, 40, sf);
+    drawText(ctx, Level.name, 700, 40, sf);
 
-    const scoreDisplay = spriteImages.ui.scoreDisplay;
-    ctx.drawImage(scoreDisplay, 700, 100, scoreDisplay.width * sf, scoreDisplay.height * sf);
+    const scd = spriteImages.ui.scoreDisplay;
+    ctx.drawImage(scd, 700, 100, scd.width * sf, scd.height * sf);
     for (let i = 0; i < 9; i++)
         drawText(ctx, `${Math.floor((Player.score / (10 ** (8 - i))) % 10)}`, 700 + 4 * sf + 7 * sf * i, 100 + 13 * sf, sf);
     
-    const lifeDisplay = spriteImages.ui.lifeDisplay;
-    const life = spriteImages.ui.life;
-    ctx.drawImage(lifeDisplay, 700, 240, lifeDisplay.width * sf, lifeDisplay.height * sf);
+    const lfd = spriteImages.ui.lifeDisplay;
+    const lf = spriteImages.ui.life;
+    ctx.drawImage(lfd, 700, 240, lfd.width * sf, lfd.height * sf);
     for (let i = 0; i < Player.lives; i++) {
-        if (i % 2 === 0) ctx.drawImage(life, 700 + 4 * sf + i * 8 * sf, 240 + 12 * sf, life.width * sf, life.height * sf);
-        else ctx.drawImage(life, 700 + 4 * sf + i * 8 * sf, 240 + 23 * sf, life.width * sf, life.height * sf);
+        if (i % 2 === 0) ctx.drawImage(lf, 700 + 4 * sf + i * 8 * sf, 240 + 12 * sf, lf.width * sf, lf.height * sf);
+        else ctx.drawImage(lf, 700 + 4 * sf + i * 8 * sf, 240 + 23 * sf, lf.width * sf, lf.height * sf);
     }
 
-    const bombDisplay = spriteImages.ui.bombDisplay;
-    const bomb = spriteImages.ui.bomb;
-    ctx.drawImage(bombDisplay, 700, 400, bombDisplay.width * sf, bombDisplay.height * sf);
+    const bmd = spriteImages.ui.bombDisplay;
+    const bm = spriteImages.ui.bomb;
+    ctx.drawImage(bmd, 700, 400, bmd.width * sf, bmd.height * sf);
     for (let i = 0; i < Player.bombs; i++) {
-        if (i % 2 === 0) ctx.drawImage(bomb, 700 + 4 * sf + i * 8 * sf, 400 + 12 * sf, bomb.width * sf, bomb.height * sf);
-        else ctx.drawImage(bomb, 700 + 4 * sf + i * 8 * sf, 400 + 23 * sf, bomb.width * sf, bomb.height * sf);
+        if (i % 2 === 0) ctx.drawImage(bm, 700 + 4 * sf + i * 8 * sf, 400 + 12 * sf, bm.width * sf, bm.height * sf);
+        else ctx.drawImage(bm, 700 + 4 * sf + i * 8 * sf, 400 + 23 * sf, bm.width * sf, bm.height * sf);
     }
 
-    const powerMeter = spriteImages.ui.powerMeter;
+    const pwm = spriteImages.ui.powerMeter;
     fillPowerMeter(sf);
-    ctx.drawImage(powerMeter, 700, 560, powerMeter.width * sf, powerMeter.height * sf);
+    ctx.drawImage(pwm, 700, 560, pwm.width * sf, pwm.height * sf);
     drawText(ctx, Player.power.toFixed(2), 700 + 26 * sf, 560 + 6 * sf, sf);
 
     drawText(ctx, `${fps.toFixed(2)} fps`, 700, 870 - 10 * sf, sf);
 }
 
 function tick(ms) {
-    //performance.mark("tickbegan"); // profiling yippee!
     const timeElapsed = ms - lastFrameTime;
     msSinceLastFpsCheck += timeElapsed;
     framesSinceLastFpsCheck++;
@@ -232,10 +236,11 @@ function tick(ms) {
         fps = framesSinceLastFpsCheck / (msSinceLastFpsCheck / 1000);
         msSinceLastFpsCheck = 0;
         framesSinceLastFpsCheck = 0;
-        drawUI();
+        dispatchEvent(new Event("game_statupdate"));
     }
 
     if (Global.gameState === Global.game.PLAY) {
+        //performance.mark("tickbegan"); // profiling yippee!
         bgScroll += bgScrollRate * timeElapsed / 1000;
         if (bgScroll >= Global.BOARD_HEIGHT) bgScroll = 0;
 
@@ -252,6 +257,8 @@ function tick(ms) {
         for (const i of Pickup.pickups)
             i.tick(timeElapsed);
 
+        //console.log(`tick took ${performance.measure("ticklength", "tickbegan").duration.toFixed(1)}ms`);
+        // sep 4 2024 (0.1.0a v18): 0.6-2.7ms per tick on personal machine during normal gameplay (battery saving mode used)
         draw();
     }
 
@@ -259,12 +266,11 @@ function tick(ms) {
     if (Player.lives < 0) loadMenu("death");
     if (Global.gameState !== Global.game.LOST && Global.gameState !== Global.game.WON)
         nextTick = requestAnimationFrame(tick);
-    //console.log(`tick took ${performance.measure("ticklength", "tickbegan").duration.toFixed(3)}ms`);
-    // sep 3 2024 (0.1.0a v17): 0.1-1.0ms per tick on personal machine during normal gameplay
 }
 
 function initGame() {
     addEventListener("game_statupdate", drawUI);
+    ctx.drawImage(spriteImages.ui.bg, 0, 0);
     drawUI();
     //bgm.play();
     //bgm.volume = 0.1;

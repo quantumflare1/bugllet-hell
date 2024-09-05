@@ -2,7 +2,7 @@ const BOARD_WIDTH = 648;
 const BOARD_HEIGHT = 864;
 
 // use as start pos
-const START_WAVE = 61;
+const START_WAVE = 55;
 const START_POWER = 4;
 
 const game = {

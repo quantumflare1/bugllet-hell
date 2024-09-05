@@ -106,7 +106,7 @@ const win = {
         ["All artwork, design and programming", Global.BOARD_WIDTH / 2 - 7 * 17.5 * 2, Global.BOARD_HEIGHT / 2 - 20, 2],
         ["by QuantumFlare", Global.BOARD_WIDTH / 2 - 7 * 7.5 * 2, Global.BOARD_HEIGHT / 2 + 20, 2],
         ["Music by ZUN", Global.BOARD_WIDTH / 2 - 7 * 6 * 2, Global.BOARD_HEIGHT / 2 + 60, 2],
-        ["(from Touhou 15: Legacy of Lunatic Kingdom)", Global.BOARD_WIDTH / 2 - 7 * 21.5 * 2, Global.BOARD_HEIGHT / 2 + 80, 1],
+        ["(from Touhou 15: Legacy of Lunatic Kingdom)", Global.BOARD_WIDTH / 2 - 7 * 21.5, Global.BOARD_HEIGHT / 2 + 100, 1],
         ["Thank you for playing!", Global.BOARD_WIDTH / 2 - 7 * 11 * 2, Global.BOARD_HEIGHT / 2 + 120, 2]
     ],
     options: [],

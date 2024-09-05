@@ -8,7 +8,7 @@ const enemies = new Set();
 
 // rewrite enemy ai
 class Enemy {
-    constructor(x, y, size, score, hp, screenTime, patterns, script, waveId, type, shotRate, moveRate, wingRate, useRotation) {
+    constructor(x, y, size, score, hp, screenTime, patterns, script, waveId, type, shotRate, moveRate, wingRate, useRotation, rotation = 0) {
         this.x = x;
         this.y = y;
         this.spawnX = x;
@@ -39,7 +39,7 @@ class Enemy {
         this.wingTimer = 0;
         this.variance = 50;
         this.extraAttribute = 0;
-        this.rotation = 0;
+        this.rotation = rotation;
         this.useRotation = useRotation;
 
         enemies.add(this);
@@ -397,6 +397,9 @@ const types = {
                     const vec = getVel(enemy.moveRate, aimAtDespawnPoint(enemy));
                     enemy.velX = vec.velX;
                     enemy.velY = vec.velY;
+
+                    if (Math.floor(enemy.velX) === 0) enemy.rotation = Math.PI / 2;
+                    if (Math.floor(enemy.velY) === 0) enemy.rotation = -Math.PI / 2;
                 }
                 
                 if (enemy.lifetime > enemy.screenTime)
@@ -423,7 +426,7 @@ const types = {
                     if (Player.y > enemy.y + 20) newY = enemy.spawnY + 40;
                 }
                 new Enemy(newX, newY, enemy.size, enemy.score, enemy.hp, enemy.screenTime - enemy.lifetime,
-                    enemy.patterns, enemy.script, enemy.waveId, enemy.type, enemy.shotRate, enemy.moveRate, enemy.wingRate);
+                    enemy.patterns, enemy.script, enemy.waveId, enemy.type, enemy.shotRate, enemy.moveRate, enemy.wingRate, enemy.useRotation, enemy.rotation);
                 enemies.delete(enemy);
             }
         }
@@ -446,6 +449,11 @@ const types = {
                     const vec = getVel(enemy.moveRate, aimAtDespawnPoint(enemy));
                     enemy.velX = vec.velX;
                     enemy.velY = vec.velY;
+
+                    if (Math.floor(enemy.velY) === 0) {
+                        if (enemy.velX > 0) enemy.rotation = -Math.PI / 2;
+                        if (enemy.velX < 0) enemy.rotation = Math.PI / 2;
+                    }
                 }
                 
                 if (enemy.lifetime > enemy.screenTime)
@@ -472,7 +480,7 @@ const types = {
                     if (Player.y > enemy.y + 20) newY = enemy.spawnY + 80;
                 }
                 new Enemy(newX, newY, enemy.size, enemy.score, enemy.hp, enemy.screenTime - enemy.lifetime,
-                    enemy.patterns, enemy.script, enemy.waveId, enemy.type, enemy.shotRate, enemy.moveRate, enemy.wingRate);
+                    enemy.patterns, enemy.script, enemy.waveId, enemy.type, enemy.shotRate, enemy.moveRate, enemy.wingRate, enemy.useRotation, enemy.rotation);
                 enemies.delete(enemy);
             }
         }
@@ -558,7 +566,7 @@ const types = {
     princessBee: {
         size: 28,
         score: 25000,
-        hp: 20000,
+        hp: 4000,
         screenTime: 9999999, // go on. dodge for 3 hours
         shotRate: 2800,
         moveRate: 5000,

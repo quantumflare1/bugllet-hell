@@ -1,6 +1,8 @@
 import * as Enemy from "./enemy.mjs";
 import * as Global from "./global.mjs";
 
+const name = "Instigation";
+
 function randomEnemy(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -302,7 +304,7 @@ const waves = [
         { x: 0, y: -1.02 }
     ], true)
 ];
-let nextWave, levelTime, waveTime, transitionTime;
+let nextWave, levelTime, waveTime, transitionTime, gameRunning = true;
 
 function tick(ms) {
     levelTime += ms;
@@ -330,8 +332,10 @@ function tick(ms) {
         }
         waves[nextWave-1].enemiesLeft = curWaveEnemies;
     }
-    if (nextWave >= waves.length && waves[nextWave-1].enemiesLeft === 0)
+    if (nextWave >= waves.length && waves[nextWave-1].enemiesLeft === 0 && gameRunning) {
         setTimeout(Global.setGameState, 2000, Global.game.WON);
+        gameRunning = false;
+    }
 }
 
 function init() {
@@ -341,4 +345,4 @@ function init() {
     transitionTime = 0;
 }
 
-export { init, tick };
+export { name, init, tick };
