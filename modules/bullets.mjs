@@ -67,7 +67,7 @@ function aimAtPoint(x, y) {
 const types = {
     basic: {
         size: 6,
-        vel: 270,
+        vel: 220,
         rot: 0,
         expireTime: 10000,
         sprite: "basic",
@@ -75,7 +75,7 @@ const types = {
     },
     small: {
         size: 3,
-        vel: 320,
+        vel: 260,
         rot: 0,
         expireTime: 9000,
         sprite: "small",
@@ -83,7 +83,7 @@ const types = {
     },
     large: {
         size: 10,
-        vel: 240,
+        vel: 190,
         rot: 0,
         expireTime: 12000,
         sprite: "large",
@@ -91,7 +91,7 @@ const types = {
     },
     massive: {
         size: 24,
-        vel: 200,
+        vel: 160,
         rot: 0,
         expireTime: 15000,
         sprite: "massive",
@@ -99,7 +99,7 @@ const types = {
     },
     spiral: {
         size: 8,
-        vel: 90,
+        vel: 70,
         rot: 15,
         expireTime: 13000,
         sprite: "spiral",
@@ -111,7 +111,7 @@ const types = {
     },
     dart: {
         size: 5,
-        vel: 370,
+        vel: 300,
         rot: 0,
         expireTime: 10000,
         sprite: "dart",
@@ -119,7 +119,7 @@ const types = {
     },
     grow1: {
         size: 3,
-        vel: 270,
+        vel: 220,
         rot: 0,
         expireTime: 9000,
         sprite: "small",
@@ -132,7 +132,7 @@ const types = {
     },
     grow2: {
         size: 6,
-        vel: 270,
+        vel: 220,
         rot: 0,
         expireTime: 10000,
         sprite: "basic",
@@ -145,7 +145,7 @@ const types = {
     },
     burst: {
         size: 10,
-        vel: 200,
+        vel: 160,
         rot: 0,
         expireTime: 10000,
         sprite: "burst",
@@ -162,7 +162,7 @@ const types = {
     },
     burst1: {
         size: 10,
-        vel: 200,
+        vel: 160,
         rot: 0,
         expireTime: 10000,
         sprite: "burst",
@@ -179,7 +179,7 @@ const types = {
     },
     burst2: {
         size: 6,
-        vel: 240,
+        vel: 190,
         rot: 0,
         expireTime: 10000,
         sprite: "basic",
@@ -196,7 +196,7 @@ const types = {
     },
     homing: {
         size: 6,
-        vel: 300,
+        vel: 240,
         rot: 0,
         expireTime: 10000,
         sprite: "basic",
@@ -211,7 +211,7 @@ const types = {
     },
     slowSpiral: {
         size: 8,
-        vel: 270,
+        vel: 220,
         rot: 0.7,
         expireTime: 5000,
         sprite: "spiral",

@@ -102,7 +102,7 @@ const types = {
     dartTriangle: {
         lastWave: 3,
         script: (pat) => {
-            const spread = 12;
+            const spread = 16;
             switch (pat.wave) {
                 case 0:
                     pat.persistent[0] = pat.parent.x; // initial firing location
@@ -114,14 +114,14 @@ const types = {
                     pat.wave++;
                     break;
                 case 1:
-                    if (pat.lifetime >= 80) {
+                    if (pat.lifetime >= 100) {
                         Bullets.makeBullet("dart", pat.persistent[0] + pat.persistent[3] * spread, pat.persistent[1] - pat.persistent[4] * spread, pat.persistent[2], 3);
                         Bullets.makeBullet("dart", pat.persistent[0] - pat.persistent[3] * spread, pat.persistent[1] + pat.persistent[4] * spread, pat.persistent[2], 3);
                         pat.wave++;
                     }
                     break;
                 case 2:
-                    if (pat.lifetime >= 160) {
+                    if (pat.lifetime >= 200) {
                         Bullets.makeBullet("dart", pat.persistent[0] + pat.persistent[3] * spread * 2, pat.persistent[1] - pat.persistent[4] * spread * 2, pat.persistent[2], 4);
                         Bullets.makeBullet("dart", pat.persistent[0], pat.persistent[1], pat.persistent[2], 4);
                         Bullets.makeBullet("dart", pat.persistent[0] - pat.persistent[3] * spread * 2, pat.persistent[1] + pat.persistent[4] * spread * 2, pat.persistent[2], 4);
@@ -129,7 +129,7 @@ const types = {
                     }
                     break;
                 case 3:
-                    if (pat.lifetime >= 240) {
+                    if (pat.lifetime >= 300) {
                         Bullets.makeBullet("dart", pat.persistent[0] + pat.persistent[3] * spread * 3, pat.persistent[1] - pat.persistent[4] * spread * 3, pat.persistent[2], 5);
                         Bullets.makeBullet("dart", pat.persistent[0] + pat.persistent[3] * spread, pat.persistent[1] - pat.persistent[4] * spread, pat.persistent[2], 5);
                         Bullets.makeBullet("dart", pat.persistent[0] - pat.persistent[3] * spread, pat.persistent[1] + pat.persistent[4] * spread, pat.persistent[2], 5);
@@ -201,7 +201,7 @@ const types = {
         lastWave: 0,
         script: (pat) => {
             const vel = Math.sqrt(pat.parent.velX ** 2 + pat.parent.velY ** 2);
-            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimWithEnemy(pat.parent.velX, pat.parent.velY), randBulletStyle(5, 3), vel + Bullets.types.basic.vel * 0.8);
+            Bullets.makeBullet("basic", pat.parent.x, pat.parent.y, aimWithEnemy(pat.parent.velX, pat.parent.velY), randBulletStyle(5, 3), vel + Bullets.types.basic.vel * 0.5);
             pat.wave++;
         }
     },

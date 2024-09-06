@@ -11,8 +11,8 @@ const BLINKS_PER_SECOND = 15;
 const GRAZE_RADIUS = 10;
 const GRAZE_PER_BULLET = 0.02;
 const BOMB_BLAST_SPEED = 2000;
-const BASE_LIVES = 5;
-const BASE_BOMBS = 3;
+const BASE_LIVES = 6;
+const BASE_BOMBS = 4;
 
 let x, y, size;
 let movingLeft, movingRight, movingUp, movingDown, isFiring;
@@ -193,7 +193,7 @@ function tick(ms) {
                 power = power > 0.2 ? power - 0.2 : 0;
                 const powerDiff = oldPower - power;
                 grazeMultiplier = 1;
-                if (bombs < 2) bombs = 2;
+                if (bombs < 3) bombs = 3;
                 invTime = 2000;
                 dispatchEvent(new Event("game_statupdate"));
     
@@ -244,67 +244,79 @@ function tick(ms) {
     if (timeSinceLastBullet > fireCooldown && isFiring && invTime <= 0) {
         if (focused) {
             if (power >= 4) {
-                fireBullet(6, 20, -2000, 10, 0);
-                fireBullet(6, -20, -2000, -10, 0);
-                fireBullet(6, 14, -2000, 8, 0);
-                fireBullet(6, -14, -2000, -8, 0);
-                fireBullet(6, 6, -2000, 8, -5);
-                fireBullet(6, -6, -2000, -8, -5);
-                fireBullet(6, 0, -2000, 0, -10);
-                fireCooldown = 45;
+                fireBullet(6, 20, -2096, 10, 0);
+                fireBullet(6, -20, -2096, -10, 0);
+                fireBullet(6, 14, -2098, 9, 0);
+                fireBullet(6, -14, -2098, -9, 0);
+                fireBullet(6, 5, -2100, 8, 0);
+                fireBullet(6, -5, -2100, -8, 0);
+                fireBullet(6, 0, -2100, 5, -5);
+                fireBullet(6, -0, -2100, -5, -5);
+                fireBullet(6, 0, -2100, 0, -10);
+                fireCooldown = 47;
             }
-            if (power >= 3) {
-                fireBullet(6, 16, -1800, 10, 0);
-                fireBullet(6, -16, -1800, -10, 0);
-                fireBullet(6, 8, -1800, 6, -5);
-                fireBullet(6, -8, -1800, -6, -5);
-                fireBullet(6, 0, -1800, 0, -10);
-                fireCooldown = 50;
+            else if (power >= 3) {
+                fireBullet(6, 16, -1885, 10, 0);
+                fireBullet(6, -16, -1885, -10, 0);
+                fireBullet(6, 6, -1888, 8, 0);
+                fireBullet(6, -6, -1888, -8, 0);
+                fireBullet(6, 0, -1890, 6, -5);
+                fireBullet(6, -0, -1890, -6, -5);
+                fireBullet(6, 0, -1890, 0, -10);
+                fireCooldown = 53;
             }
             else if (power >= 2) {
-                fireBullet(6, 10, -1600, 8, 0);
-                fireBullet(6, -10, -1600, -8, 0);
-                fireBullet(6, 3, -1600, 4, -6);
-                fireBullet(6, -3, -1600, -4, -6);
-                fireCooldown = 55;
+                fireBullet(6, 8, -1579, 8, 0);
+                fireBullet(6, -8, -1579, -8, 0);
+                fireBullet(6, 0, -1680, 4, -6);
+                fireBullet(6, 0, -1680, -4, -6);
+                fireBullet(6, 0, -1680, 0, -10);
+                fireCooldown = 58;
             }
             else if (power >= 1) {
-                fireBullet(6, 5, -1400, 2, -8);
-                fireBullet(6, -5, -1400, -2, -8);
-                fireCooldown = 60;
+                fireBullet(6, 4, -1470, 5, -6);
+                fireBullet(6, 4, -1470, -5, -6);
+                fireBullet(6, 0, -1470, 0, -10);
+                fireCooldown = 63;
             } else {
-                fireBullet(6, 0, -1200, 0, -8);
+                fireBullet(6, 0, -1260, 0, -8);
                 fireCooldown = 66;
             }
         } else {
             if (power >= 4) {
-                fireBullet(6, 180, -1920, 10, 0);
-                fireBullet(6, -180, -1920, -10, 0);
-                fireBullet(6, 100, -1960, 8, 0);
-                fireBullet(6, -100, -1960, -8, 0);
-                fireBullet(6, 20, -2000, 8, -5);
-                fireBullet(6, -20, -2000, -8, -5);
+                fireBullet(6, 400, -1700, 10, 0);
+                fireBullet(6, -400, -1700, -10, 0);
+                fireBullet(6, 270, -1850, 8, 0);
+                fireBullet(6, -270, -1850, -8, 0);
+                fireBullet(6, 160, -1930, 6, 0);
+                fireBullet(6, -160, -1930, -6, 0);
+                fireBullet(6, 60, -1980, 4, -5);
+                fireBullet(6, -60, -1980, -4, -5);
                 fireBullet(6, 0, -2000, 0, -10);
                 fireCooldown = 45;
             }
-            if (power >= 3) {
-                fireBullet(6, 120, -1760, 10, 0);
-                fireBullet(6, -120, -1760, -10, 0);
-                fireBullet(6, 40, -1800, 6, -5);
-                fireBullet(6, -40, -1800, -6, -5);
+            else if (power >= 3) {
+                fireBullet(6, 320, -1560, 10, 0);
+                fireBullet(6, -320, -1560, -10, 0);
+                fireBullet(6, 180, -1720, 10, 0);
+                fireBullet(6, -180, -1720, -10, 0);
+                fireBullet(6, 60, -1800, 6, -5);
+                fireBullet(6, -60, -1800, -6, -5);
                 fireBullet(6, 0, -1800, 0, -10);
                 fireCooldown = 50;
             }
             else if (power >= 2) {
-                fireBullet(6, 80, -1560, 8, 0);
-                fireBullet(6, -80, -1560, -8, 0);
-                fireBullet(6, 10, -1600, 4, -6);
-                fireBullet(6, -10, -1600, -4, -6);
+                fireBullet(6, 200, -1500, 8, 0);
+                fireBullet(6, -200, -1500, -8, 0);
+                fireBullet(6, 80, -1570, 4, -6);
+                fireBullet(6, -80, -1570, -4, -6);
+                fireBullet(6, 0, -1600, 0, -10);
                 fireCooldown = 55;
             }
             else if (power >= 1) {
-                fireBullet(6, 20, -1400, 2, -8);
-                fireBullet(6, -20, -1400, -2, -8);
+                fireBullet(6, 70, -1380, 2, -6);
+                fireBullet(6, -70, -1380, -2, -6);
+                fireBullet(6, 0, -1400, 0, -10);
                 fireCooldown = 60;
             } else {
                 fireBullet(6, 0, -1200, 0, -8);

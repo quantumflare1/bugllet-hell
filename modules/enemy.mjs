@@ -303,8 +303,8 @@ const types = {
         useRotation: false,
         patterns: ["tripleAimedInaccurateShot"],
         script: (enemy, ms) => {
-            const DECELERATION = 0.9;
-            const DASH_VEL = 700;
+            const DECELERATION = 0.87;
+            const DASH_VEL = 600;
             if (enemy.moveCooldown <= 0) {
                 enemy.pickDashNormal(DASH_VEL);
                 
@@ -323,7 +323,7 @@ const types = {
     basicDrone2: {
         size: 12,
         score: 500,
-        hp: 80,
+        hp: 50,
         screenTime: 1500,
         shotRate: 1400,
         moveRate: 1600,
@@ -331,7 +331,7 @@ const types = {
         useRotation: false,
         patterns: ["basicSpread", "shortVInaccurateTracker"],
         script: (enemy, ms) => {
-            const DECELERATION = 0.9; // maybe these can be moved out as an object property
+            const DECELERATION = 0.85; // maybe these can be moved out as an object property
             const DASH_VEL = 500; // investigate later
             if (enemy.moveCooldown <= 0) {
                 enemy.pickDashNormal(DASH_VEL);
@@ -351,9 +351,9 @@ const types = {
     basicDrone3: {
         size: 12,
         score: 2000,
-        hp: 480,
+        hp: 360,
         screenTime: 16000,
-        shotRate: 1000,
+        shotRate: 1300,
         moveRate: 99999,
         wingRate: 30,
         useRotation: true,
@@ -382,8 +382,8 @@ const types = {
     fighterDrone1: {
         size: 14,
         score: 800,
-        hp: 130,
-        screenTime: 11000,
+        hp: 100,
+        screenTime: 15000,
         shotRate: 1600,
         moveRate: 330,
         wingRate: 10,
@@ -398,8 +398,10 @@ const types = {
                     enemy.velX = vec.velX;
                     enemy.velY = vec.velY;
 
-                    if (Math.floor(enemy.velX) === 0) enemy.rotation = Math.PI / 2;
-                    if (Math.floor(enemy.velY) === 0) enemy.rotation = -Math.PI / 2;
+                    if (Math.floor(enemy.velY) === 0) {
+                        if (enemy.velX > 0) enemy.rotation = -Math.PI / 2;
+                        if (enemy.velX < 0) enemy.rotation = Math.PI / 2;
+                    }
                 }
                 
                 if (enemy.lifetime > enemy.screenTime)
@@ -434,13 +436,13 @@ const types = {
     fighterDrone2: {
         size: 14,
         score: 2100,
-        hp: 170,
-        screenTime: 10000,
-        shotRate: 200,
+        hp: 140,
+        screenTime: 13000,
+        shotRate: 240,
         moveRate: 440,
         wingRate: 10,
         useRotation: true,
-        patterns: ["spreadForward"],
+        patterns: ["spreadForward", "basicForward"],
         script: (enemy, ms) => {
             if (enemy.moveCooldown <= 0) {
                 if (enemy.despawnX === 0 && enemy.despawnY === 0){
@@ -461,8 +463,10 @@ const types = {
                 
                 enemy.moveCooldown = Number.MAX_VALUE;
             }
-            if (enemy.shotCooldown <= 0)
-                enemy.basicFire();
+            if (enemy.shotCooldown <= 0) {
+                if (Math.floor(enemy.velY) === 0) enemy.fireSpecific("spreadForward");
+                if (Math.floor(enemy.velX) === 0) enemy.fireSpecific("basicForward");
+            }
             if (enemy.lifetime / 180 >= enemy.extraAttribute) {
                 enemy.fireSpecificNoCooldown("basicTrail");
                 enemy.extraAttribute++;
@@ -488,7 +492,7 @@ const types = {
     tankDrone1: {
         size: 20,
         score: 3500,
-        hp: 2800,
+        hp: 2700,
         screenTime: 35000,
         shotRate: 4000,
         moveRate: 3000,
@@ -527,7 +531,7 @@ const types = {
     tankDrone2: {
         size: 20,
         score: 4200,
-        hp: 5000,
+        hp: 4000,
         screenTime: 70000,
         shotRate: 4500,
         moveRate: 2000,
@@ -536,7 +540,7 @@ const types = {
         patterns: ["expandingMachineGunFire", "basicRadial", "doubleSmallDartRay"],
         script: (enemy, ms) => {
             const DECELERATION = 0.94;
-            const DASH_VEL = 600;
+            const DASH_VEL = 400;
             const THRESHOLD = 120;
             if (enemy.moveCooldown <= 0) {
                 if (enemy.lifetime > enemy.screenTime && enemy.lifetime > 500) {
@@ -566,7 +570,7 @@ const types = {
     princessBee: {
         size: 28,
         score: 25000,
-        hp: 4000,
+        hp: 20000,
         screenTime: 9999999, // go on. dodge for 3 hours
         shotRate: 2800,
         moveRate: 5000,
