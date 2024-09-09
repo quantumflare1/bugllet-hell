@@ -289,8 +289,6 @@ function getVel(vel, dir) {
     return { velX: vx, velY: vy };
 }
 
-// todo: there are loads of reused/copied lines of code here that i would like to clean up
-// similar: the sprite index json
 const types = {
     basicDrone1: {
         size: 12,
@@ -480,8 +478,8 @@ const types = {
                     if (Player.x > enemy.x + 20) newX = enemy.spawnX + 60;
                 }
                 if (Math.floor(enemy.velY) === 0) {
-                    if (Player.y < enemy.y - 20) newY = enemy.spawnY - 80;
-                    if (Player.y > enemy.y + 20) newY = enemy.spawnY + 80;
+                    if (Player.y < enemy.y - 20) newY = enemy.spawnY - 60;
+                    if (Player.y > enemy.y + 20) newY = enemy.spawnY + 60;
                 }
                 new Enemy(newX, newY, enemy.size, enemy.score, enemy.hp, enemy.screenTime - enemy.lifetime,
                     enemy.patterns, enemy.script, enemy.waveId, enemy.type, enemy.shotRate, enemy.moveRate, enemy.wingRate, enemy.useRotation, enemy.rotation);
@@ -577,9 +575,10 @@ const types = {
         wingRate: 10,
         useRotation: true,
         patterns: ["clusterRadial", "longRadialWave", "basicHomingShot", "slowSpiralRadialWave", "bigSmallRadial", "recursiveClusterRadial", "variantRadialWave", "bigSmallRadialWave"],
+        patIndex: 0, // hacky solution whatever do something abt this later
         script: (enemy, ms) => {
             const INITIAL_DECEL = 0.93;
-            const ENRAGED_DECEL = 0.9;
+            const ENRAGED_DECEL = 0.88;
             const INITIAL_DASH_VEL = 600;
             const DASH_VEL = 400;
             const THRESHOLD_TOP = 70;
@@ -615,10 +614,14 @@ const types = {
                 enemy.velX = 0;
                 enemy.velY = 0;
             }
-            if (enemy.shotCooldown <= 0)
-                enemy.fireSpecific(enemy.patterns[randomPattern(phasePatterns[phase-1])]);
+            if (enemy.shotCooldown <= 0) {
+                enemy.fireSpecific(enemy.patterns[phasePatterns[phase-1][types.princessBee.patIndex]]);
+                types.princessBee.patIndex = types.princessBee.patIndex >= phasePatterns[phase-1].length-1 ? 0 : types.princessBee.patIndex + 1;
+            }
             if (enemy.extraAttribute !== phase) {
                 enemy.extraAttribute = phase;
+                enemy.shotRate = 1800;
+                enemy.moveRate = 3500;
 
                 // copy/pasted from player.mjs
                 function pickupBehavior(ms) {
@@ -633,8 +636,13 @@ const types = {
                 for (let i = 0; i < 5; i++) {
                     const pickupVelX = Math.random() > 0.5 ? Math.random() * 60 + 270 : Math.random() * 60 - 270;
                     const pickupVelY = Math.random() * 160 - 270;
-                    new Pickup.Pickup((Player.power === 4) ? "point" : "power", enemy.x, enemy.y, 15, 0.08, pickupVelX, pickupVelY, pickupBehavior);
+                    (Player.power === 4) ?
+                    new Pickup.Pickup("point", enemy.x, enemy.y, 15, 1000, pickupVelX, pickupVelY, pickupBehavior) :
+                    new Pickup.Pickup("power", enemy.x, enemy.y, 15, 0.08, pickupVelX, pickupVelY, pickupBehavior);
                 }
+                const pickupVelX = Math.random() > 0.5 ? Math.random() * 60 + 270 : Math.random() * 60 - 270;
+                const pickupVelY = Math.random() * 160 - 270;
+                new Pickup.Pickup("life", enemy.x, enemy.y, 15, 0.08, pickupVelX, pickupVelY, pickupBehavior);
             }
         }
     }

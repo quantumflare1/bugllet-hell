@@ -282,9 +282,8 @@ const waves = [
         { x: -0.3, y: -1.02 },
         { x: 0.3, y: -1.02 }
     ]),
-    new Wave(15000, ["tankDrone1", "tankDrone1", "fighterDrone2", "fighterDrone2"], [
+    new Wave(15000, ["tankDrone1", "fighterDrone2", "fighterDrone2"], [
         { x: -0.4, y: -1.02 },
-        { x: 0.4, y: -1.02 },
         { x: -1.02, y: -0.9 },
         { x: 1.02, y: -0.8 }
     ]),
@@ -295,21 +294,33 @@ const waves = [
         { x: 0.3, y: -1.02 },
         { x: 0.5, y: -1.02 }
     ]),
-    new Wave(3000, ["tankDrone2", "fighterDrone1", "fighterDrone1", "fighterDrone1"], [
-        { x: 0, y: -1.02 },
-        { x: -0.2, y: -1.02 },
-        { x: 0, y: -1.02 },
-        { x: 0.2, y: -1.02 }
+    new Wave(15000, ["tankDrone1"], [
+        { x: 0.4, y: -1.02 },
     ]),
-    new Wave(8000, ["basicDrone2", "basicDrone2", "basicDrone2", "basicDrone2"], [
-        { x: -0.45, y: -1.02 },
-        { x: -0.15, y: -1.02 },
-        { x: 0.15, y: -1.02 },
-        { x: 0.45, y: -1.02 }
+    new Wave(12000, ["tankDrone2", "fighterDrone1", "fighterDrone1", "fighterDrone1"], [
+        { x: 0, y: -1.02 },
+        { x: -0.8, y: -1.02 },
+        { x: 0, y: -1.02 },
+        { x: 0.8, y: -1.02 }
+    ]),
+    new Wave(8000, ["basicDrone2", "basicDrone2", "basicDrone2"], [
+        { x: -0.4, y: -1.02 },
+        { x: 0, y: -1.02 },
+        { x: 0.4, y: -1.02 }
     ]),
     new Wave(7000, ["fighterDrone2", "fighterDrone2"], [
         { x: -1.02, y: -0.7 },
         { x: 1.02, y: -0.7 }
+    ]),
+    new Wave(12000, ["basicDrone2", "basicDrone2", "basicDrone2", "basicDrone2"], [
+        { x: -0.75, y: -1.02 },
+        { x: -0.25, y: -1.02 },
+        { x: 0.25, y: -1.02 },
+        { x: 0.75, y: -1.02 }
+    ]),
+    new Wave(7000, ["fighterDrone1", "fighterDrone1"], [
+        { x: -0.9, y: -1.02 },
+        { x: -0.7, y: -1.02 }
     ]),
     new Wave(13000, ["princessBee"], [
         { x: 0, y: -1.02 }

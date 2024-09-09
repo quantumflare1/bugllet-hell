@@ -40,6 +40,8 @@
         "fighterDrone2Wings1": "booster_fire2.png",
         "tankDrone1": "tank_drone.png",
         "tankDrone2": "tank_drone.png",
-        "princessBee": "princess_drone.png"
+        "princessBee": "princess_drone.png",
+        "princessBeeWings0": "princess_wings.png",
+        "princessBeeWings1": "princess_wings2.png"
     }
 }

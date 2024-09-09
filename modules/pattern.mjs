@@ -353,7 +353,7 @@ const types = {
             if (pat.lifetime > pat.wave * 120) {
                 pat.wave++;
                 for (let i = 0; i < NUM_BULLETS; i++)
-                    Bullets.makeBullet("slowSpiral", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS + pat.parent.rotation + pat.wave, pat.persistent[0]);
+                    Bullets.makeBullet("slowSpiral", pat.parent.x, pat.parent.y, (i * TAU) / NUM_BULLETS + pat.parent.rotation - (pat.wave / 2), pat.persistent[0]);
             }
         }
     },
