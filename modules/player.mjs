@@ -244,25 +244,25 @@ function tick(ms) {
     if (timeSinceLastBullet > fireCooldown && isFiring && invTime <= 0) {
         if (focused) {
             if (power >= 4) {
-                fireBullet(6, 20, -2096, 10, 0);
-                fireBullet(6, -20, -2096, -10, 0);
-                fireBullet(6, 14, -2098, 9, 0);
-                fireBullet(6, -14, -2098, -9, 0);
-                fireBullet(6, 5, -2100, 8, 0);
-                fireBullet(6, -5, -2100, -8, 0);
-                fireBullet(6, 0, -2100, 5, -5);
-                fireBullet(6, -0, -2100, -5, -5);
-                fireBullet(6, 0, -2100, 0, -10);
+                fireBullet(7, 20, -2096, 10, 0);
+                fireBullet(7, -20, -2096, -10, 0);
+                fireBullet(7, 14, -2098, 9, 0);
+                fireBullet(7, -14, -2098, -9, 0);
+                fireBullet(8, 5, -2100, 8, 0);
+                fireBullet(8, -5, -2100, -8, 0);
+                fireBullet(8, 0, -2100, 5, -5);
+                fireBullet(8, -0, -2100, -5, -5);
+                fireBullet(8, 0, -2100, 0, -10);
                 fireCooldown = 47;
             }
             else if (power >= 3) {
                 fireBullet(6, 16, -1885, 10, 0);
                 fireBullet(6, -16, -1885, -10, 0);
-                fireBullet(6, 6, -1888, 8, 0);
-                fireBullet(6, -6, -1888, -8, 0);
-                fireBullet(6, 0, -1890, 6, -5);
-                fireBullet(6, -0, -1890, -6, -5);
-                fireBullet(6, 0, -1890, 0, -10);
+                fireBullet(7, 6, -1888, 8, 0);
+                fireBullet(7, -6, -1888, -8, 0);
+                fireBullet(7, 0, -1890, 6, -5);
+                fireBullet(7, -0, -1890, -6, -5);
+                fireBullet(8, 0, -1890, 0, -10);
                 fireCooldown = 53;
             }
             else if (power >= 2) {
@@ -270,7 +270,7 @@ function tick(ms) {
                 fireBullet(6, -8, -1579, -8, 0);
                 fireBullet(6, 0, -1680, 4, -6);
                 fireBullet(6, 0, -1680, -4, -6);
-                fireBullet(6, 0, -1680, 0, -10);
+                fireBullet(7, 0, -1680, 0, -10);
                 fireCooldown = 58;
             }
             else if (power >= 1) {
@@ -284,39 +284,39 @@ function tick(ms) {
             }
         } else {
             if (power >= 4) {
-                fireBullet(6, 400, -1700, 10, 0);
-                fireBullet(6, -400, -1700, -10, 0);
-                fireBullet(6, 270, -1850, 8, 0);
-                fireBullet(6, -270, -1850, -8, 0);
-                fireBullet(6, 160, -1930, 6, 0);
-                fireBullet(6, -160, -1930, -6, 0);
-                fireBullet(6, 60, -1980, 4, -5);
-                fireBullet(6, -60, -1980, -4, -5);
-                fireBullet(6, 0, -2000, 0, -10);
+                fireBullet(8, 400, -1700, 10, 0);
+                fireBullet(8, -400, -1700, -10, 0);
+                fireBullet(8, 270, -1850, 8, 0);
+                fireBullet(8, -270, -1850, -8, 0);
+                fireBullet(9, 160, -1930, 6, 0);
+                fireBullet(9, -160, -1930, -6, 0);
+                fireBullet(9, 60, -1980, 4, -5);
+                fireBullet(9, -60, -1980, -4, -5);
+                fireBullet(9, 0, -2000, 0, -10);
                 fireCooldown = 45;
             }
             else if (power >= 3) {
-                fireBullet(6, 320, -1560, 10, 0);
-                fireBullet(6, -320, -1560, -10, 0);
-                fireBullet(6, 180, -1720, 10, 0);
-                fireBullet(6, -180, -1720, -10, 0);
-                fireBullet(6, 60, -1800, 6, -5);
-                fireBullet(6, -60, -1800, -6, -5);
-                fireBullet(6, 0, -1800, 0, -10);
+                fireBullet(7, 320, -1560, 10, 0);
+                fireBullet(7, -320, -1560, -10, 0);
+                fireBullet(8, 180, -1720, 10, 0);
+                fireBullet(8, -180, -1720, -10, 0);
+                fireBullet(8, 60, -1800, 6, -5);
+                fireBullet(8, -60, -1800, -6, -5);
+                fireBullet(9, 0, -1800, 0, -10);
                 fireCooldown = 50;
             }
             else if (power >= 2) {
                 fireBullet(6, 200, -1500, 8, 0);
                 fireBullet(6, -200, -1500, -8, 0);
-                fireBullet(6, 80, -1570, 4, -6);
-                fireBullet(6, -80, -1570, -4, -6);
-                fireBullet(6, 0, -1600, 0, -10);
+                fireBullet(7, 80, -1570, 4, -6);
+                fireBullet(7, -80, -1570, -4, -6);
+                fireBullet(8, 0, -1600, 0, -10);
                 fireCooldown = 55;
             }
             else if (power >= 1) {
                 fireBullet(6, 70, -1380, 2, -6);
                 fireBullet(6, -70, -1380, -2, -6);
-                fireBullet(6, 0, -1400, 0, -10);
+                fireBullet(7, 0, -1400, 0, -10);
                 fireCooldown = 60;
             } else {
                 fireBullet(6, 0, -1200, 0, -8);

@@ -287,7 +287,7 @@ const waves = [
         { x: -1.02, y: -0.9 },
         { x: 1.02, y: -0.8 }
     ]),
-    new Wave(15000, ["basicDrone2", "basicDrone2", "basicDrone2", "basicDrone2", "basicDrone2"], [
+    new Wave(12000, ["basicDrone2", "basicDrone2", "basicDrone2", "basicDrone2", "basicDrone2"], [
         { x: -0.5, y: -1.02 },
         { x: -0.3, y: -1.02 },
         { x: 0, y: -1.02 },

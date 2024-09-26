@@ -59,8 +59,8 @@ class Enemy {
 
         for (const i of Bullets.playerBullets) {
             const dist = Math.sqrt((i.x - this.x) ** 2 + (i.y - this.y) ** 2);
-            if (dist < i.size + this.size) {
-                const damage = 3;
+            if (dist < 6 + this.size) { // note to self: player bullet size currently hardcoded to 6 maybe this should change at some point
+                const damage = i.size - 4;
                 this.hp -= damage;
                 Bullets.playerBullets.delete(i);
                 //Player.powerUp(damage / 1000);
@@ -89,14 +89,14 @@ class Enemy {
     generatePickup() {
         function pickupFall(ms) {
             if (this.lifetime < 600)
-                this.velY += (-this.baseVelY + 150) * ms / 600;
+                this.velY += (-this.baseVelY + 300) * ms / 600;
         }
         if (Player.power < 4 && Math.random() < 1 - (Player.power / 5)) {
-            new Pickup.Pickup("power", this.x, this.y, 15, 0.12, 0, -230 + Math.random() * 60, pickupFall);
+            new Pickup.Pickup("power", this.x, this.y, 15, 0.08, 0, -230 + Math.random() * 60, pickupFall);
         }
         else if (Math.random() < 0.7) {
             if (Player.power < 4 && Math.random() < 0.6)
-                new Pickup.Pickup("power", this.x, this.y, 15, 0.12, 0, -230 + Math.random() * 60, pickupFall);
+                new Pickup.Pickup("power", this.x, this.y, 15, 0.08, 0, -230 + Math.random() * 60, pickupFall);
             else
                 new Pickup.Pickup("point", this.x, this.y, 15, 2000, 0, -230 + Math.random() * 60, pickupFall);
         }
@@ -296,7 +296,7 @@ const types = {
         hp: 60,
         screenTime: 18000,
         shotRate: 2200,
-        moveRate: 18000,
+        moveRate: 3000,
         wingRate: 30,
         useRotation: false,
         patterns: ["tripleAimedInaccurateShot"],
@@ -306,7 +306,10 @@ const types = {
             if (enemy.moveCooldown <= 0) {
                 enemy.pickDashNormal(DASH_VEL);
                 
-                enemy.moveCooldown = enemy.moveRate + (Math.random() * 2 - 1) * enemy.variance;
+                if (enemy.lifetime < enemy.screenTime)
+                    enemy.moveCooldown = enemy.screenTime;
+                else
+                    enemy.moveCooldown = enemy.moveRate + (Math.random() * 2 - 1) * enemy.variance;
             } else if (enemy.velX > 1 || enemy.velY > 1 || enemy.velX < -1 || enemy.velY < -1) {
                 enemy.velX *= (DECELERATION * ms / 1000) / (ms / 1000);
                 enemy.velY *= (DECELERATION * ms / 1000) / (ms / 1000);
@@ -578,7 +581,7 @@ const types = {
         patIndex: 0, // hacky solution whatever do something abt this later
         script: (enemy, ms) => {
             const INITIAL_DECEL = 0.93;
-            const ENRAGED_DECEL = 0.88;
+            const ENRAGED_DECEL = 0.85;
             const INITIAL_DASH_VEL = 600;
             const DASH_VEL = 400;
             const THRESHOLD_TOP = 70;
@@ -620,7 +623,7 @@ const types = {
             }
             if (enemy.extraAttribute !== phase) {
                 enemy.extraAttribute = phase;
-                enemy.shotRate = 1800;
+                enemy.shotRate = 2200;
                 enemy.moveRate = 3500;
 
                 // copy/pasted from player.mjs
@@ -638,7 +641,7 @@ const types = {
                     const pickupVelY = Math.random() * 160 - 270;
                     (Player.power === 4) ?
                     new Pickup.Pickup("point", enemy.x, enemy.y, 15, 1000, pickupVelX, pickupVelY, pickupBehavior) :
-                    new Pickup.Pickup("power", enemy.x, enemy.y, 15, 0.08, pickupVelX, pickupVelY, pickupBehavior);
+                    new Pickup.Pickup("power", enemy.x, enemy.y, 15, 0.06, pickupVelX, pickupVelY, pickupBehavior);
                 }
                 const pickupVelX = Math.random() > 0.5 ? Math.random() * 60 + 270 : Math.random() * 60 - 270;
                 const pickupVelY = Math.random() * 160 - 270;
