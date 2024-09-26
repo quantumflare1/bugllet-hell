@@ -6,9 +6,9 @@ import * as Enemy from "./modules/enemy.mjs";
 import * as Level from "./modules/level.mjs";
 import * as Pickup from "./modules/pickup.mjs";
 import * as Menu from "./modules/menu.mjs";
-import sprites from "./sprites.json" assert { type: "json" }
-import font from "./assets/ui/font.json" assert { type: "json" }
-import bullet from "./assets/enemy/bullets.json" assert { type: "json" }
+import sprites from "./sprites.json" with { type: "json" }
+import font from "./assets/ui/font.json" with { type: "json" }
+import bullet from "./assets/enemy/bullets.json" with { type: "json" }
 
 // extremely lazy music stuff
 const bgm = new Audio("./assets/sounds/placeholder_bgm.ogg");
