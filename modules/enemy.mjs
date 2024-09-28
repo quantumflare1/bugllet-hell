@@ -99,11 +99,11 @@ class Enemy {
                 this.velY += (-this.baseVelY + 300) * ms / 600;
         }
         if (Player.power < 4 && Math.random() < 1 - (Player.power / 5)) {
-            new Pickup.Pickup("power", this.x, this.y, 15, 0.08, 0, -230 + Math.random() * 60, pickupFall);
+            new Pickup.Pickup("power", this.x, this.y, 15, 0.06, 0, -230 + Math.random() * 60, pickupFall);
         }
         else if (Math.random() < 0.7) {
             if (Player.power < 4 && Math.random() < 0.6)
-                new Pickup.Pickup("power", this.x, this.y, 15, 0.08, 0, -230 + Math.random() * 60, pickupFall);
+                new Pickup.Pickup("power", this.x, this.y, 15, 0.06, 0, -230 + Math.random() * 60, pickupFall);
             else
                 new Pickup.Pickup("point", this.x, this.y, 15, 2000, 0, -230 + Math.random() * 60, pickupFall);
         }
