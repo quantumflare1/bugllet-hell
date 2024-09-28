@@ -3,7 +3,7 @@ import * as Global from "./global.mjs";
 import * as Pickup from "./pickup.mjs";
 
 const BASE_MOVEMENT = 400;
-const BASE_FOCUS = 210;
+const BASE_FOCUS = 180;
 const SHOOTING_MOVEMENT_PENALTY = 0.7;
 const BORDER_SIZE = 20;
 const WINGBEATS_PER_SECOND = 20;
@@ -14,7 +14,7 @@ const BOMB_BLAST_SPEED = 2000;
 const BASE_LIVES = 6;
 const BASE_BOMBS = 4;
 
-let x, y, size;
+let x, y, prevX, prevY, size;
 let movingLeft, movingRight, movingUp, movingDown, isFiring;
 let moveSpeed, focused;
 let lives, bombs, score, power;
@@ -24,6 +24,13 @@ let invTime, bombCooldown, bombRadius;
 let wingTimer, wingState;
 let blinkTimer, blinkState;
 
+/**
+ * @param {number} size 
+ * @param {number} velX 
+ * @param {number} velY 
+ * @param {number} offsetX 
+ * @param {number} offsetY 
+ */
 function fireBullet(size, velX, velY, offsetX, offsetY) {
     // this is (update: was) a test bullet that shrinks
     new Bullets.Bullet(x + offsetX, y + offsetY, size, velX, velY, 0, 2000, /*(bullet, ms) => {
@@ -35,7 +42,10 @@ function fireBullet(size, velX, velY, offsetX, offsetY) {
     },*/() => {}, "player", 0);
 }
 
-function keydown(e = new KeyboardEvent()) {
+/**
+ * @param {KeyboardEvent} e
+ */
+function keydown(e) {
     //e.preventDefault()
     switch (e.key.toLowerCase()) {
         case "arrowup":
@@ -69,7 +79,10 @@ function keydown(e = new KeyboardEvent()) {
     }
 }
 
-function keyup(e = new KeyboardEvent()) {
+/**
+ * @param {KeyboardEvent} e
+ */
+function keyup(e) {
     switch (e.key) {
         case "ArrowUp":
             movingUp = false;
@@ -99,14 +112,18 @@ function setSpeed() {
     moveSpeed = (focused? BASE_FOCUS : BASE_MOVEMENT) * (isFiring? SHOOTING_MOVEMENT_PENALTY : 1);
 }
 
+/**
+ * @param {number} pow 
+ */
 function powerUp(pow) {
     power += pow;
-    if (power > 4) {
-        power = 4;
-    }
+    if (power > 4) power = 4;
     dispatchEvent(new Event("game_statupdate"));
 }
 
+/**
+ * @param {number} points
+ */
 function scoreUp(points) {
     score += points;
     dispatchEvent(new Event("game_statupdate"));
@@ -120,22 +137,41 @@ function bomb() {
     }
 }
 
+/**
+ * @param {object} e
+ * @param {number} e.detail
+ */
 function pickUpPower(e) {
     powerUp(e.detail);
 }
 
+/**
+ * @param {object} e
+ * @param {number} e.detail
+ */
 function pickUpPoints(e) {
     scoreUp(e.detail);
 }
 
+/**
+ * @param {object} e
+ * @param {number} e.detail
+ */
 function pickUpLife(e) {
     lives += e.detail;
 }
 
+/**
+ * @param {object} e
+ * @param {number} e.detail
+ */
 function pickUpBomb(e) {
     bombs += e.detail;
 }
 
+/**
+ * @param {number} ms 
+ */
 function tick(ms) {
     let moveX = 0;
     let moveY = 0;
@@ -153,6 +189,8 @@ function tick(ms) {
         moveX += moveSpeed;
     }
 
+    prevX = x;
+    prevY = y;
     x += moveX * ms / 1000;
     y += moveY * ms / 1000;
 
@@ -207,7 +245,7 @@ function tick(ms) {
                             this.velY += 300 * ms / 1000;
                         }
                     }
-    
+
                     const pickupVelX = Math.random() > 0.5 ? Math.random() * 60 + 270 : Math.random() * 60 - 270;
                     const pickupVelY = Math.random() * 160 - 270;
                     new Pickup.Pickup("power", x, y, 15, powerDiff - 0.05, pickupVelX, pickupVelY, pickupBehavior);
@@ -244,83 +282,83 @@ function tick(ms) {
     if (timeSinceLastBullet > fireCooldown && isFiring && invTime <= 0) {
         if (focused) {
             if (power >= 4) {
-                fireBullet(7, 20, -2096, 10, 0);
-                fireBullet(7, -20, -2096, -10, 0);
-                fireBullet(7, 14, -2098, 9, 0);
-                fireBullet(7, -14, -2098, -9, 0);
-                fireBullet(8, 5, -2100, 8, 0);
-                fireBullet(8, -5, -2100, -8, 0);
-                fireBullet(8, 0, -2100, 5, -5);
-                fireBullet(8, -0, -2100, -5, -5);
+                fireBullet(5, 20, -2096, 10, 0);
+                fireBullet(5, -20, -2096, -10, 0);
+                fireBullet(6, 14, -2098, 9, 0);
+                fireBullet(6, -14, -2098, -9, 0);
+                fireBullet(7, 5, -2100, 8, 0);
+                fireBullet(7, -5, -2100, -8, 0);
+                fireBullet(7, 0, -2100, 5, -5);
+                fireBullet(7, -0, -2100, -5, -5);
                 fireBullet(8, 0, -2100, 0, -10);
-                fireCooldown = 47;
+                fireCooldown = 75;
             }
             else if (power >= 3) {
-                fireBullet(6, 16, -1885, 10, 0);
-                fireBullet(6, -16, -1885, -10, 0);
-                fireBullet(7, 6, -1888, 8, 0);
-                fireBullet(7, -6, -1888, -8, 0);
-                fireBullet(7, 0, -1890, 6, -5);
-                fireBullet(7, -0, -1890, -6, -5);
-                fireBullet(8, 0, -1890, 0, -10);
-                fireCooldown = 53;
+                fireBullet(4, 16, -1885, 10, 0);
+                fireBullet(4, -16, -1885, -10, 0);
+                fireBullet(5, 6, -1888, 8, 0);
+                fireBullet(5, -6, -1888, -8, 0);
+                fireBullet(6, 0, -1890, 6, -5);
+                fireBullet(6, -0, -1890, -6, -5);
+                fireBullet(6, 0, -1890, 0, -10);
+                fireCooldown = 80;
             }
             else if (power >= 2) {
-                fireBullet(6, 8, -1579, 8, 0);
-                fireBullet(6, -8, -1579, -8, 0);
-                fireBullet(6, 0, -1680, 4, -6);
-                fireBullet(6, 0, -1680, -4, -6);
-                fireBullet(7, 0, -1680, 0, -10);
-                fireCooldown = 58;
+                fireBullet(4, 8, -1579, 8, 0);
+                fireBullet(4, -8, -1579, -8, 0);
+                fireBullet(5, 0, -1680, 4, -6);
+                fireBullet(5, 0, -1680, -4, -6);
+                fireBullet(5, 0, -1680, 0, -10);
+                fireCooldown = 85;
             }
             else if (power >= 1) {
-                fireBullet(6, 4, -1470, 5, -6);
-                fireBullet(6, 4, -1470, -5, -6);
-                fireBullet(6, 0, -1470, 0, -10);
-                fireCooldown = 63;
+                fireBullet(3, 4, -1470, 5, -6);
+                fireBullet(3, 4, -1470, -5, -6);
+                fireBullet(4, 0, -1470, 0, -10);
+                fireCooldown = 90;
             } else {
-                fireBullet(6, 0, -1260, 0, -8);
-                fireCooldown = 66;
+                fireBullet(3, 0, -1260, 0, -8);
+                fireCooldown = 95;
             }
         } else {
             if (power >= 4) {
-                fireBullet(8, 400, -1700, 10, 0);
-                fireBullet(8, -400, -1700, -10, 0);
-                fireBullet(8, 270, -1850, 8, 0);
-                fireBullet(8, -270, -1850, -8, 0);
-                fireBullet(9, 160, -1930, 6, 0);
-                fireBullet(9, -160, -1930, -6, 0);
-                fireBullet(9, 60, -1980, 4, -5);
-                fireBullet(9, -60, -1980, -4, -5);
-                fireBullet(9, 0, -2000, 0, -10);
-                fireCooldown = 45;
+                fireBullet(6, 400, -1700, 10, 0);
+                fireBullet(6, -400, -1700, -10, 0);
+                fireBullet(7, 270, -1850, 8, 0);
+                fireBullet(7, -270, -1850, -8, 0);
+                fireBullet(7, 160, -1930, 6, 0);
+                fireBullet(7, -160, -1930, -6, 0);
+                fireBullet(8, 60, -1980, 4, -5);
+                fireBullet(8, -60, -1980, -4, -5);
+                fireBullet(8, 0, -2000, 0, -10);
+                fireCooldown = 75;
             }
             else if (power >= 3) {
-                fireBullet(7, 320, -1560, 10, 0);
-                fireBullet(7, -320, -1560, -10, 0);
-                fireBullet(8, 180, -1720, 10, 0);
-                fireBullet(8, -180, -1720, -10, 0);
-                fireBullet(8, 60, -1800, 6, -5);
-                fireBullet(8, -60, -1800, -6, -5);
-                fireBullet(9, 0, -1800, 0, -10);
-                fireCooldown = 50;
+                fireBullet(5, 320, -1560, 10, 0);
+                fireBullet(5, -320, -1560, -10, 0);
+                fireBullet(6, 180, -1720, 10, 0);
+                fireBullet(6, -180, -1720, -10, 0);
+                fireBullet(6, 60, -1800, 6, -5);
+                fireBullet(6, -60, -1800, -6, -5);
+                fireBullet(7, 0, -1800, 0, -10);
+                fireCooldown = 80;
             }
             else if (power >= 2) {
-                fireBullet(6, 200, -1500, 8, 0);
-                fireBullet(6, -200, -1500, -8, 0);
-                fireBullet(7, 80, -1570, 4, -6);
-                fireBullet(7, -80, -1570, -4, -6);
-                fireBullet(8, 0, -1600, 0, -10);
-                fireCooldown = 55;
+                fireBullet(4, 200, -1500, 8, 0);
+                fireBullet(4, -200, -1500, -8, 0);
+                fireBullet(5, 80, -1570, 4, -6);
+                fireBullet(5, -80, -1570, -4, -6);
+                fireBullet(6, 0, -1600, 0, -10);
+                fireCooldown = 85;
             }
             else if (power >= 1) {
-                fireBullet(6, 70, -1380, 2, -6);
-                fireBullet(6, -70, -1380, -2, -6);
-                fireBullet(7, 0, -1400, 0, -10);
-                fireCooldown = 60;
+                fireBullet(3, 70, -1380, 2, -6);
+                fireBullet(3, -70, -1380, -2, -6);
+                fireBullet(4, 0, -1400, 0, -10);
+                fireCooldown = 90;
             } else {
-                fireBullet(6, 0, -1200, 0, -8);
-                fireCooldown = 66;
+                fireBullet(3, 0, -1200, 0, -8);
+                fireCooldown = 95;
             }
         }
         timeSinceLastBullet = 0;
@@ -353,6 +391,8 @@ function init() {
     // board size is 540x864
     x = Global.BOARD_WIDTH / 2;
     y = Global.BOARD_HEIGHT - 64;
+    prevX = x;
+    prevY = y;
     size = 5;
     moveSpeed = BASE_MOVEMENT;
 
@@ -383,4 +423,4 @@ function init() {
     addEventListener("game_pickupbomb", pickUpBomb);
 }
 
-export { x, y, size, lives, bombs, score, power, wingState, blinkState, bombRadius, reset, init, tick, keydown, keyup, powerUp, scoreUp };
+export { x, y, prevX, prevY, size, focused, lives, bombs, score, power, wingState, blinkState, bombRadius, reset, init, tick, keydown, keyup, powerUp, scoreUp };

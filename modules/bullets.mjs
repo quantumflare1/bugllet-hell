@@ -1,11 +1,30 @@
 import * as Global from "./global.mjs";
 import * as Player from "./player.mjs";
 
-// todo: maybe tick bullets twice per frame? (more accurate collision)
+/**
+ * @callback tick
+ * @param {Bullet} bullet
+ * @param {number} ms
+ */
+
 class Bullet {
-    constructor(x, y, size, velX, velY, rot, expireTime, script = () => {}, sprite, variety) {
+    /**
+     * @param {number} x 
+     * @param {number} y 
+     * @param {number} size 
+     * @param {number} velX 
+     * @param {number} velY 
+     * @param {number} rot 
+     * @param {number} expireTime 
+     * @param {tick} script
+     * @param {string} sprite 
+     * @param {number} variety 
+     */
+    constructor(x, y, size, velX, velY, rot, expireTime, script, sprite, variety) {
         this.x = x;
         this.y = y;
+        this.prevX = x;
+        this.prevY = y;
         this.size = size;
         this.velX = velX;
         this.velY = velY;
@@ -25,8 +44,14 @@ class Bullet {
             bullets.add(this);
         }
     }
+    /**
+     * @param {number} ms 
+     */
     tick(ms) {
         this.lifetime += ms;
+
+        this.prevX = this.x;
+        this.prevY = this.y;
         this.x += this.velX * ms / 1000;
         this.y += this.velY * ms / 1000;
 
@@ -57,6 +82,11 @@ class Bullet {
 const bullets = new Set();
 const playerBullets = new Set();
 
+/**
+ * @param {number} x 
+ * @param {number} y 
+ * @returns number
+ */
 function aimAtPoint(x, y) {
     if (y < 0)
         return -Math.acos(x / Math.sqrt(x ** 2 + y ** 2));
@@ -219,6 +249,14 @@ const types = {
     }
 }
 
+/**
+ * @param {string} type 
+ * @param {number} x 
+ * @param {number} y 
+ * @param {number} dir 
+ * @param {number} variety 
+ * @param {number} [vel] 
+ */
 function makeBullet(type, x, y, dir, variety, vel = types[type].vel) {
     const velX = vel * Math.cos(dir);
     const velY = vel * Math.sin(dir);

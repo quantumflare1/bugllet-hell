@@ -11,6 +11,8 @@ class Enemy {
     constructor(x, y, size, score, hp, screenTime, patterns, script, waveId, type, shotRate, moveRate, wingRate, useRotation, rotation = 0) {
         this.x = x;
         this.y = y;
+        this.prevX = x;
+        this.prevY = y;
         this.spawnX = x;
         this.spawnY = y;
         this.size = size;
@@ -41,6 +43,7 @@ class Enemy {
         this.extraAttribute = 0;
         this.rotation = rotation;
         this.useRotation = useRotation;
+        this.plrBulletDists = new Map();
 
         enemies.add(this);
     }
@@ -52,6 +55,8 @@ class Enemy {
         this.bombImmunity -= ms;
         this.wingTimer += ms;
 
+        this.prevX = this.x;
+        this.prevY = this.y;
         this.x += this.velX * ms / 1000;
         this.y += this.velY * ms / 1000;
 
@@ -59,17 +64,19 @@ class Enemy {
 
         for (const i of Bullets.playerBullets) {
             const dist = Math.sqrt((i.x - this.x) ** 2 + (i.y - this.y) ** 2);
-            if (dist < 6 + this.size) { // note to self: player bullet size currently hardcoded to 6 maybe this should change at some point
-                const damage = i.size - 4;
+            const subTickCollided = this.plrBulletDists.get(i) * dist < 0 && (Math.abs(i.y - this.y) < 4 + this.size || Math.abs(i.x - this.x) < 4 + this.size)
+            if (dist < 4 + this.size || subTickCollided) { // note to self: player bullet size currently hardcoded to 4 maybe this should change at some point
+                const damage = i.size;
                 this.hp -= damage;
                 Bullets.playerBullets.delete(i);
                 //Player.powerUp(damage / 1000);
                 Player.scoreUp(1);
             }
+            this.plrBulletDists.set(i, dist);
         }
         const dist = Math.sqrt((Player.x - this.x) ** 2 + (Player.y - this.y) ** 2);
         if (dist < this.size + Player.bombRadius && this.bombImmunity < 0) {
-            this.hp -= 60;
+            this.hp -= 100;
             this.bombImmunity = 1000;
         }
         if (this.wingTimer > 1000 / this.wingRate) {

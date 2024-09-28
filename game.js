@@ -171,7 +171,7 @@ function draw() {
     circle(gpctx, Player.x, Player.y, Player.bombRadius);
 
     for (const i of Bullets.playerBullets)
-        gpctx.drawImage(spriteImages.player.bullet, Math.floor(i.x - spriteImages.player.bullet.width / 2), Math.floor(i.y - spriteImages.player.bullet.height / 2));
+        gpctx.drawImage(spriteImages.player.bullet, Math.floor(i.x - spriteImages.player.bullet.width / 2), Math.floor(i.y - i.size));
 
     if (Player.blinkState === 1) gpctx.globalAlpha = 0.2;
     gpctx.drawImage(spriteImages.player.body, Math.floor(Player.x - spriteImages.player.body.width / 2), Math.floor(Player.y - 23));
