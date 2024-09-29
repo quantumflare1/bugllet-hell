@@ -3,6 +3,10 @@ import * as Global from "./global.mjs";
 
 const name = "Instigation";
 
+/**
+ * @param {any[]} arr 
+ * @returns any
+ */
 function randomEnemy(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -12,6 +16,12 @@ function randomPosition() {
 }
 
 class Wave {
+    /**
+     * @param {number} delay 
+     * @param {string[]} enemies 
+     * @param {object[]} positions 
+     * @param {boolean} boss 
+     */
     constructor(delay, enemies, positions, boss = false) {
         this.delay = delay;
         this.enemiesLeft = enemies.length;
@@ -19,6 +29,9 @@ class Wave {
         this.positions = positions;
         this.boss = boss;
     }
+    /**
+     * @param {number} waveNum 
+     */
     generate(waveNum) {
         for (let i = 0; i < this.enemies.length; i++) {
             Enemy.makeEnemy(this.positions[i].x * Global.BOARD_WIDTH / 2 + Global.BOARD_WIDTH / 2, this.positions[i].y * Global.BOARD_HEIGHT / 2 + Global.BOARD_HEIGHT / 2, this.enemies[i], waveNum);
@@ -328,6 +341,9 @@ const waves = [
 ];
 let nextWave, levelTime, waveTime, transitionTime, gameRunning = true;
 
+/**
+ * @param {number} ms 
+ */
 function tick(ms) {
     levelTime += ms;
     waveTime += ms;

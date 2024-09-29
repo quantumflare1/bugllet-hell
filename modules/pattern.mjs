@@ -5,7 +5,17 @@ import * as Player from "./player.mjs";
 const patterns = new Set();
 const TAU = Math.PI * 2;
 
+/**
+ * @callback tick
+ * @param {Pattern} pat
+ */
+
 class Pattern {
+    /**
+     * @param {Enemy.Enemy} parent 
+     * @param {tick} script 
+     * @param {number} lastWave 
+     */
     constructor(parent, script, lastWave) {
         this.parent = parent;
         this.script = script;
@@ -16,6 +26,9 @@ class Pattern {
 
         patterns.add(this);
     }
+    /**
+     * @param {number} ms 
+     */
     tick(ms) {
         this.lifetime += ms;
         if (this.lastWave === 0 || this.wave > this.lastWave || !Enemy.enemies.has(this.parent)) patterns.delete(this);
@@ -394,10 +407,20 @@ const types = {
 };
 // note to self for later: also rewrite menu system
 
+/**
+ * @param {number} lower 
+ * @param {number} range 
+ * @returns number
+ */
 function randBulletStyle(lower, range) {
     return (Math.floor(Math.random() * range) + lower) % 10;
 }
 
+/**
+ * @param {number} x 
+ * @param {number} y 
+ * @returns number
+ */
 function aimAtPlayer(x, y) {
     if (Player.y - y < 0) {
         return -Math.acos((Player.x - x) / Math.sqrt((Player.x - x) ** 2 + (Player.y - y) ** 2));
@@ -406,6 +429,11 @@ function aimAtPlayer(x, y) {
     }
 }
 
+/**
+ * @param {number} velX 
+ * @param {number} velY 
+ * @returns number
+ */
 function aimWithEnemy(velX, velY) {
     if (velY < 0) {
         return -Math.acos(velX / Math.sqrt(velX ** 2 + velY ** 2));
@@ -414,6 +442,10 @@ function aimWithEnemy(velX, velY) {
     }
 }
 
+/**
+ * @param {Enemy.Enemy} parent 
+ * @param {string} type 
+ */
 function makePattern(parent, type) {
     new Pattern(parent, types[type].script, types[type].lastWave);
 }

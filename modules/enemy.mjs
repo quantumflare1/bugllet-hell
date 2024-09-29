@@ -6,8 +6,32 @@ import * as Pickup from "./pickup.mjs";
 
 const enemies = new Set();
 
+/**
+ * @callback tick
+ * @param {Enemy} enemy
+ * @param {number} ms
+ */
+
 // rewrite enemy ai
 class Enemy {
+    /**
+     * @param {number} x 
+     * @param {number} y 
+     * @param {number} size 
+     * @param {number} score 
+     * @param {number} hp 
+     * @param {number} screenTime 
+     * @param {string[]} patterns 
+     * @param {tick} script 
+     * @param {number} waveId 
+     * @param {string} type 
+     * @param {number} shotRate 
+     * @param {number} moveRate 
+     * @param {number} animRate 
+     * @param {number} animFrames 
+     * @param {boolean} useRotation is this even used anymore?
+     * @param {number} rotation 
+     */
     constructor(x, y, size, score, hp, screenTime, patterns, script, waveId, type, shotRate, moveRate, animRate, animFrames, useRotation, rotation = 0) {
         this.x = x;
         this.y = y;
@@ -48,6 +72,9 @@ class Enemy {
 
         enemies.add(this);
     }
+    /**
+     * @param {number} ms 
+     */
     tick(ms) {
         this.invTime -= ms;
         this.lifetime += ms;
@@ -163,6 +190,10 @@ class Enemy {
         this.despawnX = despawnX;
         this.despawnY = despawnY;
     }
+    /**
+     * @param {number} rand 
+     * @returns void
+     */
     pickRandomDespawnPoint(rand = Math.random()) {
         let despawnX = 0;
         let despawnY = 0;
@@ -192,30 +223,55 @@ class Enemy {
         this.shotCooldown = this.shotRate + (Math.random() * 2 - 1) * this.variance;
         Pattern.makePattern(this, randomPattern(this.patterns));
     }
+    /**
+     * @param {string} pattern 
+     */
     fireSpecificNoCooldown(pattern) {
         Pattern.makePattern(this, pattern);
     }
+    /**
+     * @param {string} pattern 
+     */
     fireSpecific(pattern) {
         this.shotCooldown = this.shotRate + (Math.random() * 2 - 1) * this.variance;
         Pattern.makePattern(this, pattern);
     }
+    /**
+     * @param {number} direction 
+     * @param {number} vel 
+     */
     basicDash(direction, vel) {
         const vec = getVel(vel, direction);
         this.velX = vec.velX;
         this.velY = vec.velY;
     }
+    /**
+     * @param {number} vel 
+     */
     downDash(vel = 350) {
         this.basicDash(Math.PI / 2, vel);
     }
+    /**
+     * @param {number} vel 
+     */
     upDash(vel = 350) {
         this.basicDash(-Math.PI / 2, vel);
     }
+    /**
+     * @param {number} vel 
+     */
     leftDash(vel = 350) {
         this.basicDash(Math.PI, vel);
     }
+    /**
+     * @param {number} vel 
+     */
     rightDash(vel = 350) {
         this.basicDash(0, vel);
     }
+    /**
+     * @param {number} vel 
+     */
     despawnDash(vel = 250) {
         this.basicDash(aimAtDespawnPoint(this), vel);
     }
@@ -247,6 +303,9 @@ class Enemy {
     
         this.basicDash(moveDirection, 250);
     }
+    /**
+     * @param {number} vel 
+     */
     pickDashNormal(vel) {
         if (this.lifetime > this.screenTime && this.lifetime > 500) {
             if (!this.despawning) {
@@ -263,6 +322,9 @@ class Enemy {
     }
 }
 
+/**
+ * @param {Enemy} e 
+ */
 function pickFighterDespawnPoint(e) {
     let despawnX = e.x;
     let despawnY = e.y;
@@ -276,6 +338,12 @@ function pickFighterDespawnPoint(e) {
     e.despawnY = despawnY;
 }
 
+/**
+ * @param {Enemy} enemy 
+ * @param {number} x 
+ * @param {number} y 
+ * @returns number
+ */
 function aimAtPoint(enemy, x, y) {
     if (y - enemy.y < 0)
         return -Math.acos((x - enemy.x) / Math.sqrt((x - enemy.x) ** 2 + (y - enemy.y) ** 2));
@@ -283,14 +351,28 @@ function aimAtPoint(enemy, x, y) {
         return Math.acos((x - enemy.x) / Math.sqrt((x - enemy.x) ** 2 + (y - enemy.y) ** 2));
 }
 
+/**
+ * @param {Enemy} enemy 
+ * @returns number
+ */
 function aimAtDespawnPoint(enemy) {
     return aimAtPoint(enemy, enemy.despawnX, enemy.despawnY);
 }
 
+/**
+ * @param {string[]} arr 
+ * @returns string
+ */
 function randomPattern(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
+/**
+ * 
+ * @param {number} vel 
+ * @param {number} dir 
+ * @returns object
+ */
 function getVel(vel, dir) {
     const vx = vel * Math.cos(dir);
     const vy = vel * Math.sin(dir);
@@ -667,6 +749,12 @@ const types = {
     }
 };
 
+/**
+ * @param {number} x 
+ * @param {number} y 
+ * @param {string} type 
+ * @param {number} waveId 
+ */
 function makeEnemy(x, y, type, waveId) {
     new Enemy(x, y,
         types[type].size, types[type].score, types[type].hp, types[type].screenTime, types[type].patterns, types[type].script,

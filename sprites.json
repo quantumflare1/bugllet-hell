@@ -1,8 +1,7 @@
 {
     "player": {
-        "body": "player.png",
-        "wings0": "wings_up.png",
-        "wings1": "wings_down.png",
+        "frame0": "player1.png",
+        "frame1": "player2.png",
         "bullet": "stinger.png"
     },
     "ui": {

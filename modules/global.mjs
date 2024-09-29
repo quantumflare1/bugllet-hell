@@ -15,6 +15,9 @@ const game = {
 let gameState = game.NONE;
 let prevGameState;
 
+/**
+ * @param {number} state 
+ */
 function setGameState(state) {
     const gameStateChange = new Event("game_statechange");
     prevGameState = gameState;

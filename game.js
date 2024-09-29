@@ -31,15 +31,15 @@ const spriteImages = {};
 const fontSheet = new Image();
 const bulletSheet = new Image();
 
-// temp
-const title = "1-1: Instigation";
-
 function fullscreen() {
     document.body.requestFullscreen({ navigationUI: "hide" });
 }
 
 // note to self: incredible bug happening where despawning guys do not start the next wave
 
+/**
+ * @param {Event} e 
+ */
 function checkGameState(e) {
     switch (Global.gameState) {
         case Global.game.PLAY:
@@ -83,6 +83,9 @@ function checkGameState(e) {
     }
 }
 
+/**
+ * @param {string} name 
+ */
 function loadMenu(name) {
     let lastMenuFrameTime = document.timeline.currentTime;
     function render(ms) {
@@ -102,6 +105,13 @@ function loadMenu(name) {
     requestAnimationFrame(render);
 }
 
+/**
+ * @param {CanvasRenderingContext2D} context 
+ * @param {number} x 
+ * @param {number} y 
+ * @param {number} r 
+ * @returns void
+ */
 function circle(context, x, y, r) {
     if (r < 0) return;
     context.beginPath();
@@ -110,6 +120,13 @@ function circle(context, x, y, r) {
     context.closePath();
 }
 
+/**
+ * @param {CanvasRenderingContext2D} context 
+ * @param {string} text 
+ * @param {number} sx 
+ * @param {number} sy 
+ * @param {number} scale 
+ */
 function drawText(context, text, sx, sy, scale) {
     for (let i = 0; i < text.length; i++)
         context.drawImage(fontSheet, font[text[i]][0], font[text[i]][1], 7, 17, sx + i * 7 * scale, sy, 7 * scale, 17 * scale);
@@ -150,6 +167,9 @@ function drawEnemy(e) {
     gpctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
+/**
+ * @param {number} scale 
+ */
 function fillPowerMeter(scale) {
     ctx.fillStyle = "rgb(233, 102, 76)";
     ctx.fillRect(700 + 3 * scale, 560 + 10 * scale, Math.floor(Player.power / 4 * (spriteImages.ui.powerMeter.width * scale - 4 * scale) / scale) * scale, 4 * scale);
@@ -169,8 +189,7 @@ function draw() {
         gpctx.drawImage(spriteImages.player.bullet, Math.floor(i.x - spriteImages.player.bullet.width / 2), Math.floor(i.y - i.size));
 
     if (Player.blinkState === 1) gpctx.globalAlpha = 0.2;
-    gpctx.drawImage(spriteImages.player.body, Math.floor(Player.x - spriteImages.player.body.width / 2), Math.floor(Player.y - 23));
-    gpctx.drawImage(spriteImages.player[`wings${Player.wingState}`], Math.floor(Player.x - spriteImages.player[`wings${Player.wingState}`].width / 2), Math.floor(Player.y - 10));
+    gpctx.drawImage(spriteImages.player[`frame${Player.animState}`], Math.floor(Player.x - spriteImages.player[`frame${Player.animState}`].width / 2), Math.floor(Player.y - 23));
     gpctx.globalAlpha = 1;
 
     for (const i of Pickup.pickups)
@@ -222,6 +241,9 @@ function drawUI() {
     drawText(ctx, `${fps.toFixed(2)} fps`, 700, 870 - 10 * sf, sf);
 }
 
+/**
+ * @param {number} ms 
+ */
 function tick(ms) {
     const timeElapsed = ms - lastFrameTime;
     msSinceLastFpsCheck += timeElapsed;

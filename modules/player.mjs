@@ -13,6 +13,7 @@ const GRAZE_PER_BULLET = 0.02;
 const BOMB_BLAST_SPEED = 2000;
 const BASE_LIVES = 6;
 const BASE_BOMBS = 4;
+const ANIM_FRAMES = 2;
 
 let x, y, prevX, prevY, size;
 let movingLeft, movingRight, movingUp, movingDown, isFiring;
@@ -21,7 +22,7 @@ let lives, bombs, score, power, prevPower;
 let grazeMultiplier, prevGrazeMultiplier;
 let timeSinceLastBullet, fireCooldown;
 let invTime, bombCooldown, bombRadius, bombBufferTime, prevBombs;
-let wingTimer, wingState;
+let animTimer, animState;
 let blinkTimer, blinkState;
 
 /**
@@ -260,13 +261,13 @@ function tick(ms) {
 
     invTime -= ms;
     bombCooldown -= ms;
-    wingTimer += ms;
+    animTimer += ms;
     if (invTime > 0) blinkTimer += ms;
 
     // flip between up and down wing states
-    if (wingTimer > 1000 / WINGBEATS_PER_SECOND) {
-        wingTimer = 0;
-        wingState = wingState === 1 ? 0 : 1;
+    if (animTimer > 1000 / WINGBEATS_PER_SECOND) {
+        animTimer = 0;
+        animState = animState < ANIM_FRAMES - 1 ? animState + 1 : 0;
     }
 
     if (blinkTimer > 1000 / BLINKS_PER_SECOND) {
@@ -381,8 +382,8 @@ function reset() {
     bombCooldown = 0;
     bombRadius = 0;
 
-    wingTimer = 0;
-    wingState = 0;
+    animTimer = 0;
+    animState = 0;
     blinkTimer = 0;
     blinkState = 1;
 
@@ -413,8 +414,8 @@ function init() {
     invTime = 0;
     bombCooldown = 0;
     bombRadius = 0;
-    wingTimer = 0;
-    wingState = 0;
+    animTimer = 0;
+    animState = 0;
     blinkTimer = 0;
     blinkState = 1;
 
@@ -427,4 +428,4 @@ function init() {
     addEventListener("game_pickupbomb", pickUpBomb);
 }
 
-export { x, y, prevX, prevY, size, focused, lives, bombs, score, power, wingState, blinkState, bombRadius, reset, init, tick, keydown, keyup, powerUp, scoreUp };
+export { x, y, prevX, prevY, size, focused, lives, bombs, score, power, animState, blinkState, bombRadius, reset, init, tick, keydown, keyup, powerUp, scoreUp };
