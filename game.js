@@ -114,6 +114,10 @@ function drawText(context, text, sx, sy, scale) {
     for (let i = 0; i < text.length; i++)
         context.drawImage(fontSheet, font[text[i]][0], font[text[i]][1], 7, 17, sx + i * 7 * scale, sy, 7 * scale, 17 * scale);
 }
+
+/**
+ * @param {Bullets.Bullet} b 
+ */
 function drawBullet(b) {
     try {
         let sprData = bullet[b.sprite][b.variety];
@@ -132,27 +136,18 @@ function drawBullet(b) {
     }
 }
 
+/**
+ * @param {Enemy.Enemy} e 
+ */
 function drawEnemy(e) {
-    const wingId = `${e.type}Wings${e.wingState}`;
-    const enemySprite = spriteImages.enemy[e.type];
-    const wingSprite = spriteImages.enemy[wingId];
-    if (e.useRotation) {
-        gpctx.setTransform(1, 0, 0, 1, e.x, e.y);
-        gpctx.rotate(e.rotation);
+    const enemySprite = spriteImages.enemy[`${e.type}_${e.animFrame}`];
 
-        gpctx.drawImage(enemySprite, -enemySprite.width / 2, -enemySprite.height / 2);
-        if (spriteImages.enemy.hasOwnProperty(wingId))
-            gpctx.drawImage(wingSprite, Math.floor(-wingSprite.width / 2), Math.floor(-wingSprite.height / 2));
+    gpctx.setTransform(1, 0, 0, 1, e.x, e.y);
+    gpctx.rotate(e.rotation);
+    gpctx.drawImage(enemySprite, -enemySprite.width / 2, -enemySprite.height / 2);
 
-        gpctx.rotate(-e.rotation);
-        gpctx.setTransform(1, 0, 0, 1, 0, 0);
-    }
-    else {
-        gpctx.drawImage(enemySprite, e.x - enemySprite.width / 2, e.y - enemySprite.height / 2);
-        if (spriteImages.enemy.hasOwnProperty(wingId))
-            gpctx.drawImage(wingSprite, Math.floor(e.x - wingSprite.width / 2), Math.floor(e.y - wingSprite.height / 2));
-    }
-
+    gpctx.rotate(-e.rotation);
+    gpctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
 function fillPowerMeter(scale) {

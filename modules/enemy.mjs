@@ -8,7 +8,7 @@ const enemies = new Set();
 
 // rewrite enemy ai
 class Enemy {
-    constructor(x, y, size, score, hp, screenTime, patterns, script, waveId, type, shotRate, moveRate, wingRate, useRotation, rotation = 0) {
+    constructor(x, y, size, score, hp, screenTime, patterns, script, waveId, type, shotRate, moveRate, animRate, animFrames, useRotation, rotation = 0) {
         this.x = x;
         this.y = y;
         this.prevX = x;
@@ -36,9 +36,10 @@ class Enemy {
         this.bombImmunity = 0;
         this.waveId = waveId;
         this.type = type;
-        this.wingRate = wingRate;
-        this.wingState = 0;
-        this.wingTimer = 0;
+        this.animRate = animRate;
+        this.lastAnimFrame = animFrames;
+        this.animFrame = 0;
+        this.animTimer = 0;
         this.variance = 50;
         this.extraAttribute = 0;
         this.rotation = rotation;
@@ -53,7 +54,7 @@ class Enemy {
         this.shotCooldown -= ms;
         this.moveCooldown -= ms;
         this.bombImmunity -= ms;
-        this.wingTimer += ms;
+        this.animTimer += ms;
 
         this.prevX = this.x;
         this.prevY = this.y;
@@ -79,9 +80,9 @@ class Enemy {
             this.hp -= 100;
             this.bombImmunity = 1000;
         }
-        if (this.wingTimer > 1000 / this.wingRate) {
-            this.wingTimer = 0;
-            this.wingState = this.wingState === 1 ? 0 : 1;
+        if (this.animTimer > 1000 / this.animRate) {
+            this.animTimer = 0;
+            this.animFrame = this.animFrame < this.lastAnimFrame-1 ? this.animFrame + 1 : 0;
         }
         if (this.hp <= 0) {
             Player.scoreUp(this.score);
@@ -305,6 +306,7 @@ const types = {
         shotRate: 2200,
         moveRate: 3000,
         wingRate: 30,
+        animFrames: 2,
         useRotation: false,
         patterns: ["tripleAimedInaccurateShot"],
         script: (enemy, ms) => {
@@ -336,6 +338,7 @@ const types = {
         shotRate: 1400,
         moveRate: 1600,
         wingRate: 30,
+        animFrames: 2,
         useRotation: false,
         patterns: ["basicSpread", "shortVInaccurateTracker"],
         script: (enemy, ms) => {
@@ -364,6 +367,7 @@ const types = {
         shotRate: 1300,
         moveRate: 99999,
         wingRate: 30,
+        animFrames: 2,
         useRotation: true,
         patterns: ["sparseDoubleRadial", "dartTriangle"],
         script: (enemy, ms) => {
@@ -395,6 +399,7 @@ const types = {
         shotRate: 1600,
         moveRate: 330,
         wingRate: 10,
+        animFrames: 2,
         useRotation: true,
         patterns: ["basicRay"],
         script: (enemy, ms) => {
@@ -449,6 +454,7 @@ const types = {
         shotRate: 240,
         moveRate: 440,
         wingRate: 10,
+        animFrames: 2,
         useRotation: true,
         patterns: ["spreadForward", "basicForward"],
         script: (enemy, ms) => {
@@ -505,6 +511,7 @@ const types = {
         shotRate: 4000,
         moveRate: 3000,
         wingRate: 10,
+        animFrames: 2,
         useRotation: false,
         patterns: ["machineGunFire", "singleAimedBigShot"],
         script: (enemy, ms) => {
@@ -544,6 +551,7 @@ const types = {
         shotRate: 4500,
         moveRate: 2000,
         wingRate: 10,
+        animFrames: 2,
         useRotation: false,
         patterns: ["expandingMachineGunFire", "basicRadial", "doubleSmallDartRay"],
         script: (enemy, ms) => {
@@ -583,6 +591,7 @@ const types = {
         shotRate: 2800,
         moveRate: 5000,
         wingRate: 10,
+        animFrames: 2,
         useRotation: true,
         patterns: ["clusterRadial", "longRadialWave", "basicHomingShot", "slowSpiralRadialWave", "bigSmallRadial", "recursiveClusterRadial", "variantRadialWave", "bigSmallRadialWave"],
         patIndex: 0, // hacky solution whatever do something abt this later
@@ -661,7 +670,7 @@ const types = {
 function makeEnemy(x, y, type, waveId) {
     new Enemy(x, y,
         types[type].size, types[type].score, types[type].hp, types[type].screenTime, types[type].patterns, types[type].script,
-        waveId, type, types[type].shotRate, types[type].moveRate, types[type].wingRate, types[type].useRotation);
+        waveId, type, types[type].shotRate, types[type].moveRate, types[type].wingRate, types[type].animFrames, types[type].useRotation);
 }
 
-export { enemies, types, makeEnemy };
+export { enemies, types, makeEnemy, Enemy };
