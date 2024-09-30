@@ -2,6 +2,10 @@
     "player": {
         "frame0": "player1.png",
         "frame1": "player2.png",
+        "leftFrame0": "player1_left.png",
+        "leftFrame1": "player2_left.png",
+        "rightFrame0": "player1_right.png",
+        "rightFrame1": "player2_right.png",
         "bullet": "stinger.png"
     },
     "ui": {

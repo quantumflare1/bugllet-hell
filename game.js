@@ -189,7 +189,14 @@ function draw() {
         gpctx.drawImage(spriteImages.player.bullet, Math.floor(i.x - spriteImages.player.bullet.width / 2), Math.floor(i.y - i.size));
 
     if (Player.blinkState === 1) gpctx.globalAlpha = 0.2;
-    gpctx.drawImage(spriteImages.player[`frame${Player.animState}`], Math.floor(Player.x - spriteImages.player[`frame${Player.animState}`].width / 2), Math.floor(Player.y - 23));
+    if (Player.movingLeft && !Player.movingRight) {
+        gpctx.drawImage(spriteImages.player[`leftFrame${Player.animState}`], Math.floor(Player.x - spriteImages.player[`leftFrame${Player.animState}`].width / 2), Math.floor(Player.y - 23));
+    }
+    else if (Player.movingRight && !Player.movingLeft) {
+        gpctx.drawImage(spriteImages.player[`rightFrame${Player.animState}`], Math.floor(Player.x - spriteImages.player[`rightFrame${Player.animState}`].width / 2), Math.floor(Player.y - 23));
+    } else {
+        gpctx.drawImage(spriteImages.player[`frame${Player.animState}`], Math.floor(Player.x - spriteImages.player[`frame${Player.animState}`].width / 2), Math.floor(Player.y - 23));
+    }
     gpctx.globalAlpha = 1;
 
     for (const i of Pickup.pickups)

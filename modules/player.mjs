@@ -428,4 +428,4 @@ function init() {
     addEventListener("game_pickupbomb", pickUpBomb);
 }
 
-export { x, y, prevX, prevY, size, focused, lives, bombs, score, power, animState, blinkState, bombRadius, reset, init, tick, keydown, keyup, powerUp, scoreUp };
+export { x, y, prevX, prevY, movingLeft, movingRight, size, focused, lives, bombs, score, power, animState, blinkState, bombRadius, reset, init, tick, keydown, keyup, powerUp, scoreUp };
