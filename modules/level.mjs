@@ -1,5 +1,6 @@
 import * as Enemy from "./enemy.mjs";
 import * as Global from "./global.mjs";
+import level from "./level.json" with { type: "json" };
 
 const name = "Instigation";
 
@@ -20,13 +21,15 @@ class Wave {
      * @param {number} delay 
      * @param {string[]} enemies 
      * @param {object[]} positions 
+     * @param {number} dependent
      * @param {boolean} boss 
      */
-    constructor(delay, enemies, positions, boss = false) {
+    constructor(delay, enemies, positions, dependent, boss = false) {
         this.delay = delay;
         this.enemiesLeft = enemies.length;
         this.enemies = enemies;
         this.positions = positions;
+        this.dependent = dependent;
         this.boss = boss;
     }
     /**
@@ -38,307 +41,8 @@ class Wave {
         }
     }
 }
-/* debug waves
-[
-    new Wave(500, ["basicDrone1"], [
-        { x: 440, y: -10 }
-    ]),
-    new Wave(20000, ["basicDrone2"], [
-        { x: 440, y: -10 }
-    ]),
-    new Wave(22000, ["basicDrone3"], [
-        { x: 440, y: -10 }
-    ]),
-    new Wave(22000, ["fighterDrone1"], [
-        { x: 440, y: -10 }
-    ]),
-    new Wave(22000, ["fighterDrone2"], [
-        { x: 440, y: -10 }
-    ]),
-    new Wave(22000, ["tankDrone1"], [
-        { x: 440, y: -20 }
-    ]),
-    new Wave(22000, ["tankDrone2"], [
-        { x: 440, y: -10 }
-    ]),
-    new Wave(22000, ["princessBee"], [
-        { x: 440, y: -10 }
-    ], true)
-];
-*/
-const waves = [
-    new Wave(2000, ["basicDrone1"], [
-        { x: 0, y: -1.02 }
-    ]),
-    new Wave(10000, ["basicDrone1"], [
-        { x: -0.6, y: -1.02 }
-    ]),
-    new Wave(5000, ["basicDrone1", "basicDrone1"], [
-        { x: -0.2, y: -1.02 },
-        { x: 0.2, y: -1.02 }
-    ]),
-    new Wave(12000, ["basicDrone1", "basicDrone1"], [
-        { x: -1.02, y: -0.5 },
-        { x: 1.02, y: -0.5 }
-    ]),
-    new Wave(15000, ["basicDrone1", "basicDrone1", "basicDrone1"], [
-        { x: -1.02, y: -0.6 },
-        { x: 0, y: -1.02 },
-        { x: 1.02, y: -0.6 }
-    ]),
-    new Wave(20000, ["basicDrone1", "basicDrone1", "basicDrone1", "basicDrone1"], [
-        { x: -1.02, y: -0.7 },
-        { x: -0.2, y: -1.02 },
-        { x: 0.2, y: -1.02 },
-        { x: 1.02, y: -0.7 }
-    ]),
-    new Wave(20000, ["fighterDrone1"], [
-        { x: 0.6, y: -1.02 }
-    ]),
-    new Wave(10000, ["fighterDrone1"], [
-        { x: -0.6, y: -1.02 }
-    ]),
-    new Wave(8000, ["basicDrone1", "basicDrone1"], [
-        { x: -0.4, y: -1.02 },
-        { x: 0.4, y: -1.02 }
-    ]),
-    new Wave(10000, ["fighterDrone1", "fighterDrone1"], [
-        { x: -0.7, y: -1.02 },
-        { x: 0.7, y: -1.02 }
-    ]),
-    new Wave(18000, ["basicDrone1", "basicDrone1", "basicDrone1", "basicDrone1"], [ // 10
-        { x: -1.02, y: -0.7 },
-        { x: -1.02, y: -0.5 },
-        { x: 1.02, y: -0.7 },
-        { x: 1.02, y: -0.5 }
-    ]),
-    new Wave(12000, ["fighterDrone1"], [
-        { x: -0.4, y: -1.02 }
-    ]),
-    new Wave(8000, ["fighterDrone1"], [
-        { x: 0.4, y: -1.02 }
-    ]),
-    new Wave(6000, ["fighterDrone1"], [
-        { x: -0.6, y: -1.02 }
-    ]),
-    new Wave(6000, ["fighterDrone1"], [
-        { x: 0.6, y: -1.02 }
-    ]),
-    new Wave(15000, ["basicDrone1", "basicDrone1", "fighterDrone1", "basicDrone1", "basicDrone1"], [
-        { x: -0.3, y: -1.02 },
-        { x: -0.1, y: -1.02 },
-        { x: 0, y: -1.02 },
-        { x: 0.1, y: -1.02 },
-        { x: 0.3, y: -1.02 }
-    ]),
-    new Wave(9000, ["basicDrone2", "basicDrone2"], [
-        { x: -0.2, y: -1.02 },
-        { x: 0.2, y: -1.02 }
-    ]),
-    new Wave(3000, ["basicDrone2"], [
-        { x: -0.9, y: -1.02 }
-    ]),
-    new Wave(1000, ["basicDrone2"], [
-        { x: -0.7, y: -1.02 }
-    ]),
-    new Wave(1000, ["basicDrone2"], [
-        { x: -0.5, y: -1.02 }
-    ]),
-    new Wave(1000, ["basicDrone2"], [ // 20
-        { x: -0.3, y: -1.02 }
-    ]),
-    new Wave(1000, ["basicDrone2"], [
-        { x: -0.1, y: -1.02 }
-    ]),
-    new Wave(1000, ["basicDrone2"], [
-        { x: 0.1, y: -1.02 }
-    ]),
-    new Wave(1000, ["basicDrone2"], [
-        { x: 0.3, y: -1.02 }
-    ]),
-    new Wave(1000, ["basicDrone2"], [
-        { x: 0.5, y: -1.02 }
-    ]),
-    new Wave(1000, ["basicDrone2"], [
-        { x: 0.7, y: -1.02 }
-    ]),
-    new Wave(1000, ["basicDrone2"], [
-        { x: 0.9, y: -1.02 }
-    ]),
-    new Wave(5000, ["fighterDrone1"], [
-        { x: -1.02, y: -0.6 }
-    ]),
-    new Wave(8000, ["basicDrone1", "basicDrone1", "basicDrone1", "basicDrone1"], [
-        { x: -0.5, y: -1.02 },
-        { x: -0.2, y: -1.02 },
-        { x: 0.2, y: -1.02 },
-        { x: 0.5, y: -1.02 }
-    ]),
-    new Wave(1000, ["basicDrone2", "basicDrone2", "basicDrone2"], [
-        { x: -0.4, y: -1.02 },
-        { x: 0, y: -1.02 },
-        { x: 0.4, y: -1.02 }
-    ]),
-    new Wave(9000, ["basicDrone1", "basicDrone1"], [ // 30
-        { x: -1.02, y: -0.9 },
-        { x: -1.02, y: -0.8 }
-    ]),
-    new Wave(4000, ["basicDrone1", "basicDrone1"], [
-        { x: 1.02, y: -0.85 },
-        { x: 1.02, y: -0.75 }
-    ]),
-    new Wave(4000, ["basicDrone1", "basicDrone1"], [
-        { x: -1.02, y: -0.8 },
-        { x: -1.02, y: -0.7 }
-    ]),
-    new Wave(4000, ["basicDrone1", "basicDrone1"], [
-        { x: 1.02, y: -0.75 },
-        { x: 1.02, y: -0.65 }
-    ]),
-    new Wave(4000, ["basicDrone1", "basicDrone1"], [
-        { x: -1.02, y: -0.7 },
-        { x: -1.02, y: -0.6 }
-    ]),
-    new Wave(6000, ["tankDrone1"], [
-        { x: 0, y: -1.02 }
-    ]),
-    new Wave(2000, ["basicDrone2", "basicDrone2"], [
-        { x: -0.7, y: -1.02 },
-        { x: -0.8, y: -1.02 }
-    ]),
-    new Wave(3000, ["basicDrone2", "basicDrone2"], [
-        { x: 0.7, y: -1.02 },
-        { x: 0.8, y: -1.02 }
-    ]),
-    new Wave(3000, ["basicDrone2", "basicDrone2"], [
-        { x: -0.7, y: -1.02 },
-        { x: -0.8, y: -1.02 }
-    ]),
-    new Wave(8000, ["tankDrone1", "fighterDrone1"], [ // 40
-        { x: -1.02, y: -0.7 },
-        { x: 0.8, y: -1.02 }
-    ]),
-    new Wave(20000, ["basicDrone3", "tankDrone1", "tankDrone1"], [
-        { x: -1.02, y: -0.7 },
-        { x: -0.3, y: -1.02 },
-        { x: 0.3, y: -1.02 }
-    ]),
-    new Wave(20000, ["basicDrone3"], [
-        { x: 0, y: -1.02 }
-    ]),
-    new Wave(3000, ["basicDrone3"], [
-        { x: 0, y: -1.02 }
-    ]),
-    new Wave(3000, ["basicDrone3"], [
-        { x: 0, y: -1.02 }
-    ]),
-    new Wave(12000, ["basicDrone2", "basicDrone2"], [
-        { x: 0.5, y: -1.02 },
-        { x: -0.5, y: -1.02 }
-    ]),
-    new Wave(1000, ["basicDrone2", "basicDrone2"], [
-        { x: 0.6, y: -1.02 },
-        { x: -0.6, y: -1.02 }
-    ]),
-    new Wave(2000, ["fighterDrone1"], [
-        { x: 0.8, y: -1.02 }
-    ]),
-    new Wave(0, ["basicDrone3", "basicDrone3"], [
-        { x: -0.2, y: -1.02 },
-        { x: 0.2, y: -1.02 }
-    ]),
-    new Wave(18000, ["basicDrone1", "basicDrone1", "basicDrone1", "fighterDrone2", "fighterDrone2"], [
-        { x: -0.2, y: -1.02 },
-        { x: 0, y: -1.02 },
-        { x: 0.2, y: -1.02 },
-        { x: 0.1, y: -1.02 },
-        { x: -0.1, y: -1.02 }
-    ]),
-    new Wave(10000, ["basicDrone2"], [ // 50
-        { x: randomPosition(), y: -1.02 }
-    ]),
-    new Wave(1500, ["fighterDrone2"], [
-        { x: randomPosition(), y: -1.02 }
-    ]),
-    new Wave(2500, ["basicDrone2"], [
-        { x: randomPosition(), y: -1.02 }
-    ]),
-    new Wave(1500, ["fighterDrone2"], [
-        { x: randomPosition(), y: -1.02 }
-    ]),
-    new Wave(2500, ["basicDrone2"], [
-        { x: randomPosition(), y: -1.02 }
-    ]),
-    new Wave(1500, ["fighterDrone2"], [
-        { x: randomPosition(), y: -1.02 }
-    ]),
-    new Wave(2500, ["basicDrone2"], [
-        { x: randomPosition(), y: -1.02 }
-    ]),
-    new Wave(2500, ["fighterDrone2"], [
-        { x: randomPosition(), y: -1.02 }
-    ]),
-    new Wave(1500, ["basicDrone2"], [
-        { x: randomPosition(), y: -1.02 }
-    ]),
-    new Wave(2500, ["fighterDrone2"], [
-        { x: randomPosition(), y: -1.02 }
-    ]),
-    new Wave(1500, ["basicDrone2"], [ // 60
-        { x: randomPosition(), y: -1.02 }
-    ]),
-    new Wave(2500, ["fighterDrone2"], [
-        { x: randomPosition(), y: -1.02 }
-    ]),
-    new Wave(6000, ["basicDrone3", "fighterDrone2", "fighterDrone2"], [
-        { x: -0.8, y: -1.02 },
-        { x: -0.3, y: -1.02 },
-        { x: 0.3, y: -1.02 }
-    ]),
-    new Wave(15000, ["tankDrone1", "fighterDrone2", "fighterDrone2"], [
-        { x: -0.4, y: -1.02 },
-        { x: -1.02, y: -0.9 },
-        { x: 1.02, y: -0.8 }
-    ]),
-    new Wave(12000, ["basicDrone2", "basicDrone2", "basicDrone2", "basicDrone2", "basicDrone2"], [
-        { x: -0.5, y: -1.02 },
-        { x: -0.3, y: -1.02 },
-        { x: 0, y: -1.02 },
-        { x: 0.3, y: -1.02 },
-        { x: 0.5, y: -1.02 }
-    ]),
-    new Wave(15000, ["tankDrone1"], [
-        { x: 0.4, y: -1.02 },
-    ]),
-    new Wave(12000, ["tankDrone2", "fighterDrone1", "fighterDrone1", "fighterDrone1"], [
-        { x: 0, y: -1.02 },
-        { x: -0.8, y: -1.02 },
-        { x: 0, y: -1.02 },
-        { x: 0.8, y: -1.02 }
-    ]),
-    new Wave(8000, ["basicDrone2", "basicDrone2", "basicDrone2"], [
-        { x: -0.4, y: -1.02 },
-        { x: 0, y: -1.02 },
-        { x: 0.4, y: -1.02 }
-    ]),
-    new Wave(7000, ["fighterDrone2", "fighterDrone2"], [
-        { x: -1.02, y: -0.7 },
-        { x: 1.02, y: -0.7 }
-    ]),
-    new Wave(12000, ["basicDrone2", "basicDrone2", "basicDrone2", "basicDrone2"], [
-        { x: -0.75, y: -1.02 },
-        { x: -0.25, y: -1.02 },
-        { x: 0.25, y: -1.02 },
-        { x: 0.75, y: -1.02 }
-    ]),
-    new Wave(7000, ["fighterDrone1", "fighterDrone1"], [
-        { x: -0.9, y: -1.02 },
-        { x: -0.7, y: -1.02 }
-    ]),
-    new Wave(13000, ["princessBee"], [
-        { x: 0, y: -1.02 }
-    ], true)
-];
+
+const waves = [];
 let nextWave, levelTime, waveTime, transitionTime, gameRunning = true;
 
 /**
@@ -381,6 +85,22 @@ function init() {
     levelTime = 0;
     waveTime = 0;
     transitionTime = 0;
+
+    for (let i = 0; i < level.length; i++) {
+        let positions = [];
+        for (const j of level[i].positions) {
+            let x = j.x;
+            let y = j.y;
+            if (j.x === "rand")
+                x = randomPosition();
+            if (j.y === "rand")
+                y = randomPosition();
+
+            positions.push({ x, y });
+        }
+
+        waves[i] = new Wave(level[i].delay, level[i].enemies, positions, level[i].dependent, level[i].boss);
+    }
 }
 
 export { name, init, tick };

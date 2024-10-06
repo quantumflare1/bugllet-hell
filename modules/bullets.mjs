@@ -20,7 +20,7 @@ class Bullet {
      * @param {string} sprite 
      * @param {number} variety 
      */
-    constructor(x, y, size, velX, velY, rot, expireTime, script, sprite, variety) {
+    constructor(x, y, size, velX, velY, rot, expireTime, script, sprite, variety, animRate, lastAnimFrame) {
         this.x = x;
         this.y = y;
         this.prevX = x;
@@ -37,6 +37,10 @@ class Bullet {
         this.script = script;
         this.sprite = sprite;
         this.variety = variety;
+        this.lastAnimFrame = lastAnimFrame;
+        this.animRate = animRate;
+        this.animFrame = 0;
+        this.animTimer = 0;
 
         if (this.sprite === "player") {
             playerBullets.add(this);
@@ -49,6 +53,7 @@ class Bullet {
      */
     tick(ms) {
         this.lifetime += ms;
+        this.animTimer += ms;
 
         this.prevX = this.x;
         this.prevY = this.y;
@@ -65,6 +70,11 @@ class Bullet {
         this.velY *= prevVecLength / newVecLength;
 
         this.script(this, ms);
+
+        if (this.animRate !== 0 && this.animTimer > 1000 / this.animRate) {
+            this.animTimer = 0;
+            this.animFrame = this.animFrame < this.lastAnimFrame-1 ? this.animFrame + 1 : 0;
+        }
 
         // kill bullets
         if (this.x - this.size > Global.BOARD_WIDTH + 10 || this.x + this.size < -10 ||
@@ -260,7 +270,7 @@ const types = {
 function makeBullet(type, x, y, dir, variety, vel = types[type].vel) {
     const velX = vel * Math.cos(dir);
     const velY = vel * Math.sin(dir);
-    new Bullet(x, y, types[type].size, velX, velY, types[type].rot, types[type].expireTime, types[type].script, types[type].sprite, variety);
+    new Bullet(x, y, types[type].size, velX, velY, types[type].rot, types[type].expireTime, types[type].script, types[type].sprite, variety, 0, 0);
 }
 
 export { types, bullets, playerBullets, Bullet, makeBullet };

@@ -137,8 +137,8 @@ function drawText(context, text, sx, sy, scale) {
  */
 function drawBullet(b) {
     try {
-        let sprData = bullet[b.sprite][b.variety];
-        if (!sprData) sprData = bullet["basic"][2];
+        let sprData = bullet[b.sprite][b.animFrame][b.variety];
+        if (!sprData) sprData = bullet["basic"][0][2];
         const rotation = (Math.atan(b.velY / b.velX) + Math.PI / 2) + (b.velX > 0 ? Math.PI : 0);
     
         gpctx.setTransform(1, 0, 0, 1, b.x, b.y);
@@ -148,7 +148,7 @@ function drawBullet(b) {
         gpctx.setTransform(1, 0, 0, 1, 0, 0);
     }
     catch (e) {
-        console.log(bullet[b.sprite], b.variety);
+        console.log(bullet[b.sprite], b.animFrame, b.variety);
         throw e;
     }
 }

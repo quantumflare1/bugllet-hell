@@ -1,0 +1,910 @@
+[
+    {
+        "delay": 500,
+        "enemies": [
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": 0, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 2000,
+        "enemies": [
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": 0, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 10000,
+        "enemies": [
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": -0.6, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 5000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": -0.2, "y": -1.02 },
+            { "x": 0.2, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 12000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": -1.02, "y": -0.5 },
+            { "x": 1.02, "y": -0.5 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 15000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1",
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": -1.02, "y": -0.6 },
+            { "x": 1.02, "y": -0.6 },
+            { "x": 0, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 20000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1",
+            "basicDrone1",
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": -1.02, "y": -0.7 },
+            { "x": 1.02, "y": -0.7 },
+            { "x": 0.2, "y": -1.02 },
+            { "x": -0.2, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 20000,
+        "enemies": [
+            "fighterDrone1"
+        ],
+        "positions": [
+            { "x": 0.6, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 10000,
+        "enemies": [
+            "fighterDrone1"
+        ],
+        "positions": [
+            { "x": -0.6, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 8000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": -0.4, "y": -1.02 },
+            { "x": 0.4, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 10000,
+        "enemies": [
+            "fighterDrone1",
+            "fighterDrone1"
+        ],
+        "positions": [
+            { "x": -0.7, "y": -1.02 },
+            { "x": 0.7, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 18000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1",
+            "basicDrone1",
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": -1.02, "y": -0.7 },
+            { "x": -1.02, "y": -0.5 },
+            { "x": 1.02, "y": -0.7 },
+            { "x": 1.02, "y": -0.5 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 12000,
+        "enemies": [
+            "fighterDrone1"
+        ],
+        "positions": [
+            { "x": -0.4, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 8000,
+        "enemies": [
+            "fighterDrone1"
+        ],
+        "positions": [
+            { "x": 0.4, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 6000,
+        "enemies": [
+            "fighterDrone1"
+        ],
+        "positions": [
+            { "x": -0.6, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 6000,
+        "enemies": [
+            "fighterDrone1"
+        ],
+        "positions": [
+            { "x": 0.6, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 15000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1",
+            "basicDrone1",
+            "basicDrone1",
+            "fighterDrone1"
+        ],
+        "positions": [
+            { "x": -0.3, "y": -1.02 },
+            { "x": -0.1, "y": -1.02 },
+            { "x": 0.1, "y": -1.02 },
+            { "x": 0.3, "y": -1.02 },
+            { "x": 0, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 9000,
+        "enemies": [
+            "basicDrone2",
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": -0.2, "y": -1.02 },
+            { "x": 0.2, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 3000,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": -0.9, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1000,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": -0.7, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1000,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": -0.5, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1000,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": -0.3, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1000,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": -0.1, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1000,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": 0.1, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1000,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": 0.3, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1000,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": 0.5, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1000,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": 0.7, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1000,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": 0.9, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 5000,
+        "enemies": [
+            "fighterDrone1"
+        ],
+        "positions": [
+            { "x": -1.02, "y": -0.6 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 8000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1",
+            "basicDrone1",
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": -0.5, "y": -1.02 },
+            { "x": -0.2, "y": -1.02 },
+            { "x": 0.2, "y": -1.02 },
+            { "x": 0.5, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1000,
+        "enemies": [
+            "basicDrone2",
+            "basicDrone2",
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": -0.4, "y": -1.02 },
+            { "x": 0, "y": -1.02 },
+            { "x": 0.4, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 9000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": -1.02, "y": -0.9 },
+            { "x": -1.02, "y": -0.8 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 4000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": -1.02, "y": -0.85 },
+            { "x": -1.02, "y": -0.75 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 4000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": -1.02, "y": -0.8 },
+            { "x": -1.02, "y": -0.7 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 4000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": -1.02, "y": -0.75 },
+            { "x": -1.02, "y": -0.65 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 4000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1"
+        ],
+        "positions": [
+            { "x": -1.02, "y": -0.7 },
+            { "x": -1.02, "y": -0.6 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 6000,
+        "enemies": [
+            "tankDrone1"
+        ],
+        "positions": [
+            { "x": 0, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 2000,
+        "enemies": [
+            "basicDrone2",
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": -0.7, "y": -1.02 },
+            { "x": -0.8, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 3000,
+        "enemies": [
+            "basicDrone2",
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": 0.7, "y": -1.02 },
+            { "x": 0.8, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 3000,
+        "enemies": [
+            "basicDrone2",
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": -0.7, "y": -1.02 },
+            { "x": -0.8, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 8000,
+        "enemies": [
+            "tankDrone1",
+            "fighterDrone1"
+        ],
+        "positions": [
+            { "x": -1.02, "y": -0.7 },
+            { "x": -0.8, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 20000,
+        "enemies": [
+            "basicDrone3",
+            "tankDrone1",
+            "tankDrone1"
+        ],
+        "positions": [
+            { "x": -1.02, "y": -0.7 },
+            { "x": -0.3, "y": -1.02 },
+            { "x": 0.3, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 20000,
+        "enemies": [
+            "basicDrone3"
+        ],
+        "positions": [
+            { "x": 0, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 3000,
+        "enemies": [
+            "basicDrone3"
+        ],
+        "positions": [
+            { "x": 0, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 3000,
+        "enemies": [
+            "basicDrone3"
+        ],
+        "positions": [
+            { "x": 0, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 12000,
+        "enemies": [
+            "basicDrone2",
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": 0.5, "y": -1.02 },
+            { "x": -0.5, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1000,
+        "enemies": [
+            "basicDrone2",
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": 0.6, "y": -1.02 },
+            { "x": -0.6, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 12000,
+        "enemies": [
+            "fighterDrone1"
+        ],
+        "positions": [
+            { "x": 0.8, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 0,
+        "enemies": [
+            "basicDrone3",
+            "basicDrone3"
+        ],
+        "positions": [
+            { "x": 0.2, "y": -1.02 },
+            { "x": -0.2, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 18000,
+        "enemies": [
+            "basicDrone1",
+            "basicDrone1",
+            "basicDrone1",
+            "fighterDrone2",
+            "fighterDrone2"
+        ],
+        "positions": [
+            { "x": -0.2, "y": -1.02 },
+            { "x": 0, "y": -1.02 },
+            { "x": 0.2, "y": -1.02 },
+            { "x": 0.1, "y": -1.02 },
+            { "x": -0.1, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 10000,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": "rand", "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1500,
+        "enemies": [
+            "fighterDrone2"
+        ],
+        "positions": [
+            { "x": "rand", "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 2500,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": "rand", "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1500,
+        "enemies": [
+            "fighterDrone2"
+        ],
+        "positions": [
+            { "x": "rand", "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 2500,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": "rand", "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1500,
+        "enemies": [
+            "fighterDrone2"
+        ],
+        "positions": [
+            { "x": "rand", "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 2500,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": "rand", "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1500,
+        "enemies": [
+            "fighterDrone2"
+        ],
+        "positions": [
+            { "x": "rand", "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 2500,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": "rand", "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1500,
+        "enemies": [
+            "fighterDrone2"
+        ],
+        "positions": [
+            { "x": "rand", "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 2500,
+        "enemies": [
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": "rand", "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 1500,
+        "enemies": [
+            "fighterDrone2"
+        ],
+        "positions": [
+            { "x": "rand", "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 6000,
+        "enemies": [
+            "basicDrone3",
+            "fighterDrone2",
+            "fighterDrone2"
+        ],
+        "positions": [
+            { "x": -0.8, "y": -1.02 },
+            { "x": -0.3, "y": -1.02 },
+            { "x": 0.3, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 15000,
+        "enemies": [
+            "tankDrone1",
+            "fighterDrone2",
+            "fighterDrone2"
+        ],
+        "positions": [
+            { "x": -0.4, "y": -1.02 },
+            { "x": -1.02, "y": -0.9 },
+            { "x": 1.02, "y": -0.8 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 12000,
+        "enemies": [
+            "basicDrone2",
+            "basicDrone2",
+            "basicDrone2",
+            "basicDrone2",
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": -0.5, "y": -1.02 },
+            { "x": -0.3, "y": -1.02 },
+            { "x": 0, "y": -1.02 },
+            { "x": 0.3, "y": -1.02 },
+            { "x": 0.5, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 15000,
+        "enemies": [
+            "tankDrone1"
+        ],
+        "positions": [
+            { "x": -0.4, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 12000,
+        "enemies": [
+            "tankDrone2",
+            "fighterDrone1",
+            "fighterDrone1",
+            "fighterDrone1"
+        ],
+        "positions": [
+            { "x": 0, "y": -1.02 },
+            { "x": -0.8, "y": -1.02 },
+            { "x": 0, "y": -1.02 },
+            { "x": 0.8, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 8000,
+        "enemies": [
+            "basicDrone2",
+            "basicDrone2",
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": -0.4, "y": -1.02 },
+            { "x": 0, "y": -1.02 },
+            { "x": 0.4, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 7000,
+        "enemies": [
+            "fighterDrone2",
+            "fighterDrone2"
+        ],
+        "positions": [
+            { "x": -1.02, "y": -0.7 },
+            { "x": 1.02, "y": -0.7 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 12000,
+        "enemies": [
+            "basicDrone2",
+            "basicDrone2",
+            "basicDrone2",
+            "basicDrone2"
+        ],
+        "positions": [
+            { "x": -0.75, "y": -1.02 },
+            { "x": -0.25, "y": -1.02 },
+            { "x": 0.25, "y": -1.02 },
+            { "x": 0.75, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 7000,
+        "enemies": [
+            "fighterDrone1",
+            "fighterDrone1"
+        ],
+        "positions": [
+            { "x": -0.9, "y": -1.02 },
+            { "x": -0.7, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": false
+    },
+    {
+        "delay": 13000,
+        "enemies": [
+            "princessBee"
+        ],
+        "positions": [
+            { "x": 0, "y": -1.02 }
+        ],
+        "dependent": -1,
+        "boss": true
+    }
+]
