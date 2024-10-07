@@ -6,7 +6,7 @@ import * as Enemy from "./modules/enemy.mjs";
 import * as Level from "./modules/level.mjs";
 import * as Pickup from "./modules/pickup.mjs";
 import * as Menu from "./modules/menu.mjs";
-import sprites from "./sprites.json" with { type: "json" }
+import assets from "./sprites.json" with { type: "json" }
 import font from "./assets/ui/font.json" with { type: "json" }
 import bullet from "./assets/enemy/bullets.json" with { type: "json" }
 
@@ -27,7 +27,7 @@ let bgScroll = 0;
 let nextTick;
 const bgScrollRate = 50;
 
-const spriteImages = {};
+let spriteImages = {};
 const fontSheet = new Image();
 const bulletSheet = new Image();
 
@@ -157,7 +157,7 @@ function drawBullet(b) {
  * @param {Enemy.Enemy} e 
  */
 function drawEnemy(e) {
-    const enemySprite = spriteImages.enemy[`${e.type}_${e.animFrame}`];
+    const enemySprite = spriteImages.enemy[e.type][e.animFrame];
 
     gpctx.setTransform(1, 0, 0, 1, e.x, e.y);
     gpctx.rotate(e.rotation);
@@ -190,12 +190,12 @@ function draw() {
 
     if (Player.blinkState === 1) gpctx.globalAlpha = 0.2;
     if (Player.movingLeft && !Player.movingRight) {
-        gpctx.drawImage(spriteImages.player[`leftFrame${Player.animState}`], Math.floor(Player.x - spriteImages.player[`leftFrame${Player.animState}`].width / 2), Math.floor(Player.y - 23));
+        gpctx.drawImage(spriteImages.player.left[Player.animFrame], Math.floor(Player.x - spriteImages.player.left[Player.animFrame].width / 2), Math.floor(Player.y - 23));
     }
     else if (Player.movingRight && !Player.movingLeft) {
-        gpctx.drawImage(spriteImages.player[`rightFrame${Player.animState}`], Math.floor(Player.x - spriteImages.player[`rightFrame${Player.animState}`].width / 2), Math.floor(Player.y - 23));
+        gpctx.drawImage(spriteImages.player.right[Player.animFrame], Math.floor(Player.x - spriteImages.player.right[Player.animFrame].width / 2), Math.floor(Player.y - 23));
     } else {
-        gpctx.drawImage(spriteImages.player[`frame${Player.animState}`], Math.floor(Player.x - spriteImages.player[`frame${Player.animState}`].width / 2), Math.floor(Player.y - 23));
+        gpctx.drawImage(spriteImages.player.default[Player.animFrame], Math.floor(Player.x - spriteImages.player.default[Player.animFrame].width / 2), Math.floor(Player.y - 23));
     }
     gpctx.globalAlpha = 1;
 
@@ -301,6 +301,34 @@ function initGame() {
     bgm.loop = true;
 }
 
+function loadAssets() {
+    /**
+     * @param {object} obj 
+     * @param {string[]} ids 
+     */
+    function loadRecursive(obj, ids) {
+        for (const v in obj) {
+            if (Array.isArray(obj[v])) {
+                for (let i = 0; i < obj[v].length; i++) {
+                    const path = `${ids.join("/")}/${obj[v][i]}`;
+
+                    obj[v][i] = new Image();
+                    obj[v][i].src = path;
+                }
+            } else if (typeof obj[v] === "string") {
+                const path = `${ids.join("/")}/${obj[v]}`;
+
+                obj[v] = new Image();
+                obj[v].src = path;
+            } else if (typeof obj[v] === "object" && obj[v] !== null) {
+                loadRecursive(obj[v], [...ids, v]);
+            }
+        }
+    }
+    spriteImages = structuredClone(assets);
+    loadRecursive(spriteImages, ["./assets"]);
+}
+
 function load() {
     canvas.width = 1200;
     canvas.height = 900;
@@ -313,16 +341,12 @@ function load() {
     document.getElementById("game").appendChild(gameplayCanvas);
     gpctx.imageSmoothingEnabled = false;
 
-    Object.keys(sprites).forEach((v) => {
-        spriteImages[v] = {};
-        Object.keys(sprites[v]).forEach((val) => {
-            spriteImages[v][val] = new Image();
-            spriteImages[v][val].src = `./assets/${v}/${sprites[v][val]}`;
-        });
-    });
+    loadAssets();
     fontSheet.src = "./assets/ui/font.png";
     fontSheet.addEventListener("load", () => { loadMenu("startMenu"); });
     bulletSheet.src = "./assets/enemy/bullets.png";
+
+    console.log(spriteImages);
 
     Player.init();
     Level.init();

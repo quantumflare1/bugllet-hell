@@ -22,7 +22,7 @@ let lives, bombs, score, power, prevPower;
 let grazeMultiplier, prevGrazeMultiplier;
 let timeSinceLastBullet, fireCooldown;
 let invTime, bombCooldown, bombRadius, bombBufferTime, prevBombs;
-let animTimer, animState;
+let animTimer, animFrame;
 let blinkTimer, blinkState;
 
 /**
@@ -267,7 +267,7 @@ function tick(ms) {
     // flip between up and down wing states
     if (animTimer > 1000 / WINGBEATS_PER_SECOND) {
         animTimer = 0;
-        animState = animState < ANIM_FRAMES - 1 ? animState + 1 : 0;
+        animFrame = animFrame < ANIM_FRAMES - 1 ? animFrame + 1 : 0;
     }
 
     if (blinkTimer > 1000 / BLINKS_PER_SECOND) {
@@ -383,7 +383,7 @@ function reset() {
     bombRadius = 0;
 
     animTimer = 0;
-    animState = 0;
+    animFrame = 0;
     blinkTimer = 0;
     blinkState = 1;
 
@@ -415,7 +415,7 @@ function init() {
     bombCooldown = 0;
     bombRadius = 0;
     animTimer = 0;
-    animState = 0;
+    animFrame = 0;
     blinkTimer = 0;
     blinkState = 1;
 
@@ -428,4 +428,4 @@ function init() {
     addEventListener("game_pickupbomb", pickUpBomb);
 }
 
-export { x, y, prevX, prevY, movingLeft, movingRight, size, focused, lives, bombs, score, power, animState, blinkState, bombRadius, reset, init, tick, keydown, keyup, powerUp, scoreUp };
+export { x, y, prevX, prevY, movingLeft, movingRight, size, focused, lives, bombs, score, power, animFrame, blinkState, bombRadius, reset, init, tick, keydown, keyup, powerUp, scoreUp };

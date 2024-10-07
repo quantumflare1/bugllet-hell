@@ -1,11 +1,17 @@
 {
     "player": {
-        "frame0": "player1.png",
-        "frame1": "player2.png",
-        "leftFrame0": "player1_left.png",
-        "leftFrame1": "player2_left.png",
-        "rightFrame0": "player1_right.png",
-        "rightFrame1": "player2_right.png",
+        "default": [
+            "player1.png",
+            "player2.png"
+        ],
+        "left": [
+            "player1_left.png",
+            "player2_left.png"
+        ],
+        "right": [
+            "player1_right.png",
+            "player2_right.png"
+        ],
         "bullet": "stinger.png"
     },
     "ui": {
@@ -26,19 +32,35 @@
         "bomb": "bomb.png"
     },
     "enemy": {
-        "basicDrone1_0": "basic_drone1.png",
-        "basicDrone1_1": "basic_drone2.png",
-        "basicDrone2_0": "basic_drone1.png",
-        "basicDrone2_1": "basic_drone2.png",
-        "basicDrone3_0": "basic_drone1.png",
-        "basicDrone3_1": "basic_drone2.png",
-        "fighterDrone1_0": "fighter_drone1.png",
-        "fighterDrone1_1": "fighter_drone2.png",
-        "fighterDrone2_0": "fighter_drone1.png",
-        "fighterDrone2_1": "fighter_drone2.png",
-        "tankDrone1": "tank_drone.png",
-        "tankDrone2": "tank_drone.png",
-        "princessBee_0": "princess_bee1.png",
-        "princessBee_1": "princess_bee2.png"
+        "basicDrone1": [
+            "basic_drone1.png",
+            "basic_drone2.png"
+        ],
+        "basicDrone2": [
+            "basic_drone1.png",
+            "basic_drone2.png"
+        ],
+        "basicDrone3": [
+            "basic_drone1.png",
+            "basic_drone2.png"
+        ],
+        "fighterDrone1": [
+            "fighter_drone1.png",
+            "fighter_drone2.png"
+        ],
+        "fighterDrone2": [
+            "fighter_drone1.png",
+            "fighter_drone2.png"
+        ],
+        "tankDrone1": [
+            "tank_drone.png"
+        ],
+        "tankDrone2": [
+            "tank_drone.png"
+        ],
+        "princessBee": [
+            "princess_bee1.png",
+            "princess_bee2.png"
+        ]
     }
 }

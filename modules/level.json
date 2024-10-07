@@ -1,16 +1,5 @@
 [
     {
-        "delay": 500,
-        "enemies": [
-            "basicDrone1"
-        ],
-        "positions": [
-            { "x": 0, "y": -1.02 }
-        ],
-        "dependent": -1,
-        "boss": false
-    },
-    {
         "delay": 2000,
         "enemies": [
             "basicDrone1"

@@ -52,6 +52,13 @@ function tick(ms) {
     levelTime += ms;
     waveTime += ms;
 
+    /*
+    iterate through every wave
+    check each wave's "finished" status
+    if a wave has finished, send in any waves that depend on that wave
+    change wave delay to wave length
+    wave length determines despawn time for enemies plus when it finishes
+    */
     if (nextWave < waves.length && (waveTime >= waves[nextWave].delay || (nextWave !== 0 && waves[nextWave-1].enemiesLeft === 0))) {
         transitionTime += ms;
         if (transitionTime > 1000) {
@@ -89,12 +96,8 @@ function init() {
     for (let i = 0; i < level.length; i++) {
         let positions = [];
         for (const j of level[i].positions) {
-            let x = j.x;
-            let y = j.y;
-            if (j.x === "rand")
-                x = randomPosition();
-            if (j.y === "rand")
-                y = randomPosition();
+            let x = j.x === "rand" ? randomPosition() : j.x;
+            let y = j.y === "rand" ? randomPosition() : j.y;
 
             positions.push({ x, y });
         }
