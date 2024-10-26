@@ -25,7 +25,6 @@ let msSinceLastFpsCheck = 0;
 let framesSinceLastFpsCheck = 0;
 let bgScroll = 0;
 let nextTick;
-const bgScrollRate = 50;
 
 let spriteImages = {};
 const fontSheet = new Image();
@@ -89,7 +88,7 @@ function checkGameState(e) {
 function loadMenu(name) {
     let lastMenuFrameTime = document.timeline.currentTime;
     function render(ms) {
-        draw();
+        if (Menu[name].transition !== 0) draw();
         const elapsed = ms - lastMenuFrameTime;
         const transitionPercentComplete = elapsed / (1000 * Menu[name].transition);
         gpctx.globalAlpha = transitionPercentComplete;
@@ -177,8 +176,8 @@ function fillPowerMeter(scale) {
 
 function draw() {
     //performance.mark("drawbegan");
-    gpctx.drawImage(spriteImages.ui.gameBg, 0, bgScroll - Global.BOARD_HEIGHT);
-    gpctx.drawImage(spriteImages.ui.gameBg, 0, bgScroll);
+    gpctx.drawImage(spriteImages.ui[Level.areas[Level.activeArea].bg], 0, bgScroll - Global.BOARD_HEIGHT);
+    gpctx.drawImage(spriteImages.ui[Level.areas[Level.activeArea].bg], 0, bgScroll);
     gpctx.drawImage(spriteImages.ui.vignette, 0, 0);
 
     const bombBlastOpacity = Player.bombRadius < 0 ? 1 : -Player.bombRadius / 1050 + 1;
@@ -265,7 +264,7 @@ function tick(ms) {
 
     if (Global.gameState === Global.game.PLAY) {
         //performance.mark("tickbegan"); // profiling yippee!
-        bgScroll += bgScrollRate * timeElapsed / 1000;
+        bgScroll += Level.areas[Level.activeArea].scrollRate * timeElapsed / 1000;
         if (bgScroll >= Global.BOARD_HEIGHT) bgScroll = 0;
 
         Player.tick(timeElapsed);
@@ -293,6 +292,8 @@ function tick(ms) {
 }
 
 function initGame() {
+    Level.init();
+
     addEventListener("game_statupdate", drawUI);
     ctx.drawImage(spriteImages.ui.bg, 0, 0);
     drawUI();
@@ -349,7 +350,6 @@ function load() {
     console.log(spriteImages);
 
     Player.init();
-    Level.init();
 
     addEventListener("game_statechange", checkGameState);
     console.log(`${performance.measure("loadtime").duration.toFixed(1)}ms load time`);

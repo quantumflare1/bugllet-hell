@@ -2,8 +2,6 @@ import * as Enemy from "./enemy.mjs";
 import * as Global from "./global.mjs";
 import level from "./level.json" with { type: "json" };
 
-const name = "Instigation";
-
 /**
  * @param {any[]} arr 
  * @returns any
@@ -18,32 +16,50 @@ function randomPosition() {
 
 class Wave {
     /**
-     * @param {number} delay 
+     * @param {number} id 
+     * @param {number} time 
      * @param {string[]} enemies 
      * @param {object[]} positions 
      * @param {number} dependent
      * @param {boolean} boss 
      */
-    constructor(delay, enemies, positions, dependent, boss = false) {
-        this.delay = delay;
+    constructor(id, time, enemies, positions, dependent, boss = false) {
+        this.id = id;
+        this.timeLimit = time;
         this.enemiesLeft = enemies.length;
-        this.enemies = enemies;
+        this.enemyList = enemies;
+        this.aliveEnemies = new Set();
         this.positions = positions;
         this.dependent = dependent;
         this.boss = boss;
+        this.finished = false;
+        this.active = false;
+        this.lifetime = 0;
     }
     /**
      * @param {number} waveNum 
      */
     generate(waveNum) {
-        for (let i = 0; i < this.enemies.length; i++) {
-            Enemy.makeEnemy(this.positions[i].x * Global.BOARD_WIDTH / 2 + Global.BOARD_WIDTH / 2, this.positions[i].y * Global.BOARD_HEIGHT / 2 + Global.BOARD_HEIGHT / 2, this.enemies[i], waveNum);
+        for (let i = 0; i < this.enemyList.length; i++) {
+            this.aliveEnemies.add(Enemy.makeEnemy(
+                this.positions[i].x * Global.BOARD_WIDTH / 2 + Global.BOARD_WIDTH / 2,
+                this.positions[i].y * Global.BOARD_HEIGHT / 2 + Global.BOARD_HEIGHT / 2,
+                this.enemyList[i], waveNum)
+            );
         }
+
+        activeWaves.add(this);
     }
 }
 
+let name;
 const waves = [];
-let nextWave, levelTime, waveTime, transitionTime, gameRunning = true;
+const areas = [];
+let activeArea = 0;
+const activeWaves = new Set();
+let startWave, levelTime, waveTime, gameRunning = true;
+let transitioning, transitionTime;
+const nextWaves = [];
 
 /**
  * @param {number} ms 
@@ -59,51 +75,100 @@ function tick(ms) {
     change wave delay to wave length
     wave length determines despawn time for enemies plus when it finishes
     */
-    if (nextWave < waves.length && (waveTime >= waves[nextWave].delay || (nextWave !== 0 && waves[nextWave-1].enemiesLeft === 0))) {
+    for (const w of activeWaves) {
+        w.lifetime += ms;
+
+        // note to self: maybe optimize this later
+        w.enemiesLeft = 0;
+        for (const e of w.aliveEnemies)
+            if (Enemy.enemies.has(e))
+                w.enemiesLeft++;
+
+        if (w.lifetime > w.timeLimit || w.enemiesLeft === 0)
+            w.finished = true;
+
+        if (w.finished) {
+            for (const d of w.dependent) {
+                if (!activeWaves.has(waves[d])) {
+                    if (w.enemiesLeft === 0) {
+                        transitioning = true;
+                        nextWaves.push(d);
+                        console.log(transitioning)
+                    } else {
+                        waves[d].generate();
+                    }
+
+                    for (const i of Enemy.enemies)
+                        if (i.waveId === w.id) i.despawning = true;
+                }
+            }
+            activeWaves.delete(w);
+        }
+    }
+
+    if (transitioning) {
+        transitionTime += ms;
+        for (const i of nextWaves) {
+            if (transitionTime > 1000 && !activeWaves.has(waves[i])) {
+                waves[i].generate();
+                transitioning = false;
+                transitionTime = 0;
+            }
+        }
+    }
+
+    /*
+    if (startWave < waves.length && (waveTime >= waves[startWave].timeLimit || (startWave !== 0 && waves[startWave-1].enemiesLeft === 0))) {
         transitionTime += ms;
         if (transitionTime > 1000) {
-            nextWave++;
+            startWave++;
             waveTime = 0;
 
-            if (waves[nextWave-1].boss) 
+            if (waves[startWave-1].boss) 
                 for (const i of Enemy.enemies)
                     i.lifetime = i.screenTime; // immediately force all enemies to despawn
 
-            waves[nextWave-1].generate(nextWave-1);
+            waves[startWave-1].generate(startWave-1);
             transitionTime = 0;
         }
-    }
-    if (nextWave !== 0) {
+    }*/
+    if (startWave !== 0) {
         let curWaveEnemies = 0;
-        for (const i of Enemy.enemies) {
-            if (i.waveId === nextWave - 1)
+        for (const i of Enemy.enemies)
+            if (i.waveId === startWave - 1)
                 curWaveEnemies++;
-        }
-        waves[nextWave-1].enemiesLeft = curWaveEnemies;
+        
+        waves[startWave-1].enemiesLeft = curWaveEnemies;
     }
-    if (nextWave >= waves.length && waves[nextWave-1].enemiesLeft === 0 && gameRunning) {
+    if (startWave >= waves.length && waves[startWave-1].enemiesLeft === 0 && gameRunning) {
         setTimeout(Global.setGameState, 2000, Global.game.WON);
         gameRunning = false;
     }
 }
 
 function init() {
-    nextWave = Global.START_WAVE;
+    startWave = Global.START_WAVE;
     levelTime = 0;
     waveTime = 0;
     transitionTime = 0;
+    transitioning = false;
+    name = level.name;
 
-    for (let i = 0; i < level.length; i++) {
+    for (let i = 0; i < level.waves.length; i++) {
         let positions = [];
-        for (const j of level[i].positions) {
+        for (const j of level.waves[i].positions) {
             let x = j.x === "rand" ? randomPosition() : j.x;
             let y = j.y === "rand" ? randomPosition() : j.y;
 
             positions.push({ x, y });
         }
 
-        waves[i] = new Wave(level[i].delay, level[i].enemies, positions, level[i].dependent, level[i].boss);
+        waves[i] = new Wave(i, level.waves[i].delay, level.waves[i].enemies, positions, level.waves[i].dependent, level.waves[i].boss);
     }
+    for (let i = 0; i < level.areas.length; i++)
+        areas[i] = level.areas[i];
+    
+    setTimeout(() => { waves[0].generate(); }, level.initialDelay);
 }
 
-export { name, init, tick };
+export { name, activeArea, areas, init, tick };

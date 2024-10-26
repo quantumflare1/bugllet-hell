@@ -78,7 +78,7 @@ class Enemy {
     tick(ms) {
         this.invTime -= ms;
         this.lifetime += ms;
-        this.shotCooldown -= ms;
+        if (this.despawning) this.shotCooldown -= ms;
         this.moveCooldown -= ms;
         this.bombImmunity -= ms;
         this.animTimer += ms;
@@ -756,7 +756,7 @@ const types = {
  * @param {number} waveId 
  */
 function makeEnemy(x, y, type, waveId) {
-    new Enemy(x, y,
+    return new Enemy(x, y,
         types[type].size, types[type].score, types[type].hp, types[type].screenTime, types[type].patterns, types[type].script,
         waveId, type, types[type].shotRate, types[type].moveRate, types[type].wingRate, types[type].animFrames, types[type].useRotation);
 }
