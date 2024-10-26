@@ -178,7 +178,6 @@ function draw() {
     //performance.mark("drawbegan");
     gpctx.drawImage(spriteImages.ui[Level.areas[Level.activeArea].bg], 0, bgScroll - Global.BOARD_HEIGHT);
     gpctx.drawImage(spriteImages.ui[Level.areas[Level.activeArea].bg], 0, bgScroll);
-    gpctx.drawImage(spriteImages.ui.vignette, 0, 0);
 
     const bombBlastOpacity = Player.bombRadius < 0 ? 1 : -Player.bombRadius / 1050 + 1;
     gpctx.fillStyle = `rgba(255, 255, 255, ${0.5 * bombBlastOpacity})`;
@@ -206,6 +205,14 @@ function draw() {
 
     for (const i of Enemy.enemies)
         drawEnemy(i);
+
+    gpctx.drawImage(spriteImages.ui.vignette, 0, 0);
+
+    for (const i of Enemy.enemies) {
+        const indicator = spriteImages.ui.indicator;
+        const offset = (i.lifetime*i.lifetime*i.lifetime)/5000000 - (3*i.lifetime*i.lifetime)/10000 + (3*i.lifetime)/20 - 5; // arcane polynomial
+        gpctx.drawImage(indicator, Math.floor(i.x - indicator.width / 2), Global.BOARD_HEIGHT - Math.min(20, offset));
+    }
 
     //console.log(`draw took ${performance.measure("drawlength", "drawbegan").duration.toFixed(1)}ms`);
     // sep 4 2024 (0.1.0a v18): 0.5-12.7ms per draw on personal machine during normal gameplay (battery saving mode used)

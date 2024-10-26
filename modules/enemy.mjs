@@ -78,7 +78,7 @@ class Enemy {
     tick(ms) {
         this.invTime -= ms;
         this.lifetime += ms;
-        if (this.despawning) this.shotCooldown -= ms;
+        if (!this.despawning) this.shotCooldown -= ms;
         this.moveCooldown -= ms;
         this.bombImmunity -= ms;
         this.animTimer += ms;

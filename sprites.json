@@ -23,7 +23,8 @@
         "powerMeter": "power_meter.png",
         "bg": "background.png",
         "gameBg": "game_background.png",
-        "vignette": "vignette.png"
+        "vignette": "vignette.png",
+        "indicator": "indicator.png"
     },
     "pickup": {
         "point": "points.png",

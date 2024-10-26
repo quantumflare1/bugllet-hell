@@ -5,7 +5,8 @@ import * as Pickup from "./pickup.mjs";
 const BASE_MOVEMENT = 400;
 const BASE_FOCUS = 180;
 const SHOOTING_MOVEMENT_PENALTY = 0.7;
-const BORDER_SIZE = 20;
+const HORIZONTAL_BORDER = 40;
+const VERTICAL_BORDER = 60;
 const WINGBEATS_PER_SECOND = 20;
 const BLINKS_PER_SECOND = 15;
 const GRAZE_RADIUS = 10;
@@ -206,17 +207,17 @@ function tick(ms) {
     y += moveY * ms / 1000;
     bombBufferTime -= ms;
 
-    if (y < BORDER_SIZE) {
-        y = BORDER_SIZE;
+    if (y < VERTICAL_BORDER) {
+        y = VERTICAL_BORDER;
     }
-    else if (y > Global.BOARD_HEIGHT - BORDER_SIZE) {
-        y = Global.BOARD_HEIGHT - BORDER_SIZE;
+    else if (y > Global.BOARD_HEIGHT - VERTICAL_BORDER) {
+        y = Global.BOARD_HEIGHT - VERTICAL_BORDER;
     }
-    if (x < BORDER_SIZE) {
-        x = BORDER_SIZE;
+    if (x < HORIZONTAL_BORDER) {
+        x = HORIZONTAL_BORDER;
     }
-    else if (x > Global.BOARD_WIDTH - BORDER_SIZE) {
-        x = Global.BOARD_WIDTH - BORDER_SIZE;
+    else if (x > Global.BOARD_WIDTH - HORIZONTAL_BORDER) {
+        x = Global.BOARD_WIDTH - HORIZONTAL_BORDER;
     }
 
     if (bombCooldown > 3500) {
@@ -395,7 +396,7 @@ function reset() {
 function init() {
     // board size is 540x864
     x = Global.BOARD_WIDTH / 2;
-    y = Global.BOARD_HEIGHT - 64;
+    y = Global.BOARD_HEIGHT - 96;
     prevX = x;
     prevY = y;
     size = 5;

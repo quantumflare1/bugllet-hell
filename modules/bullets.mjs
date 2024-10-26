@@ -19,6 +19,8 @@ class Bullet {
      * @param {tick} script
      * @param {string} sprite 
      * @param {number} variety 
+     * @param {number} animRate 
+     * @param {number} lastAnimFrame 
      */
     constructor(x, y, size, velX, velY, rot, expireTime, script, sprite, variety, animRate, lastAnimFrame) {
         this.x = x;
@@ -111,6 +113,8 @@ const types = {
         rot: 0,
         expireTime: 10000,
         sprite: "basic",
+        animRate: 0,
+        lastAnimFrame: 0,
         script: () => {}
     },
     small: {
@@ -119,6 +123,8 @@ const types = {
         rot: 0,
         expireTime: 9000,
         sprite: "small",
+        animRate: 0,
+        lastAnimFrame: 0,
         script: () => {}
     },
     large: {
@@ -127,6 +133,8 @@ const types = {
         rot: 0,
         expireTime: 12000,
         sprite: "large",
+        animRate: 0,
+        lastAnimFrame: 0,
         script: () => {}
     },
     massive: {
@@ -135,6 +143,8 @@ const types = {
         rot: 0,
         expireTime: 15000,
         sprite: "massive",
+        animRate: 0,
+        lastAnimFrame: 0,
         script: () => {}
     },
     spiral: {
@@ -143,6 +153,8 @@ const types = {
         rot: 15,
         expireTime: 13000,
         sprite: "spiral",
+        animRate: 0,
+        lastAnimFrame: 0,
         script: (bullet, ms) => {
             const SPEED_MULTIPLIER = 3;
             bullet.x += bullet.baseVelX * ms / 1000 * SPEED_MULTIPLIER;
@@ -155,6 +167,8 @@ const types = {
         rot: 0,
         expireTime: 10000,
         sprite: "dart",
+        animRate: 0,
+        lastAnimFrame: 0,
         script: () => {}
     },
     grow1: {
@@ -163,6 +177,8 @@ const types = {
         rot: 0,
         expireTime: 9000,
         sprite: "small",
+        animRate: 0,
+        lastAnimFrame: 0,
         script: (bullet, ms) => {
             if (bullet.lifetime > 700) {
                 bullets.delete(bullet);
@@ -176,6 +192,8 @@ const types = {
         rot: 0,
         expireTime: 10000,
         sprite: "basic",
+        animRate: 0,
+        lastAnimFrame: 0,
         script: (bullet, ms) => {
             if (bullet.lifetime > 700) {
                 bullets.delete(bullet);
@@ -189,6 +207,8 @@ const types = {
         rot: 0,
         expireTime: 10000,
         sprite: "burst",
+        animRate: 0,
+        lastAnimFrame: 0,
         script: (bullet, ms) => {
             if (bullet.lifetime > 700) {
                 const angle = Math.random() * 2 * Math.PI;
@@ -206,6 +226,8 @@ const types = {
         rot: 0,
         expireTime: 10000,
         sprite: "burst",
+        animRate: 0,
+        lastAnimFrame: 0,
         script: (bullet, ms) => {
             if (bullet.lifetime > 700) {
                 const angle = Math.random() * 2 * Math.PI;
@@ -223,6 +245,8 @@ const types = {
         rot: 0,
         expireTime: 10000,
         sprite: "basic",
+        animRate: 0,
+        lastAnimFrame: 0,
         script: (bullet, ms) => {
             if (bullet.lifetime > 700) {
                 const angle = Math.random() * 2 * Math.PI;
@@ -240,6 +264,8 @@ const types = {
         rot: 0,
         expireTime: 10000,
         sprite: "basic",
+        animRate: 0,
+        lastAnimFrame: 0,
         script: (bullet, ms) => {
             if (bullet.lifetime < 4000) {
                 const angleToPlayer = aimAtPoint(Player.x, Player.y);
@@ -255,6 +281,8 @@ const types = {
         rot: 0.7,
         expireTime: 5000,
         sprite: "spiral",
+        animRate: 0,
+        lastAnimFrame: 0,
         script: () => {}
     }
 }
@@ -270,7 +298,7 @@ const types = {
 function makeBullet(type, x, y, dir, variety, vel = types[type].vel) {
     const velX = vel * Math.cos(dir);
     const velY = vel * Math.sin(dir);
-    new Bullet(x, y, types[type].size, velX, velY, types[type].rot, types[type].expireTime, types[type].script, types[type].sprite, variety, 0, 0);
+    new Bullet(x, y, types[type].size, velX, velY, types[type].rot, types[type].expireTime, types[type].script, types[type].sprite, variety, types[type].animRate, types[type].lastAnimFrame);
 }
 
 export { types, bullets, playerBullets, Bullet, makeBullet };
