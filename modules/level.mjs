@@ -35,20 +35,21 @@ class Wave {
         this.finished = false;
         this.active = false;
         this.lifetime = 0;
+        this.sent = false;
     }
-    /**
-     * @param {number} waveNum 
-     */
-    generate(waveNum) {
-        for (let i = 0; i < this.enemyList.length; i++) {
-            this.aliveEnemies.add(Enemy.makeEnemy(
-                this.positions[i].x * Global.BOARD_WIDTH / 2 + Global.BOARD_WIDTH / 2,
-                this.positions[i].y * Global.BOARD_HEIGHT / 2 + Global.BOARD_HEIGHT / 2,
-                this.enemyList[i], waveNum)
-            );
+    generate() {
+        if (!this.sent) {
+            for (let i = 0; i < this.enemyList.length; i++) {
+                this.aliveEnemies.add(Enemy.makeEnemy(
+                    this.positions[i].x * Global.BOARD_WIDTH / 2 + Global.BOARD_WIDTH / 2,
+                    this.positions[i].y * Global.BOARD_HEIGHT / 2 + Global.BOARD_HEIGHT / 2,
+                    this.enemyList[i], this.id)
+                );
+            }
+            this.sent = true;
+    
+            activeWaves.add(this);
         }
-
-        activeWaves.add(this);
     }
 }
 
@@ -57,24 +58,20 @@ const waves = [];
 const areas = [];
 let activeArea = 0;
 const activeWaves = new Set();
-let startWave, levelTime, waveTime, gameRunning = true;
+let startWave, levelTime, gameRunning = true;
 let transitioning, transitionTime;
-const nextWaves = [];
+const nextWaves = new Set();
 
 /**
  * @param {number} ms 
  */
 function tick(ms) {
     levelTime += ms;
-    waveTime += ms;
 
-    /*
-    iterate through every wave
-    check each wave's "finished" status
-    if a wave has finished, send in any waves that depend on that wave
-    change wave delay to wave length
-    wave length determines despawn time for enemies plus when it finishes
-    */
+    if (levelTime > level.initialDelay)
+        waves[0].generate();
+
+    // SERIOUS BUG: wave 2 seems to be constantly regenerating itself
     for (const w of activeWaves) {
         w.lifetime += ms;
 
@@ -92,8 +89,7 @@ function tick(ms) {
                 if (!activeWaves.has(waves[d])) {
                     if (w.enemiesLeft === 0) {
                         transitioning = true;
-                        nextWaves.push(d);
-                        console.log(transitioning)
+                        nextWaves.add(d);
                     } else {
                         waves[d].generate();
                     }
@@ -113,25 +109,11 @@ function tick(ms) {
                 waves[i].generate();
                 transitioning = false;
                 transitionTime = 0;
+                nextWaves.delete(i);
             }
         }
     }
 
-    /*
-    if (startWave < waves.length && (waveTime >= waves[startWave].timeLimit || (startWave !== 0 && waves[startWave-1].enemiesLeft === 0))) {
-        transitionTime += ms;
-        if (transitionTime > 1000) {
-            startWave++;
-            waveTime = 0;
-
-            if (waves[startWave-1].boss) 
-                for (const i of Enemy.enemies)
-                    i.lifetime = i.screenTime; // immediately force all enemies to despawn
-
-            waves[startWave-1].generate(startWave-1);
-            transitionTime = 0;
-        }
-    }*/
     if (startWave !== 0) {
         let curWaveEnemies = 0;
         for (const i of Enemy.enemies)
@@ -149,7 +131,6 @@ function tick(ms) {
 function init() {
     startWave = Global.START_WAVE;
     levelTime = 0;
-    waveTime = 0;
     transitionTime = 0;
     transitioning = false;
     name = level.name;
@@ -164,6 +145,7 @@ function init() {
         }
 
         waves[i] = new Wave(i, level.waves[i].delay, level.waves[i].enemies, positions, level.waves[i].dependent, level.waves[i].boss);
+        console.log(i, waves[i].dependent)
     }
     for (let i = 0; i < level.areas.length; i++)
         areas[i] = level.areas[i];
