@@ -84,7 +84,7 @@ class Bullet {
         if (this.x - this.size > Global.BOARD_WIDTH + 10 || this.x + this.size < -10 ||
             this.y - this.size > Global.BOARD_HEIGHT + 10 || this.y + this.size < -10 ||
             this.size === 0 || this.lifetime > this.expireTime) {
-            if (this.isFriendly) {
+            if (this instanceof PlayerBullet) {
                 playerBullets.delete(this);
             } else {
                 bullets.delete(this);

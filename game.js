@@ -304,8 +304,8 @@ function initGame() {
     addEventListener("game_statupdate", drawUI);
     ctx.drawImage(spriteImages.ui.bg, 0, 0);
     drawUI();
-    //bgm.play();
-    //bgm.volume = 0.1;
+    bgm.play();
+    bgm.volume = 0.1;
     bgm.loop = true;
 }
 
