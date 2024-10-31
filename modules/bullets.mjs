@@ -7,6 +7,11 @@ import * as Player from "./player.mjs";
  * @param {number} ms
  */
 
+/**
+ * @callback spawn
+ * @param {Bullet} bullet
+ */
+
 class Bullet {
     /**
      * @param {number} x 
@@ -17,12 +22,13 @@ class Bullet {
      * @param {number} rot 
      * @param {number} expireTime 
      * @param {tick} script
+     * @param {spawn} spawn 
      * @param {string} sprite 
      * @param {number} variety 
      * @param {number} animRate 
      * @param {number} lastAnimFrame 
      */
-    constructor(x, y, size, velX, velY, rot, expireTime, script, sprite, variety, animRate, lastAnimFrame) {
+    constructor(x, y, size, velX, velY, rot, expireTime, script, spawn, sprite, variety, animRate, lastAnimFrame) {
         this.x = x;
         this.y = y;
         this.prevX = x;
@@ -44,11 +50,7 @@ class Bullet {
         this.animFrame = 0;
         this.animTimer = 0;
 
-        if (this.sprite === "player") {
-            playerBullets.add(this);
-        } else {
-            bullets.add(this);
-        }
+        spawn(this);
     }
     /**
      * @param {number} ms 
@@ -91,6 +93,48 @@ class Bullet {
     }
 }
 
+class PlayerBullet extends Bullet {
+        /**
+     * @param {number} x 
+     * @param {number} y 
+     * @param {number} size 
+     * @param {number} velX 
+     * @param {number} velY 
+     * @param {number} expireTime 
+     * @param {tick} script
+     * @param {spawn} spawn 
+     * @param {string} sprite 
+     * @param {number} animRate 
+     * @param {number} lastAnimFrame 
+     */
+        constructor(x, y, size, velX, velY, expireTime, script, spawn, sprite, animRate, lastAnimFrame) {
+            super(x, y, size, velX, velY, 0, expireTime, script, spawn, sprite, 0, animRate, lastAnimFrame);
+            playerBullets.add(this);
+        }
+}
+
+class EnemyBullet extends Bullet {
+    /**
+     * @param {number} x 
+     * @param {number} y 
+     * @param {number} size 
+     * @param {number} velX 
+     * @param {number} velY 
+     * @param {number} rot 
+     * @param {number} expireTime 
+     * @param {tick} script
+     * @param {spawn} spawn 
+     * @param {string} sprite 
+     * @param {number} variety 
+     * @param {number} animRate 
+     * @param {number} lastAnimFrame 
+     */
+    constructor(x, y, size, velX, velY, rot, expireTime, script, spawn, sprite, variety, animRate, lastAnimFrame) {
+        super(x, y, size, velX, velY, rot, expireTime, script, spawn, sprite, variety, animRate, lastAnimFrame);
+        bullets.add(this);
+    }
+}
+
 const bullets = new Set();
 const playerBullets = new Set();
 
@@ -115,7 +159,8 @@ const types = {
         sprite: "basic",
         animRate: 0,
         lastAnimFrame: 0,
-        script: () => {}
+        script: () => {},
+        spawn: () => {}
     },
     small: {
         size: 3,
@@ -125,7 +170,8 @@ const types = {
         sprite: "small",
         animRate: 0,
         lastAnimFrame: 0,
-        script: () => {}
+        script: () => {},
+        spawn: () => {}
     },
     large: {
         size: 10,
@@ -135,7 +181,8 @@ const types = {
         sprite: "large",
         animRate: 0,
         lastAnimFrame: 0,
-        script: () => {}
+        script: () => {},
+        spawn: () => {}
     },
     massive: {
         size: 24,
@@ -145,7 +192,8 @@ const types = {
         sprite: "massive",
         animRate: 0,
         lastAnimFrame: 0,
-        script: () => {}
+        script: () => {},
+        spawn: () => {}
     },
     spiral: {
         size: 8,
@@ -159,7 +207,8 @@ const types = {
             const SPEED_MULTIPLIER = 3;
             bullet.x += bullet.baseVelX * ms / 1000 * SPEED_MULTIPLIER;
             bullet.y += bullet.baseVelY * ms / 1000 * SPEED_MULTIPLIER;
-        }
+        },
+        spawn: () => {}
     },
     dart: {
         size: 5,
@@ -169,7 +218,8 @@ const types = {
         sprite: "dart",
         animRate: 0,
         lastAnimFrame: 0,
-        script: () => {}
+        script: () => {},
+        spawn: () => {}
     },
     grow1: {
         size: 3,
@@ -184,7 +234,8 @@ const types = {
                 bullets.delete(bullet);
                 makeBullet("grow2", bullet.x, bullet.y, aimAtPoint(bullet.velX, bullet.velY), bullet.variety, Math.sqrt(bullet.velX ** 2 + bullet.velY ** 2));
             }
-        }
+        },
+        spawn: () => {}
     },
     grow2: {
         size: 6,
@@ -199,7 +250,8 @@ const types = {
                 bullets.delete(bullet);
                 makeBullet("large", bullet.x, bullet.y, aimAtPoint(bullet.velX, bullet.velY), bullet.variety, Math.sqrt(bullet.velX ** 2 + bullet.velY ** 2));
             }
-        }
+        },
+        spawn: () => {}
     },
     burst: {
         size: 10,
@@ -218,7 +270,8 @@ const types = {
                     makeBullet("basic", bullet.x, bullet.y, angle + (i / 8) * 2 * Math.PI, variety, Math.sqrt(bullet.velX ** 2 + bullet.velY ** 2));
                 }
             }
-        }
+        },
+        spawn: () => {}
     },
     burst1: {
         size: 10,
@@ -237,7 +290,8 @@ const types = {
                     makeBullet("burst2", bullet.x, bullet.y, angle + (i / 8) * 2 * Math.PI, variety, Math.sqrt(bullet.velX ** 2 + bullet.velY ** 2));
                 }
             }
-        }
+        },
+        spawn: () => {}
     },
     burst2: {
         size: 6,
@@ -256,7 +310,8 @@ const types = {
                     makeBullet("small", bullet.x, bullet.y, angle + (i / 8) * 2 * Math.PI, variety, Math.sqrt(bullet.velX ** 2 + bullet.velY ** 2));
                 }
             }
-        }
+        },
+        spawn: () => {}
     },
     homing: {
         size: 6,
@@ -273,7 +328,8 @@ const types = {
                 bullet.velX = netVel * Math.cos(angleToPlayer);
                 bullet.velY = netVel * Math.sin(angleToPlayer);
             }
-        }
+        },
+        spawn: () => {}
     },
     slowSpiral: {
         size: 8,
@@ -283,7 +339,19 @@ const types = {
         sprite: "spiral",
         animRate: 0,
         lastAnimFrame: 0,
-        script: () => {}
+        script: () => {},
+        spawn: () => {}
+    },
+    playerHoming: {
+        size: 8,
+        vel: 400,
+        rot: 0,
+        expireTime: 6000,
+        sprite: "player",
+        animRate: 0,
+        lastAnimFrame: 0,
+        script: () => {},
+        spawn: () => {}
     }
 }
 
@@ -298,7 +366,7 @@ const types = {
 function makeBullet(type, x, y, dir, variety, vel = types[type].vel) {
     const velX = vel * Math.cos(dir);
     const velY = vel * Math.sin(dir);
-    new Bullet(x, y, types[type].size, velX, velY, types[type].rot, types[type].expireTime, types[type].script, types[type].sprite, variety, types[type].animRate, types[type].lastAnimFrame);
+    new EnemyBullet(x, y, types[type].size, velX, velY, types[type].rot, types[type].expireTime, types[type].script, types[type].spawn, types[type].sprite, variety, types[type].animRate, types[type].lastAnimFrame);
 }
 
-export { types, bullets, playerBullets, Bullet, makeBullet };
+export { types, bullets, playerBullets, EnemyBullet, PlayerBullet, makeBullet };

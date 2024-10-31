@@ -132,13 +132,13 @@ function drawText(context, text, sx, sy, scale) {
 }
 
 /**
- * @param {Bullets.Bullet} b 
+ * @param {Bullets.EnemyBullet | Bullets.PlayerBullet} b 
  */
 function drawBullet(b) {
     try {
         let sprData = bullet[b.sprite][b.animFrame][b.variety];
         if (!sprData) sprData = bullet["basic"][0][2];
-        const rotation = (Math.atan(b.velY / b.velX) + Math.PI / 2) + (b.velX > 0 ? Math.PI : 0);
+        const rotation = (Math.atan(b.velY / b.velX) + Math.PI / 2) + (b.velX >= 0 ? Math.PI : 0);
     
         gpctx.setTransform(1, 0, 0, 1, b.x, b.y);
         gpctx.rotate(rotation);
@@ -184,7 +184,7 @@ function draw() {
     circle(gpctx, Player.x, Player.y, Player.bombRadius);
 
     for (const i of Bullets.playerBullets)
-        gpctx.drawImage(spriteImages.player.bullet, Math.floor(i.x - spriteImages.player.bullet.width / 2), Math.floor(i.y - i.size));
+        drawBullet(i);
 
     if (Player.blinkState === 1) gpctx.globalAlpha = 0.2;
     if (Player.movingLeft && !Player.movingRight) {

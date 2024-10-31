@@ -3,7 +3,7 @@ const BOARD_HEIGHT = 864;
 
 // use as start pos
 const START_WAVE = 0;
-const START_POWER = 0;
+const START_POWER = 2;
 
 const game = {
     NONE: 0,

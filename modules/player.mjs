@@ -1,6 +1,6 @@
 import * as Bullets from "./bullets.mjs";
 import * as Global from "./global.mjs";
-import * as Pickup from "./pickup.mjs";
+import * as Enemy from "./enemy.mjs";
 
 const BASE_MOVEMENT = 400;
 const BASE_FOCUS = 180;
@@ -21,7 +21,7 @@ let movingLeft, movingRight, movingUp, movingDown, isFiring;
 let moveSpeed, focused;
 let lives, bombs, score, power, prevPower;
 let grazeMultiplier, prevGrazeMultiplier;
-let timeSinceLastBullet, fireCooldown;
+let timeSinceLastBullet, shotsSinceLastSub, fireCooldown;
 let invTime, bombCooldown, bombRadius, bombBufferTime, prevBombs;
 let animTimer, animFrame;
 let blinkTimer, blinkState;
@@ -33,15 +33,45 @@ let blinkTimer, blinkState;
  * @param {number} offsetX 
  * @param {number} offsetY 
  */
-function fireBullet(size, velX, velY, offsetX, offsetY) {
-    // this is (update: was) a test bullet that shrinks
-    new Bullets.Bullet(x + offsetX, y + offsetY, size, velX, velY, 0, 2000, /*(bullet, ms) => {
-        const GROW_DELAY = 300;
-        const GROW_RATE = 8;
-        if (bullet.lifetime > GROW_DELAY && bullet.size > ms / 1000 * GROW_RATE) {
-            bullet.size += ms / 1000 * GROW_RATE;
-        }
-    },*/() => {}, "player", 0);
+function fireBullet(size, velX, velY, offsetX, offsetY, type) {
+    if (type === "normal")
+        new Bullets.PlayerBullet(x + offsetX, y + offsetY, size, velX, velY, 2000, () => {}, () => {}, "player");
+    if (type === "sub")
+        new Bullets.PlayerBullet(x + offsetX, y + offsetY, size, velX, velY, 2000, (bullet, ms) => {
+            if (bullet.target) {
+                // get angle between current movement vector and relative enemy position, turn towards that direction
+                // a bunch of expensive math incoming
+                let moveAngle = Math.acos(bullet.velX / Math.sqrt(bullet.velX ** 2 + bullet.velY ** 2));
+                if (bullet.velY < 0)
+                    moveAngle *= -1;
+                let enemyAngle = Math.acos((bullet.target.x - bullet.x) / Math.sqrt((bullet.target.x - bullet.x) ** 2 + (bullet.target.y - bullet.y) ** 2));
+                if (bullet.target.y - bullet.y < 0)
+                    enemyAngle *= -1;
+                
+                const angularDiff = moveAngle - enemyAngle;
+                const angularDir = angularDiff < 0 ? -1 : 1;
+
+                const angleChange = Math.min(bullet.maxHoming * ms / 1000, Math.abs(angularDiff));
+                const newAngle = moveAngle - (angleChange * angularDir);
+                const moveLength = Math.sqrt(bullet.velX ** 2 + bullet.velY ** 2);
+
+                bullet.velX = moveLength * Math.cos(newAngle);
+                bullet.velY = moveLength * Math.sin(newAngle);
+            }
+        }, (bullet) => {
+            let shortestDist = Number.MAX_VALUE;
+            let closestEnemy;
+            for (const i of Enemy.enemies) {
+                const enemyDist = Math.sqrt((bullet.x - i.x) ** 2 + (bullet.y - i.y) ** 2);
+                if (enemyDist < shortestDist) {
+                    shortestDist = enemyDist;
+                    closestEnemy = i;
+                }
+            }
+
+            bullet.target = closestEnemy;
+            bullet.maxHoming = 3; // max radians turned per second
+        }, "playerHoming");
 }
 
 /**
@@ -283,86 +313,137 @@ function tick(ms) {
     if (timeSinceLastBullet > fireCooldown && isFiring && invTime <= 0) {
         if (focused) {
             if (power >= 4) {
-                fireBullet(5, 20, -2096, 10, 0);
-                fireBullet(5, -20, -2096, -10, 0);
-                fireBullet(6, 14, -2098, 9, 0);
-                fireBullet(6, -14, -2098, -9, 0);
-                fireBullet(7, 5, -2100, 8, 0);
-                fireBullet(7, -5, -2100, -8, 0);
-                fireBullet(7, 0, -2100, 5, -5);
-                fireBullet(7, -0, -2100, -5, -5);
-                fireBullet(8, 0, -2100, 0, -10);
+                fireBullet(5, 20, -2096, 10, 0, "normal");
+                fireBullet(5, -20, -2096, -10, 0, "normal");
+                fireBullet(6, 14, -2098, 9, 0, "normal");
+                fireBullet(6, -14, -2098, -9, 0, "normal");
+                fireBullet(7, 5, -2100, 8, 0, "normal");
+                fireBullet(7, -5, -2100, -8, 0, "normal");
+                fireBullet(7, 0, -2100, 5, -5, "normal");
+                fireBullet(7, -0, -2100, -5, -5, "normal");
+                fireBullet(8, 0, -2100, 0, -10, "normal");
+
+                if (shotsSinceLastSub === 6) {
+                    fireBullet(25, 600, -800, 16, 0, "sub");
+                    fireBullet(25, -600, -800, -16, 0, "sub");
+                    fireBullet(25, 0, -1000, 0, -20, "sub");
+                    shotsSinceLastSub = 0;
+                }
                 fireCooldown = 75;
             }
             else if (power >= 3) {
-                fireBullet(4, 16, -1885, 10, 0);
-                fireBullet(4, -16, -1885, -10, 0);
-                fireBullet(5, 6, -1888, 8, 0);
-                fireBullet(5, -6, -1888, -8, 0);
-                fireBullet(6, 0, -1890, 6, -5);
-                fireBullet(6, -0, -1890, -6, -5);
-                fireBullet(6, 0, -1890, 0, -10);
+                fireBullet(4, 16, -1885, 10, 0, "normal");
+                fireBullet(4, -16, -1885, -10, 0, "normal");
+                fireBullet(5, 6, -1888, 8, 0, "normal");
+                fireBullet(5, -6, -1888, -8, 0, "normal");
+                fireBullet(6, 0, -1890, 6, -5, "normal");
+                fireBullet(6, -0, -1890, -6, -5, "normal");
+                fireBullet(6, 0, -1890, 0, -10, "normal");
+
+                if (shotsSinceLastSub === 7) {
+                    fireBullet(24, 570, -760, 16, 0, "sub");
+                    fireBullet(24, -570, -760, -16, 0, "sub");
+                    fireBullet(24, 0, -950, 0, -20, "sub");
+                    shotsSinceLastSub = 0;
+                }
                 fireCooldown = 80;
             }
             else if (power >= 2) {
-                fireBullet(4, 8, -1579, 8, 0);
-                fireBullet(4, -8, -1579, -8, 0);
-                fireBullet(5, 0, -1680, 4, -6);
-                fireBullet(5, 0, -1680, -4, -6);
-                fireBullet(5, 0, -1680, 0, -10);
+                fireBullet(4, 8, -1679, 8, 0, "normal");
+                fireBullet(4, -8, -1679, -8, 0, "normal");
+                fireBullet(5, 0, -1680, 4, -6, "normal");
+                fireBullet(5, 0, -1680, -4, -6, "normal");
+                fireBullet(5, 0, -1680, 0, -10, "normal");
+
+                if (shotsSinceLastSub === 7) {
+                    fireBullet(22, 540, -720, 16, 0, "sub");
+                    fireBullet(22, -540, -720, -16, 0, "sub");
+                    shotsSinceLastSub = 0;
+                }
                 fireCooldown = 85;
             }
             else if (power >= 1) {
-                fireBullet(3, 4, -1470, 5, -6);
-                fireBullet(3, 4, -1470, -5, -6);
-                fireBullet(4, 0, -1470, 0, -10);
+                fireBullet(3, 4, -1470, 5, -6, "normal");
+                fireBullet(3, 4, -1470, -5, -6, "normal");
+                fireBullet(4, 0, -1470, 0, -10, "normal");
+
+                if (shotsSinceLastSub === 8) {
+                    fireBullet(20, 0, -800, 0, -20, "sub");
+                    shotsSinceLastSub = 0;
+                }
                 fireCooldown = 90;
             } else {
-                fireBullet(3, 0, -1260, 0, -8);
+                fireBullet(3, 0, -1260, 0, -8, "normal");
                 fireCooldown = 95;
             }
         } else {
             if (power >= 4) {
-                fireBullet(6, 400, -1700, 10, 0);
-                fireBullet(6, -400, -1700, -10, 0);
-                fireBullet(7, 270, -1850, 8, 0);
-                fireBullet(7, -270, -1850, -8, 0);
-                fireBullet(7, 160, -1930, 6, 0);
-                fireBullet(7, -160, -1930, -6, 0);
-                fireBullet(8, 60, -1980, 4, -5);
-                fireBullet(8, -60, -1980, -4, -5);
-                fireBullet(8, 0, -2000, 0, -10);
+                fireBullet(6, 400, -1700, 10, 0, "normal");
+                fireBullet(6, -400, -1700, -10, 0, "normal");
+                fireBullet(7, 270, -1850, 8, 0, "normal");
+                fireBullet(7, -270, -1850, -8, 0, "normal");
+                fireBullet(7, 160, -1930, 6, 0, "normal");
+                fireBullet(7, -160, -1930, -6, 0, "normal");
+                fireBullet(8, 60, -1980, 4, -5, "normal");
+                fireBullet(8, -60, -1980, -4, -5, "normal");
+                fireBullet(8, 0, -2000, 0, -10, "normal");
+
+                if (shotsSinceLastSub === 6) {
+                    fireBullet(25, 600, -800, 16, 0, "sub");
+                    fireBullet(25, -600, -800, -16, 0, "sub");
+                    fireBullet(25, 0, -1000, 0, -20, "sub");
+                    shotsSinceLastSub = 0;
+                }
                 fireCooldown = 75;
             }
             else if (power >= 3) {
-                fireBullet(5, 320, -1560, 10, 0);
-                fireBullet(5, -320, -1560, -10, 0);
-                fireBullet(6, 180, -1720, 10, 0);
-                fireBullet(6, -180, -1720, -10, 0);
-                fireBullet(6, 60, -1800, 6, -5);
-                fireBullet(6, -60, -1800, -6, -5);
-                fireBullet(7, 0, -1800, 0, -10);
+                fireBullet(5, 320, -1560, 10, 0, "normal");
+                fireBullet(5, -320, -1560, -10, 0, "normal");
+                fireBullet(6, 180, -1720, 10, 0, "normal");
+                fireBullet(6, -180, -1720, -10, 0, "normal");
+                fireBullet(6, 60, -1800, 6, -5, "normal");
+                fireBullet(6, -60, -1800, -6, -5, "normal");
+                fireBullet(7, 0, -1800, 0, -10, "normal");
+
+                if (shotsSinceLastSub === 7) {
+                    fireBullet(24, 570, -760, 16, 0, "sub");
+                    fireBullet(24, -570, -760, -16, 0, "sub");
+                    fireBullet(24, 0, -950, 0, -20, "sub");
+                    shotsSinceLastSub = 0;
+                }
                 fireCooldown = 80;
             }
             else if (power >= 2) {
-                fireBullet(4, 200, -1500, 8, 0);
-                fireBullet(4, -200, -1500, -8, 0);
-                fireBullet(5, 80, -1570, 4, -6);
-                fireBullet(5, -80, -1570, -4, -6);
-                fireBullet(6, 0, -1600, 0, -10);
+                fireBullet(4, 200, -1500, 8, 0, "normal");
+                fireBullet(4, -200, -1500, -8, 0, "normal");
+                fireBullet(5, 80, -1570, 4, -6, "normal");
+                fireBullet(5, -80, -1570, -4, -6, "normal");
+                fireBullet(6, 0, -1600, 0, -10, "normal");
+
+                if (shotsSinceLastSub === 7) {
+                    fireBullet(22, 540, -720, 16, 0, "sub");
+                    fireBullet(22, -540, -720, -16, 0, "sub");
+                    shotsSinceLastSub = 0;
+                }
                 fireCooldown = 85;
             }
             else if (power >= 1) {
-                fireBullet(3, 70, -1380, 2, -6);
-                fireBullet(3, -70, -1380, -2, -6);
-                fireBullet(4, 0, -1400, 0, -10);
+                fireBullet(3, 70, -1380, 2, -6, "normal");
+                fireBullet(3, -70, -1380, -2, -6, "normal");
+                fireBullet(4, 0, -1400, 0, -10, "normal");
+
+                if (shotsSinceLastSub === 8) {
+                    fireBullet(20, 0, -800, 0, -20, "sub");
+                    shotsSinceLastSub = 0;
+                }
                 fireCooldown = 90;
             } else {
-                fireBullet(3, 0, -1200, 0, -8);
+                fireBullet(3, 0, -1200, 0, -8, "normal");
                 fireCooldown = 95;
             }
         }
         timeSinceLastBullet = 0;
+        shotsSinceLastSub++;
     }
 }
 
@@ -377,6 +458,7 @@ function reset() {
     grazeMultiplier = 1;
 
     timeSinceLastBullet = 0;
+    shotsSinceLastSub = 0;
     fireCooldown = 66;
 
     invTime = 0;
@@ -410,6 +492,7 @@ function init() {
     grazeMultiplier = 1;
 
     timeSinceLastBullet = 0;
+    shotsSinceLastSub = 0;
     fireCooldown = 66;
 
     invTime = 0;

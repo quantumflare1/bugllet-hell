@@ -12,6 +12,11 @@ const enemies = new Set();
  * @param {number} ms
  */
 
+/**
+ * @callback spawn
+ * @param {Enemy} enemy
+ */
+
 // rewrite enemy ai
 class Enemy {
     /**
@@ -23,6 +28,7 @@ class Enemy {
      * @param {number} screenTime 
      * @param {string[]} patterns 
      * @param {tick} script 
+     * @param {spawn} spawn 
      * @param {number} waveId 
      * @param {string} type 
      * @param {number} shotRate 
@@ -32,7 +38,7 @@ class Enemy {
      * @param {boolean} useRotation is this even used anymore?
      * @param {number} rotation 
      */
-    constructor(x, y, size, score, hp, screenTime, patterns, script, waveId, type, shotRate, moveRate, animRate, animFrames, useRotation, rotation = 0) {
+    constructor(x, y, size, score, hp, screenTime, patterns, script, spawn, waveId, type, shotRate, moveRate, animRate, animFrames, useRotation, rotation = 0) {
         this.x = x;
         this.y = y;
         this.prevX = x;
@@ -65,12 +71,13 @@ class Enemy {
         this.animFrame = 0;
         this.animTimer = 0;
         this.variance = 50;
-        this.extraAttribute = 0;
+        this.extraAttributes = {};
         this.rotation = rotation;
         this.useRotation = useRotation;
         this.plrBulletDists = new Map();
 
         enemies.add(this);
+        spawn(this);
     }
     /**
      * @param {number} ms 
@@ -124,7 +131,7 @@ class Enemy {
     generatePickup() {
         function pickupFall(ms) {
             if (this.lifetime < 600)
-                this.velY += (-this.baseVelY + 300) * ms / 600;
+                this.velY += (-this.baseVelY + 200) * ms / 600;
         }
         if (Player.power < 4 && Math.random() < 1 - (Player.power / 5)) {
             new Pickup.Pickup("power", this.x, this.y, 15, 0.06, 0, -230 + Math.random() * 60, pickupFall);
@@ -391,19 +398,21 @@ const types = {
         animFrames: 2,
         useRotation: false,
         patterns: ["tripleAimedInaccurateShot"],
+        spawn: (enemy) => {
+            enemy.extraAttributes.decel = 0.87;
+            enemy.extraAttributes.dashVel = 600;
+        },
         script: (enemy, ms) => {
-            const DECELERATION = 0.87;
-            const DASH_VEL = 600;
             if (enemy.moveCooldown <= 0) {
-                enemy.pickDashNormal(DASH_VEL);
+                enemy.pickDashNormal(enemy.extraAttributes.dashVel);
                 
                 if (enemy.lifetime < enemy.screenTime)
                     enemy.moveCooldown = enemy.screenTime;
                 else
                     enemy.moveCooldown = enemy.moveRate + (Math.random() * 2 - 1) * enemy.variance;
             } else if (enemy.velX > 1 || enemy.velY > 1 || enemy.velX < -1 || enemy.velY < -1) {
-                enemy.velX *= (DECELERATION * ms / 1000) / (ms / 1000);
-                enemy.velY *= (DECELERATION * ms / 1000) / (ms / 1000);
+                enemy.velX *= (enemy.extraAttributes.decel * ms / 1000) / (ms / 1000);
+                enemy.velY *= (enemy.extraAttributes.decel * ms / 1000) / (ms / 1000);
             } else {
                 enemy.velX = 0;
                 enemy.velY = 0;
@@ -423,16 +432,18 @@ const types = {
         animFrames: 2,
         useRotation: false,
         patterns: ["basicSpread", "shortVInaccurateTracker"],
+        spawn: (enemy) => {
+            enemy.extraAttributes.decel = 0.85;
+            enemy.extraAttributes.dashVel = 500;
+        },
         script: (enemy, ms) => {
-            const DECELERATION = 0.85; // maybe these can be moved out as an object property
-            const DASH_VEL = 500; // investigate later
             if (enemy.moveCooldown <= 0) {
-                enemy.pickDashNormal(DASH_VEL);
+                enemy.pickDashNormal(enemy.extraAttributes.dashVel);
                 
                 enemy.moveCooldown = enemy.moveRate + (Math.random() * 2 - 1) * enemy.variance;
             } else if (enemy.velX > 1 || enemy.velY > 1 || enemy.velX < -1 || enemy.velY < -1) {
-                enemy.velX *= (DECELERATION * ms / 1000) / (ms / 1000);
-                enemy.velY *= (DECELERATION * ms / 1000) / (ms / 1000);
+                enemy.velX *= (enemy.extraAttributes.decel * ms / 1000) / (ms / 1000);
+                enemy.velY *= (enemy.extraAttributes.decel * ms / 1000) / (ms / 1000);
             } else {
                 enemy.velX = 0;
                 enemy.velY = 0;
@@ -452,6 +463,7 @@ const types = {
         animFrames: 2,
         useRotation: true,
         patterns: ["sparseDoubleRadial", "dartTriangle"],
+        spawn: (enemy) => {},
         script: (enemy, ms) => {
             if (enemy.moveCooldown <= 0) {
                 if (enemy.despawnX === 0 && enemy.despawnY === 0)
@@ -484,6 +496,9 @@ const types = {
         animFrames: 2,
         useRotation: true,
         patterns: ["basicRay"],
+        spawn: (enemy) => {
+            enemy.extraAttributes.trailsFired = 0;
+        },
         script: (enemy, ms) => {
             if (enemy.moveCooldown <= 0) {
                 if (enemy.despawnX === 0 && enemy.despawnY === 0){
@@ -506,9 +521,9 @@ const types = {
             }
             if (enemy.shotCooldown <= 0)
                 enemy.basicFire();
-            if (enemy.lifetime / 400 >= enemy.extraAttribute) {
+            if (enemy.lifetime / 400 >= enemy.extraAttributes.trailsFired) {
                 enemy.fireSpecificNoCooldown("basicTrail");
-                enemy.extraAttribute++;
+                enemy.extraAttributes.trailsFired++;
             }
             if (enemy.x + enemy.size < -10 || enemy.x - enemy.size > Global.BOARD_WIDTH + 10 ||
                 enemy.y + enemy.size < -10 || enemy.y - enemy.size > Global.BOARD_HEIGHT + 10) {
@@ -539,6 +554,9 @@ const types = {
         animFrames: 2,
         useRotation: true,
         patterns: ["spreadForward", "basicForward"],
+        spawn: (enemy) => {
+            enemy.extraAttributes.trailsFired = 0;
+        },
         script: (enemy, ms) => {
             if (enemy.moveCooldown <= 0) {
                 if (enemy.despawnX === 0 && enemy.despawnY === 0){
@@ -563,9 +581,9 @@ const types = {
                 if (Math.floor(enemy.velY) === 0) enemy.fireSpecific("spreadForward");
                 if (Math.floor(enemy.velX) === 0) enemy.fireSpecific("basicForward");
             }
-            if (enemy.lifetime / 180 >= enemy.extraAttribute) {
+            if (enemy.lifetime / 180 >= enemy.extraAttributes.trailsFired) {
                 enemy.fireSpecificNoCooldown("basicTrail");
-                enemy.extraAttribute++;
+                enemy.extraAttributes.trailsFired++;
             }
             if (enemy.x + enemy.size < -10 || enemy.x - enemy.size > Global.BOARD_WIDTH + 10 ||
                 enemy.y + enemy.size < -10 || enemy.y - enemy.size > Global.BOARD_HEIGHT + 10) {
@@ -596,27 +614,29 @@ const types = {
         animFrames: 2,
         useRotation: false,
         patterns: ["machineGunFire", "singleAimedBigShot"],
+        spawn: (enemy) => {
+            enemy.extraAttributes.decel = 0.9;
+            enemy.extraAttributes.dashVel = 400;
+            enemy.extraAttributes.threshold = 100;
+        },
         script: (enemy, ms) => {
-            const DECELERATION = 0.9;
-            const DASH_VEL = 400;
-            const THRESHOLD = 100;
             if (enemy.moveCooldown <= 0) {
                 if (enemy.lifetime > enemy.screenTime && enemy.lifetime > 500) {
                     if (!enemy.despawning) {
                         enemy.pickDespawnPoint();
                         enemy.despawning = true;
                     }
-                    enemy.despawnDash(DASH_VEL);
+                    enemy.despawnDash(enemy.extraAttributes.dashVel);
                 }
-                else if (enemy.y < THRESHOLD) enemy.downDash(DASH_VEL);
-                else if (enemy.y > Global.BOARD_HEIGHT - THRESHOLD) enemy.upDash(DASH_VEL);
-                else if (enemy.x < THRESHOLD) enemy.rightDash(DASH_VEL);
-                else if (enemy.x > Global.BOARD_WIDTH - THRESHOLD) enemy.leftDash(DASH_VEL);
+                else if (enemy.y < enemy.extraAttributes.threshold) enemy.downDash(enemy.extraAttributes.dashVel);
+                else if (enemy.y > Global.BOARD_HEIGHT - enemy.extraAttributes.threshold) enemy.upDash(enemy.extraAttributes.dashVel);
+                else if (enemy.x < enemy.extraAttributes.threshold) enemy.rightDash(enemy.extraAttributes.dashVel);
+                else if (enemy.x > Global.BOARD_WIDTH - enemy.extraAttributes.threshold) enemy.leftDash(enemy.extraAttributes.dashVel);
                 
                 enemy.moveCooldown = enemy.moveRate + (Math.random() * 2 - 1) * enemy.variance;
             } else if (enemy.velX > 1 || enemy.velY > 1 || enemy.velX < -1 || enemy.velY < -1) {
-                enemy.velX *= (DECELERATION * ms / 1000) / (ms / 1000);
-                enemy.velY *= (DECELERATION * ms / 1000) / (ms / 1000);
+                enemy.velX *= (enemy.extraAttributes.decel * ms / 1000) / (ms / 1000);
+                enemy.velY *= (enemy.extraAttributes.decel * ms / 1000) / (ms / 1000);
             } else {
                 enemy.velX = 0;
                 enemy.velY = 0;
@@ -636,27 +656,29 @@ const types = {
         animFrames: 2,
         useRotation: false,
         patterns: ["expandingMachineGunFire", "basicRadial", "doubleSmallDartRay"],
+        spawn: (enemy) => {
+            enemy.extraAttributes.decel = 0.94;
+            enemy.extraAttributes.dashVel = 400;
+            enemy.extraAttributes.threshold = 120;
+        },
         script: (enemy, ms) => {
-            const DECELERATION = 0.94;
-            const DASH_VEL = 400;
-            const THRESHOLD = 120;
             if (enemy.moveCooldown <= 0) {
                 if (enemy.lifetime > enemy.screenTime && enemy.lifetime > 500) {
                     if (!enemy.despawning) {
                         enemy.pickDespawnPoint();
                         enemy.despawning = true;
                     }
-                    enemy.despawnDash(DASH_VEL);
+                    enemy.despawnDash(enemy.extraAttributes.dashVel);
                 }
-                else if (enemy.y < THRESHOLD) enemy.downDash(DASH_VEL);
-                else if (enemy.y > Global.BOARD_HEIGHT - THRESHOLD) enemy.upDash(DASH_VEL);
-                else if (enemy.x < THRESHOLD) enemy.leftDash(DASH_VEL);
-                else if (enemy.x > Global.BOARD_WIDTH - THRESHOLD) enemy.rightDash(DASH_VEL);
+                else if (enemy.y < enemy.extraAttributes.threshold) enemy.downDash(enemy.extraAttributes.dashVel);
+                else if (enemy.y > Global.BOARD_HEIGHT - enemy.extraAttributes.threshold) enemy.upDash(enemy.extraAttributes.dashVel);
+                else if (enemy.x < enemy.extraAttributes.threshold) enemy.leftDash(enemy.extraAttributes.dashVel);
+                else if (enemy.x > Global.BOARD_WIDTH - enemy.extraAttributes.threshold) enemy.rightDash(enemy.extraAttributes.dashVel);
                 
                 enemy.moveCooldown = enemy.moveRate + (Math.random() * 2 - 1) * enemy.variance;
             } else if (enemy.velX > 1 || enemy.velY > 1 || enemy.velX < -1 || enemy.velY < -1) {
-                enemy.velX *= (DECELERATION * ms / 1000) / (ms / 1000);
-                enemy.velY *= (DECELERATION * ms / 1000) / (ms / 1000);
+                enemy.velX *= (enemy.extraAttributes.decel * ms / 1000) / (ms / 1000);
+                enemy.velY *= (enemy.extraAttributes.decel * ms / 1000) / (ms / 1000);
             } else {
                 enemy.velX = 0;
                 enemy.velY = 0;
@@ -677,6 +699,9 @@ const types = {
         useRotation: true,
         patterns: ["clusterRadial", "longRadialWave", "basicHomingShot", "slowSpiralRadialWave", "bigSmallRadial", "recursiveClusterRadial", "variantRadialWave", "bigSmallRadialWave"],
         patIndex: 0, // hacky solution whatever do something abt this later
+        spawn: (enemy) => {
+            enemy.extraAttributes.phase = 1;
+        },
         script: (enemy, ms) => {
             const INITIAL_DECEL = 0.93;
             const ENRAGED_DECEL = 0.85;
@@ -690,7 +715,6 @@ const types = {
                 [0, 1, 3, 4],
                 [5, 6, 7]
             ];
-            if (enemy.extraAttribute === 0) enemy.extraAttribute = 1;
 
             if (enemy.moveCooldown <= 0) {
                 if (enemy.lifetime > enemy.screenTime && enemy.lifetime > 500) {
@@ -719,8 +743,8 @@ const types = {
                 enemy.fireSpecific(enemy.patterns[phasePatterns[phase-1][types.princessBee.patIndex]]);
                 types.princessBee.patIndex = types.princessBee.patIndex >= phasePatterns[phase-1].length-1 ? 0 : types.princessBee.patIndex + 1;
             }
-            if (enemy.extraAttribute !== phase) {
-                enemy.extraAttribute = phase;
+            if (enemy.extraAttributes.phase !== phase) {
+                enemy.extraAttributes.phase = phase;
                 enemy.shotRate = 2200;
                 enemy.moveRate = 3500;
 
@@ -757,7 +781,7 @@ const types = {
  */
 function makeEnemy(x, y, type, waveId) {
     return new Enemy(x, y,
-        types[type].size, types[type].score, types[type].hp, types[type].screenTime, types[type].patterns, types[type].script,
+        types[type].size, types[type].score, types[type].hp, types[type].screenTime, types[type].patterns, types[type].script, types[type].spawn,
         waveId, type, types[type].shotRate, types[type].moveRate, types[type].wingRate, types[type].animFrames, types[type].useRotation);
 }
 
